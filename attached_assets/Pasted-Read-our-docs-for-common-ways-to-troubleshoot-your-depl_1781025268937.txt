@@ -1,0 +1,90 @@
+Read our docs for common ways to troubleshoot your deploy.
+
+All logs
+Search
+Search
+
+Jun 9, 7:11 PM - 7:14 PM
+GMT+2
+
+
+
+==> Cloning from https://github.com/ravehero3/beatz
+==> Checking out commit 6b67c4c1b026fb80cd7d33824132cd6aceafbb38 in branch main
+==> Using Node.js version 24.14.1 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'npm install && npm run build'...
+> workspace@0.0.0 preinstall
+> sh -c 'if [ "$RENDER" = "true" ] || [ "$CI" = "true" ]; then exit 0; fi; rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) ;; *) echo "Use pnpm instead" >&2; exit 1 ;; esac'
+added 2 packages, and audited 3 packages in 1s
+1 package is looking for funding
+  run `npm fund` for details
+found 0 vulnerabilities
+> workspace@0.0.0 build
+> pnpm run typecheck && pnpm -r --if-present run build
+> workspace@0.0.0 typecheck /opt/render/project/src
+> pnpm run typecheck:libs && pnpm -r --filter "./artifacts/**" --filter "./scripts" --if-present run typecheck
+> workspace@0.0.0 typecheck:libs /opt/render/project/src
+> tsc --build
+error TS2688: Cannot find type definition file for 'node'.
+  The file is in the program because:
+    Entry point of type library 'node' specified in compilerOptions
+lib/db/src/index.ts(1,25): error TS2307: Cannot find module 'drizzle-orm/node-postgres' or its corresponding type declarations.
+lib/db/src/index.ts(2,16): error TS2307: Cannot find module 'pg' or its corresponding type declarations.
+lib/db/src/index.ts(7,6): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+lib/db/src/index.ts(13,50): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+lib/db/src/schema/artists.ts(1,57): error TS2307: Cannot find module 'drizzle-orm/pg-core' or its corresponding type declarations.
+lib/db/src/schema/artists.ts(2,36): error TS2307: Cannot find module 'drizzle-zod' or its corresponding type declarations.
+lib/db/src/schema/artists.ts(3,19): error TS2307: Cannot find module 'zod/v4' or its corresponding type declarations.
+lib/db/src/schema/beats.ts(1,75): error TS2307: Cannot find module 'drizzle-orm/pg-core' or its corresponding type declarations.
+lib/db/src/schema/beats.ts(2,36): error TS2307: Cannot find module 'drizzle-zod' or its corresponding type declarations.
+lib/db/src/schema/beats.ts(3,19): error TS2307: Cannot find module 'zod/v4' or its corresponding type declarations.
+lib/db/src/schema/orders.ts(1,57): error TS2307: Cannot find module 'drizzle-orm/pg-core' or its corresponding type declarations.
+lib/db/src/schema/orders.ts(2,36): error TS2307: Cannot find module 'drizzle-zod' or its corresponding type declarations.
+lib/db/src/schema/orders.ts(3,19): error TS2307: Cannot find module 'zod/v4' or its corresponding type declarations.
+lib/db/src/schema/profiles.ts(1,48): error TS2307: Cannot find module 'drizzle-orm/pg-core' or its corresponding type declarations.
+lib/db/src/schema/profiles.ts(2,36): error TS2307: Cannot find module 'drizzle-zod' or its corresponding type declarations.
+lib/db/src/schema/profiles.ts(3,19): error TS2307: Cannot find module 'zod/v4' or its corresponding type declarations.
+lib/db/src/schema/saved_beats.ts(1,42): error TS2307: Cannot find module 'drizzle-orm/pg-core' or its corresponding type declarations.
+lib/db/src/schema/saved_beats.ts(2,36): error TS2307: Cannot find module 'drizzle-zod' or its corresponding type declarations.
+lib/db/src/schema/saved_beats.ts(3,19): error TS2307: Cannot find module 'zod/v4' or its corresponding type declarations.
+lib/db/src/schema/withdrawals.ts(1,57): error TS2307: Cannot find module 'drizzle-orm/pg-core' or its corresponding type declarations.
+lib/db/src/schema/withdrawals.ts(2,36): error TS2307: Cannot find module 'drizzle-zod' or its corresponding type declarations.
+lib/db/src/schema/withdrawals.ts(3,19): error TS2307: Cannot find module 'zod/v4' or its corresponding type declarations.
+lib/api-client-react/src/generated/api.ts(11,8): error TS2307: Cannot find module '@tanstack/react-query' or its corresponding type declarations.
+lib/api-client-react/src/generated/api.ts(20,8): error TS2307: Cannot find module '@tanstack/react-query' or its corresponding type declarations.
+lib/api-client-react/src/generated/api.ts(104,80): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(188,78): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(263,114): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(336,85): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(413,79): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(490,76): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(566,126): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(636,99): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(706,107): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(786,80): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(863,87): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(940,84): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1017,87): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1092,128): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1165,81): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1240,120): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1311,114): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1382,120): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1525,81): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1600,116): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1673,77): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1747,101): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1820,86): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1897,85): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1974,85): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2051,84): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2126,126): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2196,107): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2269,83): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2343,101): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2413,103): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2486,83): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2560,102): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2630,105): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-zod/src/generated/api.ts(8,22): error TS2307: Cannot find module 'zod' or its corresponding type declarations.
