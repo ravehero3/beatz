@@ -2,13 +2,15 @@ services:
   - type: web
     name: beatpack
     env: node
-    buildCommand: corepack enable && corepack prepare pnpm@10.26.1 --activate && rm -rf node_modules && pnpm install --frozen-lockfile && pnpm run build
+    buildCommand: pnpm install --frozen-lockfile && pnpm run build
     startCommand: node artifacts/api-server/dist/index.mjs
     envVars:
       - key: PORT
         value: 10000
       - key: NODE_ENV
         value: production
+      - key: ENABLE_COREPACK
+        value: "1"
       - key: DATABASE_URL
         sync: false
       - key: SESSION_SECRET
