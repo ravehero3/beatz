@@ -3,20 +3,34 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Beatpack API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: beats
+    description: Beat management
+  - name: artists
+    description: Artist profiles
+  - name: orders
+    description: Orders and checkout
+  - name: users
+    description: User profiles
+  - name: dashboard
+    description: Dashboard stats
+  - name: withdrawals
+    description: Withdrawal requests
+  - name: saved
+    description: Saved beats
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +38,602 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ───────────── BEATS ─────────────
+  /beats:
+    get:
+      operationId: listBeats
+      tags: [beats]
+      summary: List/search beats
+      parameters:
+        - in: query
+          name: genre
+          schema: { type: ["string", "null"] }
+        - in: query
+          name: mood
+          schema: { type: ["string", "null"] }
+        - in: query
+          name: bpmMin
+          schema: { type: ["integer", "null"] }
+        - in: query
+          name: bpmMax
+          schema: { type: ["integer", "null"] }
+        - in: query
+          name: search
+          schema: { type: ["string", "null"] }
+        - in: query
+          name: artistId
+          schema: { type: ["string", "null"] }
+        - in: query
+          name: limit
+          schema: { type: ["integer", "null"] }
+        - in: query
+          name: offset
+          schema: { type: ["integer", "null"] }
+      responses:
+        "200":
+          description: List of beats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Beat"
+    post:
+      operationId: createBeat
+      tags: [beats]
+      summary: Upload a new beat (artist only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BeatInput"
+      responses:
+        "201":
+          description: Created beat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Beat"
+
+  /beats/featured:
+    get:
+      operationId: getFeaturedBeats
+      tags: [beats]
+      summary: Get featured beats for homepage
+      responses:
+        "200":
+          description: Featured beats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Beat"
+
+  /beats/genres:
+    get:
+      operationId: listGenres
+      tags: [beats]
+      summary: Get all available genres
+      responses:
+        "200":
+          description: Genre list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GenreCount"
+
+  /beats/{id}:
+    get:
+      operationId: getBeat
+      tags: [beats]
+      summary: Get a single beat
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Beat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BeatDetail"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateBeat
+      tags: [beats]
+      summary: Update a beat (artist only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BeatUpdate"
+      responses:
+        "200":
+          description: Updated beat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Beat"
+    delete:
+      operationId: deleteBeat
+      tags: [beats]
+      summary: Delete a beat (artist only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "204":
+          description: Deleted
+
+  /beats/{id}/play:
+    post:
+      operationId: incrementBeatPlays
+      tags: [beats]
+      summary: Increment play count
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Updated play count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayCount"
+
+  # ───────────── ARTISTS ─────────────
+  /artists:
+    get:
+      operationId: listArtists
+      tags: [artists]
+      summary: List all artists
+      parameters:
+        - in: query
+          name: search
+          schema: { type: ["string", "null"] }
+        - in: query
+          name: limit
+          schema: { type: ["integer", "null"] }
+        - in: query
+          name: offset
+          schema: { type: ["integer", "null"] }
+      responses:
+        "200":
+          description: Artists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Artist"
+
+  /artists/featured:
+    get:
+      operationId: getFeaturedArtists
+      tags: [artists]
+      summary: Get featured artists for homepage
+      responses:
+        "200":
+          description: Featured artists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Artist"
+
+  /artists/{slug}:
+    get:
+      operationId: getArtistBySlug
+      tags: [artists]
+      summary: Get artist public profile by slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Artist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtistDetail"
+        "404":
+          description: Not found
+
+  /artists/me:
+    get:
+      operationId: getMyArtistProfile
+      tags: [artists]
+      summary: Get current artist profile
+      responses:
+        "200":
+          description: Artist profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtistDetail"
+    patch:
+      operationId: updateMyArtistProfile
+      tags: [artists]
+      summary: Update current artist profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArtistUpdate"
+      responses:
+        "200":
+          description: Updated artist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtistDetail"
+
+  # ───────────── USERS ─────────────
+  /users/me:
+    get:
+      operationId: getMyProfile
+      tags: [users]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    patch:
+      operationId: updateMyProfile
+      tags: [users]
+      summary: Update current user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags: [users]
+      summary: Login with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "401":
+          description: Invalid credentials
+
+  /auth/register:
+    post:
+      operationId: registerUser
+      tags: [users]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+
+  /auth/logout:
+    post:
+      operationId: logoutUser
+      tags: [users]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResult"
+
+  # ───────────── ORDERS ─────────────
+  /orders:
+    get:
+      operationId: listMyOrders
+      tags: [orders]
+      summary: List orders (buyer sees their purchases, artist sees received orders)
+      responses:
+        "200":
+          description: Orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create a new order (checkout)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "201":
+          description: Created order with QR payment data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get a single order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{id}/confirm:
+    post:
+      operationId: confirmOrder
+      tags: [orders]
+      summary: Confirm payment for an order (artist only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Confirmed order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  # ───────────── DASHBOARD ─────────────
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get studio dashboard stats for artist
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/earnings:
+    get:
+      operationId: getEarningsChart
+      tags: [dashboard]
+      summary: Get daily earnings for chart (last 30 days)
+      responses:
+        "200":
+          description: Daily earnings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DailyEarning"
+
+  /dashboard/platform-stats:
+    get:
+      operationId: getPlatformStats
+      tags: [dashboard]
+      summary: Get platform-wide stats (admin only)
+      responses:
+        "200":
+          description: Platform stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformStats"
+
+  # ───────────── WITHDRAWALS ─────────────
+  /withdrawals:
+    get:
+      operationId: listWithdrawals
+      tags: [withdrawals]
+      summary: List withdrawal requests (artist sees own, admin sees all)
+      responses:
+        "200":
+          description: Withdrawals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Withdrawal"
+    post:
+      operationId: createWithdrawal
+      tags: [withdrawals]
+      summary: Request a withdrawal (artist only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WithdrawalInput"
+      responses:
+        "201":
+          description: Created withdrawal request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Withdrawal"
+
+  /withdrawals/{id}/pay:
+    post:
+      operationId: markWithdrawalPaid
+      tags: [withdrawals]
+      summary: Mark withdrawal as paid (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Updated withdrawal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Withdrawal"
+
+  # ───────────── SAVED BEATS ─────────────
+  /saved:
+    get:
+      operationId: listSavedBeats
+      tags: [saved]
+      summary: Get current user's saved beats
+      responses:
+        "200":
+          description: Saved beats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Beat"
+
+  /saved/{beatId}:
+    post:
+      operationId: saveBeat
+      tags: [saved]
+      summary: Save a beat to wishlist
+      parameters:
+        - in: path
+          name: beatId
+          required: true
+          schema: { type: string }
+      responses:
+        "201":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResult"
+    delete:
+      operationId: unsaveBeat
+      tags: [saved]
+      summary: Remove beat from wishlist
+      parameters:
+        - in: path
+          name: beatId
+          required: true
+          schema: { type: string }
+      responses:
+        "204":
+          description: Removed
+
+  # ───────────── ADMIN ─────────────
+  /admin/users:
+    get:
+      operationId: adminListUsers
+      tags: [users]
+      summary: List all users (admin only)
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /admin/beats/{id}/flag:
+    post:
+      operationId: adminFlagBeat
+      tags: [beats]
+      summary: Flag a beat (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Updated beat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Beat"
+
+  /admin/beats/{id}/restore:
+    post:
+      operationId: adminRestoreBeat
+      tags: [beats]
+      summary: Restore a flagged/removed beat (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Updated beat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Beat"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +641,271 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    MessageResult:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+
+    PlayCount:
+      type: object
+      properties:
+        plays:
+          type: integer
+      required: [plays]
+
+    GenreCount:
+      type: object
+      properties:
+        genre:
+          type: string
+        count:
+          type: integer
+      required: [genre, count]
+
+    # ── BEAT ──
+    Beat:
+      type: object
+      properties:
+        id:          { type: string }
+        artistId:    { type: string }
+        title:       { type: string }
+        slug:        { type: ["string", "null"] }
+        bpm:         { type: ["integer", "null"] }
+        key:         { type: ["string", "null"] }
+        genre:       { type: ["string", "null"] }
+        mood:        { type: ["string", "null"] }
+        tags:
+          type: array
+          items: { type: string }
+        coverUrl:    { type: ["string", "null"] }
+        audioPreviewUrl: { type: ["string", "null"] }
+        priceBasic:  { type: ["number", "null"] }
+        pricePremium: { type: ["number", "null"] }
+        priceExclusive: { type: ["number", "null"] }
+        isExclusiveSold: { type: boolean }
+        plays:       { type: integer }
+        status:      { type: string }
+        createdAt:   { type: string }
+        artistName:  { type: ["string", "null"] }
+        artistSlug:  { type: ["string", "null"] }
+      required: [id, artistId, title, plays, status, createdAt, isExclusiveSold]
+
+    BeatDetail:
+      allOf:
+        - $ref: "#/components/schemas/Beat"
+        - type: object
+          properties:
+            description: { type: ["string", "null"] }
+            artist:
+              $ref: "#/components/schemas/Artist"
+
+    BeatInput:
+      type: object
+      properties:
+        title:       { type: string }
+        description: { type: ["string", "null"] }
+        bpm:         { type: ["integer", "null"] }
+        key:         { type: ["string", "null"] }
+        genre:       { type: ["string", "null"] }
+        mood:        { type: ["string", "null"] }
+        tags:
+          type: array
+          items: { type: string }
+        coverUrl:    { type: ["string", "null"] }
+        audioPreviewUrl: { type: ["string", "null"] }
+        audioFullUrl: { type: ["string", "null"] }
+        priceBasic:  { type: ["number", "null"] }
+        pricePremium: { type: ["number", "null"] }
+        priceExclusive: { type: ["number", "null"] }
+      required: [title]
+
+    BeatUpdate:
+      type: object
+      properties:
+        title:       { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        bpm:         { type: ["integer", "null"] }
+        key:         { type: ["string", "null"] }
+        genre:       { type: ["string", "null"] }
+        mood:        { type: ["string", "null"] }
+        tags:
+          type: array
+          items: { type: string }
+        coverUrl:    { type: ["string", "null"] }
+        priceBasic:  { type: ["number", "null"] }
+        pricePremium: { type: ["number", "null"] }
+        priceExclusive: { type: ["number", "null"] }
+        status:      { type: ["string", "null"] }
+
+    # ── ARTIST ──
+    Artist:
+      type: object
+      properties:
+        id:               { type: string }
+        slug:             { type: ["string", "null"] }
+        displayName:      { type: ["string", "null"] }
+        bio:              { type: ["string", "null"] }
+        bannerUrl:        { type: ["string", "null"] }
+        profilePictureUrl: { type: ["string", "null"] }
+        storeTemplate:    { type: ["string", "null"] }
+        socialInstagram:  { type: ["string", "null"] }
+        socialSoundcloud: { type: ["string", "null"] }
+        socialYoutube:    { type: ["string", "null"] }
+        subscriptionTier: { type: ["string", "null"] }
+        beatCount:        { type: ["integer", "null"] }
+        totalEarnedCzk:   { type: ["number", "null"] }
+        createdAt:        { type: string }
+      required: [id, createdAt]
+
+    ArtistDetail:
+      allOf:
+        - $ref: "#/components/schemas/Artist"
+        - type: object
+          properties:
+            balanceCzk:      { type: ["number", "null"] }
+            bankIban:        { type: ["string", "null"] }
+            bankAccountName: { type: ["string", "null"] }
+            beats:
+              type: array
+              items:
+                $ref: "#/components/schemas/Beat"
+
+    ArtistUpdate:
+      type: object
+      properties:
+        displayName:      { type: ["string", "null"] }
+        bio:              { type: ["string", "null"] }
+        bannerUrl:        { type: ["string", "null"] }
+        profilePictureUrl: { type: ["string", "null"] }
+        storeTemplate:    { type: ["string", "null"] }
+        storePrimaryColor: { type: ["string", "null"] }
+        socialInstagram:  { type: ["string", "null"] }
+        socialSoundcloud: { type: ["string", "null"] }
+        socialYoutube:    { type: ["string", "null"] }
+        bankIban:         { type: ["string", "null"] }
+        bankAccountName:  { type: ["string", "null"] }
+
+    # ── USER ──
+    User:
+      type: object
+      properties:
+        id:         { type: string }
+        email:      { type: ["string", "null"] }
+        firstName:  { type: ["string", "null"] }
+        lastName:   { type: ["string", "null"] }
+        role:       { type: string }
+        avatarUrl:  { type: ["string", "null"] }
+        createdAt:  { type: string }
+      required: [id, role, createdAt]
+
+    UserUpdate:
+      type: object
+      properties:
+        firstName: { type: ["string", "null"] }
+        lastName:  { type: ["string", "null"] }
+        avatarUrl: { type: ["string", "null"] }
+
+    LoginInput:
+      type: object
+      properties:
+        email:    { type: string }
+        password: { type: string }
+      required: [email, password]
+
+    RegisterInput:
+      type: object
+      properties:
+        email:     { type: string }
+        password:  { type: string }
+        firstName: { type: ["string", "null"] }
+        lastName:  { type: ["string", "null"] }
+      required: [email, password]
+
+    AuthResult:
+      type: object
+      properties:
+        user:  { $ref: "#/components/schemas/User" }
+        token: { type: string }
+      required: [user, token]
+
+    # ── ORDER ──
+    Order:
+      type: object
+      properties:
+        id:              { type: string }
+        buyerId:         { type: string }
+        artistId:        { type: string }
+        beatId:          { type: string }
+        licenseType:     { type: string }
+        amountCzk:       { type: number }
+        paymentMethod:   { type: ["string", "null"] }
+        paymentStatus:   { type: string }
+        variableSymbol:  { type: ["string", "null"] }
+        qrCodeData:      { type: ["string", "null"] }
+        licensePdfUrl:   { type: ["string", "null"] }
+        confirmedAt:     { type: ["string", "null"] }
+        createdAt:       { type: string }
+        beat:
+          $ref: "#/components/schemas/Beat"
+      required: [id, buyerId, artistId, beatId, licenseType, amountCzk, paymentStatus, createdAt]
+
+    OrderInput:
+      type: object
+      properties:
+        beatId:        { type: string }
+        licenseType:   { type: string }
+        paymentMethod: { type: string }
+      required: [beatId, licenseType, paymentMethod]
+
+    # ── DASHBOARD ──
+    DashboardStats:
+      type: object
+      properties:
+        earningsThisMonth: { type: number }
+        ordersThisMonth:   { type: integer }
+        totalPlays:        { type: integer }
+        activeBeats:       { type: integer }
+        pendingBalance:    { type: number }
+        totalEarned:       { type: number }
+      required: [earningsThisMonth, ordersThisMonth, totalPlays, activeBeats, pendingBalance, totalEarned]
+
+    DailyEarning:
+      type: object
+      properties:
+        date:     { type: string }
+        earnings: { type: number }
+      required: [date, earnings]
+
+    PlatformStats:
+      type: object
+      properties:
+        totalUsers:       { type: integer }
+        totalArtists:     { type: integer }
+        totalBeats:       { type: integer }
+        revenueThisMonth: { type: number }
+        pendingPayouts:   { type: integer }
+      required: [totalUsers, totalArtists, totalBeats, revenueThisMonth, pendingPayouts]
+
+    # ── WITHDRAWAL ──
+    Withdrawal:
+      type: object
+      properties:
+        id:          { type: string }
+        artistId:    { type: string }
+        amountCzk:   { type: number }
+        status:      { type: string }
+        qrCodeData:  { type: ["string", "null"] }
+        requestedAt: { type: string }
+        paidAt:      { type: ["string", "null"] }
+        artistName:  { type: ["string", "null"] }
+      required: [id, artistId, amountCzk, status, requestedAt]
+
+    WithdrawalInput:
+      type: object
+      properties:
+        amountCzk: { type: number }
+      required: [amountCzk]
