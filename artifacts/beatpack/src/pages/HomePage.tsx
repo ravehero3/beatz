@@ -132,7 +132,7 @@ export default function HomePage() {
                 artistName={beat.artistName}
                 artistSlug={beat.artistSlug}
                 bpm={beat.bpm}
-                key_={beat.key}
+                musicalKey={beat.key}
                 genre={beat.genre}
                 coverUrl={beat.coverUrl}
                 priceBasic={beat.priceBasic !== undefined ? Number(beat.priceBasic) : null}

@@ -115,17 +115,17 @@ export default function CheckoutPage() {
             {/* Status */}
             <div style={{ marginBottom: "24px" }}>
               {order?.paymentStatus === "paid" ? (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "8px 16px", background: "#F0FDF4", border: "1px solid #86EFAC", borderRadius: "9999px", display: "inline-flex" }}>
+                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "8px 16px", background: "#F0FDF4", border: "1px solid #86EFAC", borderRadius: "9999px" }}>
                   <CheckCircle2 size={16} color="#22C55E" />
                   <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "14px", fontWeight: 600, color: "#22C55E" }}>Payment confirmed</span>
                 </div>
               ) : order?.paymentStatus === "failed" ? (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "8px 16px", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: "9999px", display: "inline-flex" }}>
+                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "8px 16px", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: "9999px" }}>
                   <AlertCircle size={16} color="#EF4444" />
                   <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "14px", fontWeight: 600, color: "#EF4444" }}>Payment failed</span>
                 </div>
               ) : (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "8px 16px", background: "#FFFBEB", border: "1px solid #FCD34D", borderRadius: "9999px", display: "inline-flex" }}>
+                <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "8px 16px", background: "#FFFBEB", border: "1px solid #FCD34D", borderRadius: "9999px" }}>
                   <Clock size={16} color="#F59E0B" />
                   <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "14px", fontWeight: 600, color: "#F59E0B" }}>Waiting for payment...</span>
                 </div>

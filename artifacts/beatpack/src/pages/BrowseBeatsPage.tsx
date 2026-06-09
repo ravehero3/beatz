@@ -7,13 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export default function BrowseBeatsPage() {
   const [search, setSearch] = useState("");
-  const [genre, setGenre] = useState("");
+  const [genre, setGenre] = useState("all");
   const [bpmMin, setBpmMin] = useState("");
   const [bpmMax, setBpmMax] = useState("");
 
   const { data: beats, isLoading } = useListBeats({
     search: search || undefined,
-    genre: genre || undefined,
+    genre: genre && genre !== "all" ? genre : undefined,
     bpmMin: bpmMin ? Number(bpmMin) : undefined,
     bpmMax: bpmMax ? Number(bpmMax) : undefined,
     limit: 48,
@@ -71,7 +71,7 @@ export default function BrowseBeatsPage() {
                 <SelectValue placeholder="Genre" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All genres</SelectItem>
+                <SelectItem value="all">All genres</SelectItem>
                 {(genres ?? []).map((g) => (
                   <SelectItem key={g.genre} value={g.genre}>{g.genre} ({g.count})</SelectItem>
                 ))}
@@ -159,7 +159,7 @@ export default function BrowseBeatsPage() {
                   artistName={beat.artistName}
                   artistSlug={beat.artistSlug}
                   bpm={beat.bpm}
-                  key_={beat.key}
+                  musicalKey={beat.key}
                   genre={beat.genre}
                   coverUrl={beat.coverUrl}
                   priceBasic={beat.priceBasic !== undefined ? Number(beat.priceBasic) : null}

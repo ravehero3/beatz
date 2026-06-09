@@ -8,7 +8,7 @@ interface BeatCardProps {
   artistName?: string | null;
   artistSlug?: string | null;
   bpm?: number | null;
-  key?: string | null;
+  musicalKey?: string | null;
   genre?: string | null;
   coverUrl?: string | null;
   priceBasic?: number | null;
@@ -24,7 +24,7 @@ export default function BeatCard({
   artistName,
   artistSlug,
   bpm,
-  key,
+  musicalKey,
   genre,
   coverUrl,
   priceBasic,
@@ -162,12 +162,12 @@ export default function BeatCard({
               letterSpacing: "0.02em",
             }}>{bpm} BPM</span>
           )}
-          {key && (
+          {musicalKey && (
             <span style={{
               fontFamily: "'Figtree', sans-serif",
               fontSize: "11px",
               color: "#888888",
-            }}>{key}</span>
+            }}>{musicalKey}</span>
           )}
           {genre && (
             <span style={{

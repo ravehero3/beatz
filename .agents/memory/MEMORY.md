@@ -1,0 +1,1 @@
+- [Beatpack project overview](beatpack-overview.md) — Czech beat marketplace SaaS; key quirks for Express 5, BeatCard props, Radix Select, lib build order
