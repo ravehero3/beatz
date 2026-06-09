@@ -10,6 +10,7 @@ export const profilesTable = pgTable("profiles", {
   role: text("role").notNull().default("buyer"),
   avatarUrl: text("avatar_url"),
   passwordHash: text("password_hash"),
+  googleId: text("google_id").unique(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

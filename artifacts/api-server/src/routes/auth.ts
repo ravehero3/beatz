@@ -1,12 +1,139 @@
 import { Router, type IRouter } from "express";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { db } from "../lib/db";
 import { profilesTable } from "@workspace/db";
 import { signToken, requireAuth } from "../lib/auth";
 import { LoginUserBody, RegisterUserBody } from "@workspace/api-zod";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 
 const router: IRouter = Router();
+
+const JWT_SECRET = process.env["SESSION_SECRET"] ?? "beatpack-dev-secret-change-in-prod";
+const APP_URL = process.env["APP_URL"] ?? "http://localhost:18143";
+const GOOGLE_CLIENT_ID = process.env["GOOGLE_CLIENT_ID"] ?? "";
+const GOOGLE_CLIENT_SECRET = process.env["GOOGLE_CLIENT_SECRET"] ?? "";
+const GOOGLE_REDIRECT_URI = `${APP_URL}/api/auth/google/callback`;
+
+function makeOAuthState(): string {
+  return jwt.sign({ nonce: crypto.randomUUID() }, JWT_SECRET, { expiresIn: "10m" });
+}
+
+function verifyOAuthState(state: string): boolean {
+  try {
+    jwt.verify(state, JWT_SECRET);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+router.get("/auth/google", (req, res) => {
+  if (!GOOGLE_CLIENT_ID) {
+    res.status(503).json({ error: "Google Sign-In is not configured" });
+    return;
+  }
+  const state = makeOAuthState();
+  const params = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: GOOGLE_REDIRECT_URI,
+    response_type: "code",
+    scope: "openid email profile",
+    state,
+    access_type: "online",
+    prompt: "select_account",
+  });
+  res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
+});
+
+router.get("/auth/google/callback", async (req, res) => {
+  const { code, state, error } = req.query as Record<string, string>;
+
+  if (error || !code || !state || !verifyOAuthState(state)) {
+    res.redirect(`${APP_URL}/login?error=google_failed`);
+    return;
+  }
+
+  try {
+    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        code,
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
+        redirect_uri: GOOGLE_REDIRECT_URI,
+        grant_type: "authorization_code",
+      }),
+    });
+
+    const tokenData = await tokenRes.json() as Record<string, unknown>;
+
+    if (!tokenRes.ok || !tokenData["access_token"]) {
+      req.log.error({ tokenData }, "Google token exchange failed");
+      res.redirect(`${APP_URL}/login?error=google_failed`);
+      return;
+    }
+
+    const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+      headers: { Authorization: `Bearer ${tokenData["access_token"]}` },
+    });
+    const googleUser = await userInfoRes.json() as {
+      id: string;
+      email: string;
+      given_name?: string;
+      family_name?: string;
+      picture?: string;
+    };
+
+    if (!googleUser.id || !googleUser.email) {
+      res.redirect(`${APP_URL}/login?error=google_failed`);
+      return;
+    }
+
+    let user = await db.query.profilesTable.findFirst({
+      where: or(
+        eq(profilesTable.googleId, googleUser.id),
+        eq(profilesTable.email, googleUser.email),
+      ),
+    });
+
+    if (user) {
+      if (!user.googleId) {
+        await db.update(profilesTable)
+          .set({
+            googleId: googleUser.id,
+            ...(googleUser.picture && !user.avatarUrl ? { avatarUrl: googleUser.picture } : {}),
+          })
+          .where(eq(profilesTable.id, user.id));
+      }
+    } else {
+      const [created] = await db.insert(profilesTable).values({
+        email: googleUser.email,
+        firstName: googleUser.given_name ?? null,
+        lastName: googleUser.family_name ?? null,
+        avatarUrl: googleUser.picture ?? null,
+        googleId: googleUser.id,
+        role: "buyer",
+      }).returning();
+      user = created;
+    }
+
+    if (!user) {
+      res.redirect(`${APP_URL}/login?error=google_failed`);
+      return;
+    }
+
+    const token = signToken({ userId: user.id, role: user.role });
+    req.log.info({ userId: user.id }, "User signed in with Google");
+
+    const params = new URLSearchParams({ token });
+    res.redirect(`${APP_URL}/auth/google/callback?${params}`);
+  } catch (err) {
+    req.log.error({ err }, "Google OAuth error");
+    res.redirect(`${APP_URL}/login?error=google_failed`);
+  }
+});
 
 router.post("/auth/register", async (req, res) => {
   const parsed = RegisterUserBody.safeParse(req.body);
