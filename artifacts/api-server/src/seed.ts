@@ -49,8 +49,6 @@ async function seed() {
         slug: u.slug,
         displayName: u.displayName,
         bio: `Czech ${u.genre} producer from Prague. Making beats since 2018.`,
-        genre: u.genre ?? undefined,
-        isFeatured: true,
       }).onConflictDoNothing().returning();
       if (artist) {
         createdArtists.push({ id: artist.id, slug: u.slug });
@@ -78,11 +76,10 @@ async function seed() {
           genre,
           bpm,
           key,
-          priceBasic: 49900,
-          pricePremium: 99900,
-          priceExclusive: 299900,
+          priceBasic: "49900",
+          pricePremium: "99900",
+          priceExclusive: "299900",
           status: "active",
-          isFeatured: beatIndex < 6,
           tags: [genre, `${bpm} BPM`],
         }).onConflictDoNothing();
         beatIndex++;

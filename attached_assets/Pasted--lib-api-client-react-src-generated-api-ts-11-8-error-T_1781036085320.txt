@@ -1,0 +1,37 @@
+
+lib/api-client-react/src/generated/api.ts(11,8): error TS2307: Cannot find module '@tanstack/react-query' or its corresponding type declarations.
+lib/api-client-react/src/generated/api.ts(20,8): error TS2307: Cannot find module '@tanstack/react-query' or its corresponding type declarations.
+lib/api-client-react/src/generated/api.ts(104,80): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(188,78): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(263,114): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(336,85): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(413,79): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(490,76): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(566,126): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(636,99): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(706,107): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(786,80): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(863,87): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(940,84): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1017,87): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1092,128): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1165,81): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1240,120): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1311,114): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1382,120): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1525,81): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1600,116): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1673,77): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1747,101): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1820,86): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1897,85): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(1974,85): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2051,84): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2126,126): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2196,107): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2269,83): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2343,101): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2413,103): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2486,83): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2560,102): error TS7006: Parameter 'props' implicitly has an 'any' type.
+lib/api-client-react/src/generated/api.ts(2630,105): error TS7006: Parameter 'props' implicitly has an 'any' type.
