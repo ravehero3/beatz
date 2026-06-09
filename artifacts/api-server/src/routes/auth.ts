@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { db } from "../lib/db";
-import { profilesTable } from "@workspace/db";
+import { profilesTable, artistsTable } from "@workspace/db";
 import { signToken, requireAuth } from "../lib/auth";
 import { LoginUserBody, RegisterUserBody } from "@workspace/api-zod";
 import { eq, or } from "drizzle-orm";
@@ -133,6 +133,68 @@ router.get("/auth/google/callback", async (req, res) => {
     req.log.error({ err }, "Google OAuth error");
     res.redirect(`${APP_URL}/login?error=google_failed`);
   }
+});
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "") || "artist";
+}
+
+async function uniqueSlug(base: string): Promise<string> {
+  let candidate = base;
+  let n = 2;
+  while (true) {
+    const existing = await db.query.artistsTable.findFirst({ where: eq(artistsTable.slug, candidate) });
+    if (!existing) return candidate;
+    candidate = `${base}-${n++}`;
+  }
+}
+
+router.post("/auth/become-artist", requireAuth, async (req, res) => {
+  const userId = req.user!.userId;
+
+  const profile = await db.query.profilesTable.findFirst({ where: eq(profilesTable.id, userId) });
+  if (!profile) {
+    res.status(404).json({ error: "User not found" });
+    return;
+  }
+  if (profile.role === "artist" || profile.role === "admin") {
+    res.status(409).json({ error: "Already an artist" });
+    return;
+  }
+
+  const { displayName } = req.body;
+  if (!displayName || typeof displayName !== "string" || !displayName.trim()) {
+    res.status(400).json({ error: "Artist name is required" });
+    return;
+  }
+
+  const slug = await uniqueSlug(slugify(displayName.trim()));
+
+  await db.insert(artistsTable).values({ id: userId, displayName: displayName.trim(), slug });
+  const [updated] = await db.update(profilesTable)
+    .set({ role: "artist" })
+    .where(eq(profilesTable.id, userId))
+    .returning();
+
+  const token = signToken({ userId, role: "artist" });
+  req.log.info({ userId }, "User became artist");
+  res.json({
+    token,
+    user: {
+      id: updated.id,
+      email: updated.email,
+      firstName: updated.firstName,
+      lastName: updated.lastName,
+      role: updated.role,
+      avatarUrl: updated.avatarUrl,
+      createdAt: updated.createdAt,
+    },
+  });
 });
 
 router.post("/auth/register", async (req, res) => {

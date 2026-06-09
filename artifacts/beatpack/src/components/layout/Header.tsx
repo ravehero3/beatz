@@ -131,6 +131,13 @@ export default function Header() {
                     <User size={14} className="mr-2" /> My Account
                   </Link>
                 </DropdownMenuItem>
+                {user.role === "buyer" && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/become-a-seller" data-testid="menu-become-seller">
+                      <Music size={14} className="mr-2" /> Sell beats
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 {(user.role === "artist" || user.role === "admin") && (
                   <DropdownMenuItem asChild>
                     <Link href="/studio" data-testid="menu-studio">
