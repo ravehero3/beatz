@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/store/authStore";
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/HomePage";
 import BrowseBeatsPage from "@/pages/BrowseBeatsPage";
@@ -28,6 +29,8 @@ import AdminBeatsPage from "@/pages/admin/AdminBeatsPage";
 import AdminPayoutsPage from "@/pages/admin/AdminPayoutsPage";
 import GoogleCallbackPage from "@/pages/GoogleCallbackPage";
 import BecomeSellerPage from "@/pages/BecomeSellerPage";
+import OnboardingPage from "@/pages/OnboardingPage";
+import ProfileSetupPage from "@/pages/ProfileSetupPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,6 +54,12 @@ function PublicOnlyRoute({ component: Component }: { component: React.ComponentT
   return <Component />;
 }
 
+function OnboardingRoute() {
+  const { user } = useAuthStore();
+  if (!user) return <Redirect to="/register" />;
+  return <OnboardingPage />;
+}
+
 function AppRouter() {
   return (
     <Switch>
@@ -63,6 +72,10 @@ function AppRouter() {
       <Route path="/pricing" component={PricingPage} />
       <Route path="/login" component={() => <PublicOnlyRoute component={LoginPage} />} />
       <Route path="/register" component={() => <PublicOnlyRoute component={RegisterPage} />} />
+
+      {/* Onboarding */}
+      <Route path="/onboarding" component={OnboardingRoute} />
+      <Route path="/profile-setup/:type" component={() => <ProtectedRoute component={ProfileSetupPage} />} />
 
       {/* Protected: buyers */}
       <Route path="/checkout" component={() => <ProtectedRoute component={CheckoutPage} />} />
@@ -94,15 +107,20 @@ function AppRouter() {
   );
 }
 
+const HIDE_CHROME_PATHS = ["/studio", "/admin", "/login", "/register", "/onboarding"];
+
 function Layout() {
-  const { pathname } = { pathname: typeof window !== "undefined" ? window.location.pathname : "/" };
-  const hideHeader = pathname.startsWith("/studio") || pathname.startsWith("/admin") || pathname === "/login" || pathname === "/register";
+  const path = typeof window !== "undefined" ? window.location.pathname : "/";
+  const hideChrome = HIDE_CHROME_PATHS.some((p) => path === p || path.startsWith(p + "/")) || path.startsWith("/profile-setup");
 
   return (
-    <>
-      <Header />
-      <AppRouter />
-    </>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      {!hideChrome && <Header />}
+      <main style={{ flex: 1 }}>
+        <AppRouter />
+      </main>
+      {!hideChrome && <Footer />}
+    </div>
   );
 }
 

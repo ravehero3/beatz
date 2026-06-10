@@ -35,7 +35,7 @@ export default function RegisterPage() {
       {
         onSuccess: (result) => {
           setAuth(result.user, result.token);
-          setLocation("/");
+          setLocation("/onboarding");
         },
         onError: () => {
           setError(t("register.error"));
