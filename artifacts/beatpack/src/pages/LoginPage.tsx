@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useLoginUser, getGetMyProfileQueryKey } from "@workspace/api-client-react";
 import { useAuthStore } from "@/store/authStore";
@@ -21,11 +21,19 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [googleEnabled, setGoogleEnabled] = useState(false);
   const loginMutation = useLoginUser();
   const { setAuth } = useAuthStore();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const t = useT();
+
+  useEffect(() => {
+    fetch("/api/auth/config")
+      .then((r) => r.json())
+      .then((data: { googleEnabled: boolean }) => setGoogleEnabled(data.googleEnabled))
+      .catch(() => {});
+  }, []);
 
   const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
   const oauthError = params.get("error");
@@ -81,43 +89,47 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <a
-          href="/api/auth/google"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "10px",
-            height: "44px",
-            borderRadius: "9999px",
-            border: "1px solid #E5E5E5",
-            background: "#FFFFFF",
-            fontFamily: "'Figtree', sans-serif",
-            fontWeight: 500,
-            fontSize: "14px",
-            color: "#0A0A0A",
-            textDecoration: "none",
-            cursor: "pointer",
-            transition: "border-color 0.15s ease, background 0.15s ease",
-            marginBottom: "20px",
-          }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#0A0A0A"; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#E5E5E5"; }}
-        >
-          <GoogleIcon />
-          {t("login.google")}
-        </a>
+        {googleEnabled && (
+          <>
+            <a
+              href="/api/auth/google"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "10px",
+                height: "44px",
+                borderRadius: "9999px",
+                border: "1px solid #E5E5E5",
+                background: "#FFFFFF",
+                fontFamily: "'Figtree', sans-serif",
+                fontWeight: 500,
+                fontSize: "14px",
+                color: "#0A0A0A",
+                textDecoration: "none",
+                cursor: "pointer",
+                transition: "border-color 0.15s ease, background 0.15s ease",
+                marginBottom: "20px",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#0A0A0A"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#E5E5E5"; }}
+            >
+              <GoogleIcon />
+              {t("login.google")}
+            </a>
 
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          marginBottom: "20px",
-        }}>
-          <div style={{ flex: 1, height: "1px", background: "#E5E5E5" }} />
-          <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "12px", color: "#BBBBBB" }}>{t("login.or")}</span>
-          <div style={{ flex: 1, height: "1px", background: "#E5E5E5" }} />
-        </div>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              marginBottom: "20px",
+            }}>
+              <div style={{ flex: 1, height: "1px", background: "#E5E5E5" }} />
+              <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "12px", color: "#BBBBBB" }}>{t("login.or")}</span>
+              <div style={{ flex: 1, height: "1px", background: "#E5E5E5" }} />
+            </div>
+          </>
+        )}
 
         {oauthError && (
           <div style={{

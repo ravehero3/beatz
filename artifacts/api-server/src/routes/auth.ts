@@ -28,6 +28,10 @@ function verifyOAuthState(state: string): boolean {
   }
 }
 
+router.get("/auth/config", (_req, res) => {
+  res.json({ googleEnabled: Boolean(GOOGLE_CLIENT_ID) });
+});
+
 router.get("/auth/google", (req, res) => {
   if (!GOOGLE_CLIENT_ID) {
     res.status(503).json({ error: "Google Sign-In is not configured" });
