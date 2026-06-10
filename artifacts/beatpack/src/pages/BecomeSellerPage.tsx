@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/authStore";
 import beatpackLogo from "@assets/beatpack_logo_1_1781012889607.png";
+import { useT } from "@/lib/i18n";
 
 function slugify(text: string): string {
   return text
@@ -18,6 +19,7 @@ export default function BecomeSellerPage() {
   const [loading, setLoading] = useState(false);
   const { user, setAuth, token } = useAuthStore();
   const [, setLocation] = useLocation();
+  const t = useT();
 
   if (!user) {
     setLocation("/register");
@@ -46,13 +48,13 @@ export default function BecomeSellerPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong. Please try again.");
+        setError(data.error ?? t("seller.error"));
         return;
       }
       setAuth(data.user, data.token);
       setLocation("/studio");
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t("seller.error"));
     } finally {
       setLoading(false);
     }
@@ -85,9 +87,9 @@ export default function BecomeSellerPage() {
             color: "#0A0A0A",
             letterSpacing: "-0.02em",
             marginBottom: "8px",
-          }}>Start selling beats</h1>
+          }}>{t("seller.title")}</h1>
           <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: "14px", color: "#888888", lineHeight: 1.5 }}>
-            Set your artist name and get your own store page.
+            {t("seller.sub")}
           </p>
         </div>
 
@@ -101,7 +103,7 @@ export default function BecomeSellerPage() {
               color: "#444444",
               marginBottom: "6px",
             }}>
-              Artist name
+              {t("seller.nameLabel")}
             </label>
             <input
               type="text"
@@ -109,7 +111,7 @@ export default function BecomeSellerPage() {
               onChange={(e) => setDisplayName(e.target.value)}
               required
               autoFocus
-              placeholder="e.g. DJ Novák"
+              placeholder={t("seller.namePlaceholder")}
               data-testid="input-display-name"
               style={{
                 width: "100%",
@@ -136,7 +138,7 @@ export default function BecomeSellerPage() {
               padding: "12px 14px",
             }}>
               <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "12px", color: "#888888", marginBottom: "2px" }}>
-                Your store URL
+                {t("seller.urlLabel")}
               </div>
               <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "13px", color: "#0A0A0A" }}>
                 beatpack.cz/artists/<strong>{slug}</strong>
@@ -176,7 +178,7 @@ export default function BecomeSellerPage() {
               transition: "opacity 0.15s ease",
             }}
           >
-            {loading ? "Setting up your store…" : "Start selling"}
+            {loading ? t("seller.submitting") : t("seller.submit")}
           </button>
         </form>
       </div>

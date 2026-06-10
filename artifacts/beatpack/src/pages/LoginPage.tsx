@@ -4,6 +4,7 @@ import { useLoginUser, getGetMyProfileQueryKey } from "@workspace/api-client-rea
 import { useAuthStore } from "@/store/authStore";
 import { useQueryClient } from "@tanstack/react-query";
 import beatpackLogo from "@assets/beatpack_logo_1_1781012889607.png";
+import { useT } from "@/lib/i18n";
 
 function GoogleIcon() {
   return (
@@ -24,6 +25,7 @@ export default function LoginPage() {
   const { setAuth } = useAuthStore();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  const t = useT();
 
   const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
   const oauthError = params.get("error");
@@ -40,7 +42,7 @@ export default function LoginPage() {
           setLocation("/");
         },
         onError: () => {
-          setError("Invalid email or password. Please try again.");
+          setError(t("login.error"));
         },
       }
     );
@@ -73,9 +75,9 @@ export default function LoginPage() {
             color: "#0A0A0A",
             letterSpacing: "-0.02em",
             marginBottom: "8px",
-          }}>Welcome back</h1>
+          }}>{t("login.title")}</h1>
           <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: "14px", color: "#888888" }}>
-            Sign in to your Beatpack account
+            {t("login.sub")}
           </p>
         </div>
 
@@ -103,7 +105,7 @@ export default function LoginPage() {
           onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#E5E5E5"; }}
         >
           <GoogleIcon />
-          Continue with Google
+          {t("login.google")}
         </a>
 
         <div style={{
@@ -113,7 +115,7 @@ export default function LoginPage() {
           marginBottom: "20px",
         }}>
           <div style={{ flex: 1, height: "1px", background: "#E5E5E5" }} />
-          <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "12px", color: "#BBBBBB" }}>or</span>
+          <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "12px", color: "#BBBBBB" }}>{t("login.or")}</span>
           <div style={{ flex: 1, height: "1px", background: "#E5E5E5" }} />
         </div>
 
@@ -128,7 +130,7 @@ export default function LoginPage() {
             color: "#EF4444",
             marginBottom: "16px",
           }}>
-            Google sign-in failed. Please try again or use email below.
+            {t("login.googleError")}
           </div>
         )}
 
@@ -141,7 +143,7 @@ export default function LoginPage() {
               fontWeight: 500,
               color: "#444444",
               marginBottom: "6px",
-            }}>Email</label>
+            }}>{t("login.email")}</label>
             <input
               type="email"
               autoComplete="email"
@@ -174,7 +176,7 @@ export default function LoginPage() {
               fontWeight: 500,
               color: "#444444",
               marginBottom: "6px",
-            }}>Password</label>
+            }}>{t("login.password")}</label>
             <input
               type="password"
               autoComplete="current-password"
@@ -233,7 +235,7 @@ export default function LoginPage() {
               marginTop: "8px",
             }}
           >
-            {loginMutation.isPending ? "Signing in..." : "Sign in"}
+            {loginMutation.isPending ? t("login.submitting") : t("login.submit")}
           </button>
         </form>
 
@@ -244,9 +246,9 @@ export default function LoginPage() {
           fontSize: "14px",
           color: "#888888",
         }}>
-          Don't have an account?{" "}
+          {t("login.noAccount")}{" "}
           <Link href="/register" style={{ color: "#0A0A0A", fontWeight: 600, textDecoration: "none" }}>
-            Sign up
+            {t("login.signup")}
           </Link>
         </p>
       </div>

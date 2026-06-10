@@ -3,10 +3,12 @@ import { ArrowRight, Upload, DollarSign, Zap } from "lucide-react";
 import { useGetFeaturedBeats, useGetFeaturedArtists } from "@workspace/api-client-react";
 import BeatCard from "@/components/BeatCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useT } from "@/lib/i18n";
 
 export default function HomePage() {
   const { data: featuredBeats, isLoading: beatsLoading } = useGetFeaturedBeats();
   const { data: featuredArtists, isLoading: artistsLoading } = useGetFeaturedArtists();
+  const t = useT();
 
   return (
     <div style={{ paddingTop: "44px" }}>
@@ -26,7 +28,7 @@ export default function HomePage() {
           lineHeight: 1.1,
           marginBottom: "20px",
         }}>
-          Your beats. Your store.
+          {t("home.hero.title")}
         </h1>
         <p style={{
           fontFamily: "'Figtree', sans-serif",
@@ -37,7 +39,7 @@ export default function HomePage() {
           margin: "0 auto 40px",
           lineHeight: 1.6,
         }}>
-          The Czech beat marketplace for independent producers. Sell your beats directly to buyers — keep everything you earn.
+          {t("home.hero.sub")}
         </p>
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
           <Link href="/beats">
@@ -60,7 +62,7 @@ export default function HomePage() {
                 transition: "all 0.15s ease",
               }}
             >
-              Browse Beats <ArrowRight size={16} />
+              {t("home.hero.browse")} <ArrowRight size={16} />
             </button>
           </Link>
           <Link href="/pricing">
@@ -80,7 +82,7 @@ export default function HomePage() {
                 transition: "all 0.15s ease",
               }}
             >
-              Start Selling
+              {t("home.hero.sell")}
             </button>
           </Link>
         </div>
@@ -95,7 +97,7 @@ export default function HomePage() {
             fontSize: "24px",
             color: "#0A0A0A",
             letterSpacing: "-0.02em",
-          }}>Featured Beats</h2>
+          }}>{t("home.featured.beats")}</h2>
           <Link href="/beats" style={{
             fontFamily: "'Figtree', sans-serif",
             fontSize: "14px",
@@ -106,7 +108,7 @@ export default function HomePage() {
             alignItems: "center",
             gap: "4px",
           }}>
-            View all <ArrowRight size={14} />
+            {t("home.featured.viewAllBeats")} <ArrowRight size={14} />
           </Link>
         </div>
         <div style={{
@@ -157,7 +159,7 @@ export default function HomePage() {
               fontSize: "24px",
               color: "#0A0A0A",
               letterSpacing: "-0.02em",
-            }}>Featured Artists</h2>
+            }}>{t("home.featured.artists")}</h2>
             <Link href="/artists" style={{
               fontFamily: "'Figtree', sans-serif",
               fontSize: "14px",
@@ -168,7 +170,7 @@ export default function HomePage() {
               alignItems: "center",
               gap: "4px",
             }}>
-              View all <ArrowRight size={14} />
+              {t("home.featured.viewAllArtists")} <ArrowRight size={14} />
             </Link>
           </div>
           <div style={{
@@ -222,7 +224,7 @@ export default function HomePage() {
                         fontSize: "12px",
                         color: "#888888",
                         marginTop: "2px",
-                      }}>{artist.beatCount} beats</div>
+                      }}>{artist.beatCount} {t("home.artist.beats")}</div>
                     )}
                   </div>
                 </Link>
@@ -242,16 +244,16 @@ export default function HomePage() {
           letterSpacing: "-0.02em",
           textAlign: "center",
           marginBottom: "48px",
-        }}>How it works</h2>
+        }}>{t("home.how.title")}</h2>
         <div style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
           gap: "32px",
         }}>
           {[
-            { icon: <Upload size={24} />, title: "Upload beats", desc: "Upload your MP3/WAV files and set your own prices for each license tier." },
-            { icon: <Zap size={24} />, title: "Set prices", desc: "Choose Basic, Premium, or Exclusive licenses. You control every price." },
-            { icon: <DollarSign size={24} />, title: "Get paid directly", desc: "Buyers pay directly to your bank via QR platba. Money goes straight to you." },
+            { icon: <Upload size={24} />, title: t("home.how.upload.title"), desc: t("home.how.upload.desc") },
+            { icon: <Zap size={24} />, title: t("home.how.price.title"), desc: t("home.how.price.desc") },
+            { icon: <DollarSign size={24} />, title: t("home.how.pay.title"), desc: t("home.how.pay.desc") },
           ].map((step, i) => (
             <div key={i} style={{
               background: "#FFFFFF",
@@ -302,13 +304,13 @@ export default function HomePage() {
           color: "#FFFFFF",
           letterSpacing: "-0.03em",
           marginBottom: "16px",
-        }}>Start your beat store today</h2>
+        }}>{t("home.cta.title")}</h2>
         <p style={{
           fontFamily: "'Figtree', sans-serif",
           fontSize: "16px",
           color: "rgba(255,255,255,0.6)",
           marginBottom: "32px",
-        }}>Free forever. Upgrade when you're ready.</p>
+        }}>{t("home.cta.sub")}</p>
         <Link href="/pricing">
           <button
             data-testid="btn-cta-pricing"
@@ -329,7 +331,7 @@ export default function HomePage() {
               transition: "all 0.15s ease",
             }}
           >
-            View pricing <ArrowRight size={16} />
+            {t("home.cta.button")} <ArrowRight size={16} />
           </button>
         </Link>
       </section>
@@ -345,7 +347,7 @@ export default function HomePage() {
           fontSize: "13px",
           color: "#888888",
         }}>
-          © 2024 Beatpack. All rights reserved.
+          {t("home.footer")}
         </p>
       </footer>
     </div>

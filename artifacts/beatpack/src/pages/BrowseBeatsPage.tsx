@@ -4,12 +4,14 @@ import { useListBeats, useListGenres } from "@workspace/api-client-react";
 import BeatCard from "@/components/BeatCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useT } from "@/lib/i18n";
 
 export default function BrowseBeatsPage() {
   const [search, setSearch] = useState("");
   const [genre, setGenre] = useState("all");
   const [bpmMin, setBpmMin] = useState("");
   const [bpmMax, setBpmMax] = useState("");
+  const t = useT();
 
   const { data: beats, isLoading } = useListBeats({
     search: search || undefined,
@@ -37,14 +39,14 @@ export default function BrowseBeatsPage() {
             color: "#0A0A0A",
             letterSpacing: "-0.02em",
             marginBottom: "20px",
-          }}>Browse Beats</h1>
+          }}>{t("browse.title")}</h1>
           {/* Search + filters */}
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
             <div style={{ position: "relative", flex: "1 1 300px", maxWidth: "440px" }}>
               <Search size={16} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#888888" }} />
               <input
                 type="search"
-                placeholder="Search beats, artists..."
+                placeholder={t("browse.searchPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 data-testid="input-search"
@@ -68,10 +70,10 @@ export default function BrowseBeatsPage() {
 
             <Select value={genre} onValueChange={setGenre}>
               <SelectTrigger style={{ width: "150px", height: "40px", borderRadius: "10px" }} data-testid="select-genre">
-                <SelectValue placeholder="Genre" />
+                <SelectValue placeholder={t("browse.allGenres")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All genres</SelectItem>
+                <SelectItem value="all">{t("browse.allGenres")}</SelectItem>
                 {(genres ?? []).map((g) => (
                   <SelectItem key={g.genre} value={g.genre}>{g.genre} ({g.count})</SelectItem>
                 ))}
@@ -82,7 +84,7 @@ export default function BrowseBeatsPage() {
               <SlidersHorizontal size={14} color="#888888" />
               <input
                 type="number"
-                placeholder="BPM min"
+                placeholder={t("browse.bpmMin")}
                 value={bpmMin}
                 onChange={(e) => setBpmMin(e.target.value)}
                 data-testid="input-bpm-min"
@@ -100,7 +102,7 @@ export default function BrowseBeatsPage() {
               <span style={{ color: "#888888", fontSize: "12px" }}>–</span>
               <input
                 type="number"
-                placeholder="BPM max"
+                placeholder={t("browse.bpmMax")}
                 value={bpmMax}
                 onChange={(e) => setBpmMax(e.target.value)}
                 data-testid="input-bpm-max"
@@ -137,8 +139,12 @@ export default function BrowseBeatsPage() {
         ) : (beats ?? []).length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 24px", color: "#888888" }}>
             <div style={{ fontSize: "40px", marginBottom: "16px" }}>♪</div>
-            <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "16px", fontWeight: 600, color: "#0A0A0A", marginBottom: "8px" }}>No beats found</div>
-            <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "14px" }}>Try adjusting your filters.</div>
+            <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "16px", fontWeight: 600, color: "#0A0A0A", marginBottom: "8px" }}>
+              {t("browse.noBeats")}
+            </div>
+            <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "14px" }}>
+              {t("browse.noBeatsHint")}
+            </div>
           </div>
         ) : (
           <>
@@ -148,7 +154,7 @@ export default function BrowseBeatsPage() {
               color: "#888888",
               marginBottom: "20px",
             }}>
-              {beats?.length ?? 0} beats found
+              {beats?.length ?? 0} {t("browse.beatsFound")}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "24px" }}>
               {(beats ?? []).map((beat) => (

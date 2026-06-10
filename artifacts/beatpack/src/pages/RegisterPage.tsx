@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useRegisterUser } from "@workspace/api-client-react";
 import { useAuthStore } from "@/store/authStore";
 import beatpackLogo from "@assets/beatpack_logo_1_1781012889607.png";
+import { useT } from "@/lib/i18n";
 
 function GoogleIcon() {
   return (
@@ -24,6 +25,7 @@ export default function RegisterPage() {
   const registerMutation = useRegisterUser();
   const { setAuth } = useAuthStore();
   const [, setLocation] = useLocation();
+  const t = useT();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,7 +38,7 @@ export default function RegisterPage() {
           setLocation("/");
         },
         onError: () => {
-          setError("Registration failed. The email may already be in use.");
+          setError(t("register.error"));
         },
       }
     );
@@ -69,9 +71,9 @@ export default function RegisterPage() {
             color: "#0A0A0A",
             letterSpacing: "-0.02em",
             marginBottom: "8px",
-          }}>Create your account</h1>
+          }}>{t("register.title")}</h1>
           <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: "14px", color: "#888888" }}>
-            Start buying and selling beats today
+            {t("register.sub")}
           </p>
         </div>
 
@@ -99,7 +101,7 @@ export default function RegisterPage() {
           onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#E5E5E5"; }}
         >
           <GoogleIcon />
-          Continue with Google
+          {t("register.google")}
         </a>
 
         <div style={{
@@ -109,14 +111,16 @@ export default function RegisterPage() {
           marginBottom: "20px",
         }}>
           <div style={{ flex: 1, height: "1px", background: "#E5E5E5" }} />
-          <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "12px", color: "#BBBBBB" }}>or</span>
+          <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "12px", color: "#BBBBBB" }}>{t("register.or")}</span>
           <div style={{ flex: 1, height: "1px", background: "#E5E5E5" }} />
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
             <div>
-              <label style={{ display: "block", fontFamily: "'Figtree', sans-serif", fontSize: "13px", fontWeight: 500, color: "#444444", marginBottom: "5px" }}>First name</label>
+              <label style={{ display: "block", fontFamily: "'Figtree', sans-serif", fontSize: "13px", fontWeight: 500, color: "#444444", marginBottom: "5px" }}>
+                {t("register.firstName")}
+              </label>
               <input
                 type="text"
                 value={firstName}
@@ -129,7 +133,9 @@ export default function RegisterPage() {
               />
             </div>
             <div>
-              <label style={{ display: "block", fontFamily: "'Figtree', sans-serif", fontSize: "13px", fontWeight: 500, color: "#444444", marginBottom: "5px" }}>Last name</label>
+              <label style={{ display: "block", fontFamily: "'Figtree', sans-serif", fontSize: "13px", fontWeight: 500, color: "#444444", marginBottom: "5px" }}>
+                {t("register.lastName")}
+              </label>
               <input
                 type="text"
                 value={lastName}
@@ -143,7 +149,9 @@ export default function RegisterPage() {
             </div>
           </div>
           <div>
-            <label style={{ display: "block", fontFamily: "'Figtree', sans-serif", fontSize: "13px", fontWeight: 500, color: "#444444", marginBottom: "5px" }}>Email</label>
+            <label style={{ display: "block", fontFamily: "'Figtree', sans-serif", fontSize: "13px", fontWeight: 500, color: "#444444", marginBottom: "5px" }}>
+              {t("register.email")}
+            </label>
             <input
               type="email"
               autoComplete="email"
@@ -158,7 +166,9 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label style={{ display: "block", fontFamily: "'Figtree', sans-serif", fontSize: "13px", fontWeight: 500, color: "#444444", marginBottom: "5px" }}>Password</label>
+            <label style={{ display: "block", fontFamily: "'Figtree', sans-serif", fontSize: "13px", fontWeight: 500, color: "#444444", marginBottom: "5px" }}>
+              {t("register.password")}
+            </label>
             <input
               type="password"
               autoComplete="new-password"
@@ -166,7 +176,7 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
-              placeholder="At least 8 characters"
+              placeholder={t("register.passwordPlaceholder")}
               data-testid="input-password"
               style={{ width: "100%", height: "40px", padding: "0 12px", borderRadius: "10px", border: "1px solid #E5E5E5", fontFamily: "'Figtree', sans-serif", fontSize: "14px", outline: "none", boxSizing: "border-box" }}
               onFocus={(e) => (e.target.style.borderColor = "#0A0A0A")}
@@ -198,13 +208,15 @@ export default function RegisterPage() {
               marginTop: "8px",
             }}
           >
-            {registerMutation.isPending ? "Creating account..." : "Create account"}
+            {registerMutation.isPending ? t("register.submitting") : t("register.submit")}
           </button>
         </form>
 
         <p style={{ textAlign: "center", marginTop: "24px", fontFamily: "'Figtree', sans-serif", fontSize: "14px", color: "#888888" }}>
-          Already have an account?{" "}
-          <Link href="/login" style={{ color: "#0A0A0A", fontWeight: 600, textDecoration: "none" }}>Sign in</Link>
+          {t("register.hasAccount")}{" "}
+          <Link href="/login" style={{ color: "#0A0A0A", fontWeight: 600, textDecoration: "none" }}>
+            {t("register.login")}
+          </Link>
         </p>
       </div>
     </div>

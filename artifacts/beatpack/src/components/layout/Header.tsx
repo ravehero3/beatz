@@ -6,6 +6,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { ChevronDown, User, Music, Shield, LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import beatpackLogo from "@assets/beatpack_logo_1_1781012889607.png";
+import { useLanguageStore } from "@/store/languageStore";
+import { useT } from "@/lib/i18n";
 
 export default function Header() {
   const { user, logout } = useAuthStore();
@@ -13,6 +15,8 @@ export default function Header() {
   const queryClient = useQueryClient();
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { lang, toggle } = useLanguageStore();
+  const t = useT();
 
   function handleLogout() {
     logoutMutation.mutate(undefined, {
@@ -24,9 +28,9 @@ export default function Header() {
   }
 
   const navLinks = [
-    { href: "/beats", label: "Browse" },
-    { href: "/artists", label: "Artists" },
-    { href: "/pricing", label: "Pricing" },
+    { href: "/beats", label: t("nav.browse") },
+    { href: "/artists", label: t("nav.artists") },
+    { href: "/pricing", label: t("nav.pricing") },
   ];
 
   return (
@@ -67,7 +71,7 @@ export default function Header() {
                 textDecoration: "none",
                 transition: "color 0.15s ease",
               }}
-              data-testid={`nav-${link.label.toLowerCase()}`}
+              data-testid={`nav-${link.href.replace("/", "")}`}
             >
               {link.label}
             </Link>
@@ -77,19 +81,27 @@ export default function Header() {
         <div className="flex items-center gap-3 ml-auto">
           {/* Language toggle */}
           <button
+            onClick={toggle}
             style={{
               fontFamily: "'Figtree', sans-serif",
               fontSize: "12px",
-              fontWeight: 500,
-              color: "#888888",
+              fontWeight: 600,
+              color: "#444444",
               background: "none",
-              border: "none",
+              border: "1px solid #E5E5E5",
+              borderRadius: "6px",
               cursor: "pointer",
               letterSpacing: "0.06em",
+              padding: "2px 8px",
+              height: "24px",
+              lineHeight: "20px",
+              transition: "border-color 0.15s ease, color 0.15s ease",
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#0A0A0A"; e.currentTarget.style.color = "#0A0A0A"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E5E5E5"; e.currentTarget.style.color = "#444444"; }}
             data-testid="language-toggle"
           >
-            EN
+            {lang === "en" ? "EN" : "CS"}
           </button>
 
           {user ? (
@@ -121,40 +133,40 @@ export default function Header() {
                   }}>
                     <User size={14} color="#444" />
                   </div>
-                  {user.firstName || user.email?.split("@")[0] || "Account"}
+                  {user.firstName || user.email?.split("@")[0] || t("nav.account")}
                   <ChevronDown size={14} />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" style={{ minWidth: "180px" }}>
                 <DropdownMenuItem asChild>
                   <Link href="/account" data-testid="menu-account">
-                    <User size={14} className="mr-2" /> My Account
+                    <User size={14} className="mr-2" /> {t("nav.account")}
                   </Link>
                 </DropdownMenuItem>
                 {user.role === "buyer" && (
                   <DropdownMenuItem asChild>
                     <Link href="/become-a-seller" data-testid="menu-become-seller">
-                      <Music size={14} className="mr-2" /> Sell beats
+                      <Music size={14} className="mr-2" /> {t("nav.sell")}
                     </Link>
                   </DropdownMenuItem>
                 )}
                 {(user.role === "artist" || user.role === "admin") && (
                   <DropdownMenuItem asChild>
                     <Link href="/studio" data-testid="menu-studio">
-                      <Music size={14} className="mr-2" /> My Studio
+                      <Music size={14} className="mr-2" /> {t("nav.studio")}
                     </Link>
                   </DropdownMenuItem>
                 )}
                 {user.role === "admin" && (
                   <DropdownMenuItem asChild>
                     <Link href="/admin" data-testid="menu-admin">
-                      <Shield size={14} className="mr-2" /> Admin Panel
+                      <Shield size={14} className="mr-2" /> {t("nav.admin")}
                     </Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} data-testid="menu-logout">
-                  <LogOut size={14} className="mr-2" /> Log out
+                  <LogOut size={14} className="mr-2" /> {t("nav.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -177,7 +189,7 @@ export default function Header() {
                   }}
                   data-testid="btn-login"
                 >
-                  Log in
+                  {t("nav.login")}
                 </button>
               </Link>
               <Link href="/register">
@@ -197,7 +209,7 @@ export default function Header() {
                   }}
                   data-testid="btn-register"
                 >
-                  Sign up
+                  {t("nav.signup")}
                 </button>
               </Link>
             </div>

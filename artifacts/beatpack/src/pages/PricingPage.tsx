@@ -1,80 +1,131 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Check, X } from "lucide-react";
+import {
+  Music2, User, CreditCard, Paintbrush, BarChart2, Headphones,
+  Zap, FileText, Link2, Package, Users, Shield, Globe, MessageSquare,
+} from "lucide-react";
+import { useT } from "@/lib/i18n";
 
-const plans = {
-  monthly: [
-    {
-      name: "Free",
-      nameCz: "Zdarma",
-      price: 0,
-      period: "forever",
-      highlight: false,
-      badge: null,
-      cta: "Start for free",
-      ctaHref: "/register",
-      features: [
-        { text: "Up to 5 beats", included: true },
-        { text: "Basic profile page", included: true },
-        { text: "QR platba payments", included: true },
-        { text: "Custom store design", included: false },
-        { text: "Analytics", included: false },
-        { text: "Priority support", included: false },
-      ],
-    },
-    {
-      name: "Pro",
-      price: 299,
-      period: "month",
-      highlight: true,
-      badge: "Most popular",
-      cta: "Start Pro",
-      ctaHref: "/register",
-      features: [
-        { text: "Unlimited beats", included: true },
-        { text: "Custom store design (3 templates)", included: true },
-        { text: "Full analytics dashboard", included: true },
-        { text: "QR platba + GoPay + Lemon Squeezy", included: true },
-        { text: "Auto-generated invoices + licenses", included: true },
-        { text: "Priority support", included: true },
-        { text: "Custom store URL slug", included: true },
-      ],
-    },
-    {
-      name: "Pro+",
-      nameSub: "Label",
-      price: 799,
-      period: "month",
-      highlight: false,
-      badge: null,
-      cta: "Go Pro+",
-      ctaHref: "/register",
-      features: [
-        { text: "Everything in Pro", included: true },
-        { text: "Multiple artist profiles (up to 5)", included: true },
-        { text: "White-label store (no Beatpack branding)", included: true },
-        { text: "Fio API auto-confirmation", included: true },
-        { text: "Custom domain support", included: true },
-        { text: "Dedicated support", included: true },
-      ],
-    },
-  ],
-  yearly: [
-    { name: "Free", nameCz: "Zdarma", price: 0, period: "forever", highlight: false, badge: null, cta: "Start for free", ctaHref: "/register", features: [{ text: "Up to 5 beats", included: true }, { text: "Basic profile page", included: true }, { text: "QR platba payments", included: true }, { text: "Custom store design", included: false }, { text: "Analytics", included: false }, { text: "Priority support", included: false }] },
-    { name: "Pro", price: 2490, period: "year", highlight: true, badge: "Most popular", cta: "Start Pro", ctaHref: "/register", features: [{ text: "Unlimited beats", included: true }, { text: "Custom store design (3 templates)", included: true }, { text: "Full analytics dashboard", included: true }, { text: "QR platba + GoPay + Lemon Squeezy", included: true }, { text: "Auto-generated invoices + licenses", included: true }, { text: "Priority support", included: true }, { text: "Custom store URL slug", included: true }] },
-    { name: "Pro+", nameSub: "Label", price: 6990, period: "year", highlight: false, badge: null, cta: "Go Pro+", ctaHref: "/register", features: [{ text: "Everything in Pro", included: true }, { text: "Multiple artist profiles (up to 5)", included: true }, { text: "White-label store (no Beatpack branding)", included: true }, { text: "Fio API auto-confirmation", included: true }, { text: "Custom domain support", included: true }, { text: "Dedicated support", included: true }] },
-  ],
-};
+type BillingPeriod = "monthly" | "yearly";
+
+function BillingToggle({
+  billing,
+  setBilling,
+  t,
+}: {
+  billing: BillingPeriod;
+  setBilling: (b: BillingPeriod) => void;
+  t: (k: Parameters<ReturnType<typeof useT>>[0]) => string;
+}) {
+  return (
+    <div style={{
+      display: "inline-flex",
+      alignItems: "center",
+      background: "#F2F2F2",
+      borderRadius: "9999px",
+      padding: "3px",
+      gap: "0",
+    }}>
+      {(["monthly", "yearly"] as const).map((b) => (
+        <button
+          key={b}
+          onClick={() => setBilling(b)}
+          style={{
+            height: "26px",
+            padding: "0 12px",
+            borderRadius: "9999px",
+            border: "none",
+            fontFamily: "'Figtree', sans-serif",
+            fontWeight: 500,
+            fontSize: "12px",
+            cursor: "pointer",
+            transition: "all 0.15s ease",
+            background: billing === b ? "#FFFFFF" : "transparent",
+            color: billing === b ? "#0A0A0A" : "#888888",
+            boxShadow: billing === b ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {b === "monthly" ? t("pricing.monthly") : t("pricing.yearly")}
+          {b === "yearly" && billing === "yearly" && (
+            <span style={{ marginLeft: "4px", fontSize: "10px", color: "#22C55E", fontWeight: 600 }}>
+              {t("pricing.save")}
+            </span>
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function PricingPage() {
-  const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
-  const currentPlans = plans[billing];
+  const [billing, setBilling] = useState<BillingPeriod>("monthly");
+  const t = useT();
+
+  const plans = [
+    {
+      key: "free",
+      name: "Free",
+      price: 0,
+      highlight: false,
+      badge: null,
+      hasBillingToggle: false,
+      cta: t("pricing.free.cta"),
+      ctaHref: "/register",
+      features: [
+        { text: t("pricing.free.f1"), icon: <Music2 size={14} />, included: true },
+        { text: t("pricing.free.f2"), icon: <User size={14} />, included: true },
+        { text: t("pricing.free.f3"), icon: <CreditCard size={14} />, included: true },
+        { text: t("pricing.free.f4"), icon: <Paintbrush size={14} />, included: false },
+        { text: t("pricing.free.f5"), icon: <BarChart2 size={14} />, included: false },
+        { text: t("pricing.free.f6"), icon: <Headphones size={14} />, included: false },
+      ],
+    },
+    {
+      key: "pro",
+      name: "Pro",
+      price: billing === "monthly" ? 299 : 2490,
+      highlight: true,
+      badge: t("pricing.mostPopular"),
+      hasBillingToggle: true,
+      cta: t("pricing.pro.cta"),
+      ctaHref: "/register",
+      features: [
+        { text: t("pricing.pro.f1"), icon: <Zap size={14} />, included: true },
+        { text: t("pricing.pro.f2"), icon: <Paintbrush size={14} />, included: true },
+        { text: t("pricing.pro.f3"), icon: <BarChart2 size={14} />, included: true },
+        { text: t("pricing.pro.f4"), icon: <CreditCard size={14} />, included: true },
+        { text: t("pricing.pro.f5"), icon: <FileText size={14} />, included: true },
+        { text: t("pricing.pro.f6"), icon: <Headphones size={14} />, included: true },
+        { text: t("pricing.pro.f7"), icon: <Link2 size={14} />, included: true },
+      ],
+    },
+    {
+      key: "proplus",
+      name: "Pro+",
+      nameSub: "Label",
+      price: billing === "monthly" ? 799 : 6990,
+      highlight: false,
+      badge: null,
+      hasBillingToggle: true,
+      cta: t("pricing.proplus.cta"),
+      ctaHref: "/register",
+      features: [
+        { text: t("pricing.proplus.f1"), icon: <Package size={14} />, included: true },
+        { text: t("pricing.proplus.f2"), icon: <Users size={14} />, included: true },
+        { text: t("pricing.proplus.f3"), icon: <Shield size={14} />, included: true },
+        { text: t("pricing.proplus.f4"), icon: <Zap size={14} />, included: true },
+        { text: t("pricing.proplus.f5"), icon: <Globe size={14} />, included: true },
+        { text: t("pricing.proplus.f6"), icon: <MessageSquare size={14} />, included: true },
+      ],
+    },
+  ];
 
   return (
     <div style={{ paddingTop: "44px", minHeight: "100vh", background: "#FFFFFF" }}>
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "80px 24px" }}>
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "48px" }}>
+        <div style={{ textAlign: "center", marginBottom: "56px" }}>
           <h1 style={{
             fontFamily: "'Figtree', sans-serif",
             fontWeight: 700,
@@ -82,90 +133,120 @@ export default function PricingPage() {
             color: "#0A0A0A",
             letterSpacing: "-0.03em",
             marginBottom: "12px",
-          }}>Choose your plan</h1>
+          }}>{t("pricing.title")}</h1>
           <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: "16px", color: "#888888" }}>
-            No contracts. Cancel anytime.
+            {t("pricing.sub")}
           </p>
-          {/* Toggle */}
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "0", marginTop: "28px", background: "#F2F2F2", borderRadius: "9999px", padding: "4px" }}>
-            {(["monthly", "yearly"] as const).map((b) => (
-              <button
-                key={b}
-                onClick={() => setBilling(b)}
-                data-testid={`btn-billing-${b}`}
-                style={{
-                  height: "34px",
-                  padding: "0 20px",
-                  borderRadius: "9999px",
-                  border: "none",
-                  fontFamily: "'Figtree', sans-serif",
-                  fontWeight: 500,
-                  fontSize: "13px",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                  background: billing === b ? "#FFFFFF" : "transparent",
-                  color: billing === b ? "#0A0A0A" : "#888888",
-                  boxShadow: billing === b ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
-                }}
-              >
-                {b === "monthly" ? "Monthly" : "Yearly"} {b === "yearly" && <span style={{ fontSize: "11px", color: "#22C55E" }}>Save 17%</span>}
-              </button>
-            ))}
-          </div>
         </div>
 
-        {/* Plan cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px", alignItems: "start" }}>
-          {currentPlans.map((plan) => (
-            <div key={plan.name} style={{ position: "relative" }}>
-              {plan.badge && (
-                <div style={{
-                  textAlign: "center",
-                  marginBottom: "8px",
-                }}>
-                  <span style={{
-                    background: "#0A0A0A",
-                    color: "#FFFFFF",
-                    padding: "4px 14px",
-                    borderRadius: "9999px",
-                    fontSize: "12px",
-                    fontFamily: "'Figtree', sans-serif",
-                    fontWeight: 600,
-                    letterSpacing: "0.04em",
-                  }}>{plan.badge}</span>
-                </div>
-              )}
-              <div
-                data-testid={`card-plan-${plan.name.toLowerCase()}`}
-                style={{
-                  background: "#FFFFFF",
-                  border: plan.highlight ? "2px solid #0A0A0A" : "1px solid #E5E5E5",
-                  borderRadius: "16px",
-                  padding: "32px",
-                  transform: plan.highlight ? "scale(1.02)" : "none",
-                }}
-              >
-                <div style={{ marginBottom: "24px" }}>
-                  <div style={{ fontFamily: "'Figtree', sans-serif", fontWeight: 700, fontSize: "20px", color: "#0A0A0A", letterSpacing: "-0.02em" }}>
-                    {plan.name}{(plan as any).nameSub && <span style={{ fontWeight: 400, fontSize: "16px", color: "#888888" }}> / {(plan as any).nameSub}</span>}
+        {/* Plan cards — equal height via stretch */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: "24px",
+          alignItems: "stretch",
+        }}>
+          {plans.map((plan) => (
+            <div
+              key={plan.key}
+              data-testid={`card-plan-${plan.key}`}
+              style={{
+                background: "#FFFFFF",
+                border: plan.highlight ? "2px solid #0A0A0A" : "1px solid #E5E5E5",
+                borderRadius: "20px",
+                padding: "28px",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              {/* Card top: name + optional toggle */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                    <span style={{
+                      fontFamily: "'Figtree', sans-serif",
+                      fontWeight: 700,
+                      fontSize: "18px",
+                      color: "#0A0A0A",
+                      letterSpacing: "-0.02em",
+                    }}>
+                      {plan.name}
+                    </span>
+                    {(plan as { nameSub?: string }).nameSub && (
+                      <span style={{
+                        fontFamily: "'Figtree', sans-serif",
+                        fontWeight: 400,
+                        fontSize: "13px",
+                        color: "#888888",
+                      }}>/ {(plan as { nameSub?: string }).nameSub}</span>
+                    )}
+                    {plan.badge && (
+                      <span style={{
+                        background: "#0A0A0A",
+                        color: "#FFFFFF",
+                        padding: "2px 10px",
+                        borderRadius: "9999px",
+                        fontSize: "11px",
+                        fontFamily: "'Figtree', sans-serif",
+                        fontWeight: 600,
+                        letterSpacing: "0.04em",
+                      }}>{plan.badge}</span>
+                    )}
                   </div>
-                  <div style={{ marginTop: "12px" }}>
+                  <div style={{ marginTop: "8px" }}>
                     {plan.price === 0 ? (
-                      <span style={{ fontFamily: "'Figtree', sans-serif", fontWeight: 700, fontSize: "32px", color: "#0A0A0A" }}>Free</span>
+                      <span style={{ fontFamily: "'Figtree', sans-serif", fontWeight: 700, fontSize: "30px", color: "#0A0A0A" }}>
+                        {t("pricing.freeLabel")}
+                      </span>
                     ) : (
-                      <>
-                        <span style={{ fontFamily: "'Figtree', sans-serif", fontWeight: 800, fontSize: "36px", color: "#0A0A0A", letterSpacing: "-0.03em" }}>
-                          {plan.price.toLocaleString("cs-CZ")} Kč
+                      <span style={{ fontFamily: "'Figtree', sans-serif", fontWeight: 800, fontSize: "32px", color: "#0A0A0A", letterSpacing: "-0.03em" }}>
+                        {plan.price.toLocaleString("cs-CZ")} Kč
+                        <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "13px", fontWeight: 400, color: "#888888", marginLeft: "4px" }}>
+                          {billing === "monthly" ? t("pricing.perMonth") : t("pricing.perYear")}
                         </span>
-                        <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "14px", color: "#888888" }}>/{plan.period}</span>
-                      </>
+                      </span>
+                    )}
+                    {plan.price === 0 && (
+                      <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "13px", color: "#888888", marginLeft: "6px" }}>
+                        {t("pricing.forever")}
+                      </span>
                     )}
                   </div>
                 </div>
 
+                {/* Per-card billing toggle (Pro + Pro+ only) */}
+                {plan.hasBillingToggle && (
+                  <BillingToggle billing={billing} setBilling={setBilling} t={t} />
+                )}
+              </div>
+
+              {/* Features — flex:1 pushes CTA to bottom */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
+                {plan.features.map((feature, i) => {
+                  const color = feature.included ? "#444444" : "#CCCCCC";
+                  return (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span style={{ color, flexShrink: 0, display: "flex", alignItems: "center" }}>
+                        {feature.icon}
+                      </span>
+                      <span style={{
+                        fontFamily: "'Figtree', sans-serif",
+                        fontSize: "13.5px",
+                        color,
+                        lineHeight: 1.4,
+                      }}>
+                        {feature.text}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* CTA at bottom */}
+              <div style={{ marginTop: "24px" }}>
                 <Link href={plan.ctaHref}>
                   <button
-                    data-testid={`btn-cta-${plan.name.toLowerCase()}`}
+                    data-testid={`btn-cta-${plan.key}`}
                     style={{
                       width: "100%",
                       height: "44px",
@@ -177,29 +258,18 @@ export default function PricingPage() {
                       fontWeight: 500,
                       fontSize: "14px",
                       cursor: "pointer",
-                      marginBottom: "24px",
                       transition: "all 0.15s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!plan.highlight) e.currentTarget.style.borderColor = "#0A0A0A";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!plan.highlight) e.currentTarget.style.borderColor = "#E5E5E5";
                     }}
                   >
                     {plan.cta}
                   </button>
                 </Link>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                  {plan.features.map((feature, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      {feature.included
-                        ? <Check size={16} color="#22C55E" style={{ flexShrink: 0 }} />
-                        : <X size={16} color="#D4D4D4" style={{ flexShrink: 0 }} />
-                      }
-                      <span style={{
-                        fontFamily: "'Figtree', sans-serif",
-                        fontSize: "14px",
-                        color: feature.included ? "#444444" : "#AAAAAA",
-                      }}>{feature.text}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
           ))}
@@ -213,9 +283,9 @@ export default function PricingPage() {
           fontSize: "13px",
           color: "#888888",
           lineHeight: 1.7,
+          whiteSpace: "pre-line",
         }}>
-          All plans include: GDPR-compliant, hosted in EU, cancel anytime,<br />
-          automatic license PDF generation, buyer email notifications.
+          {t("pricing.footerNote")}
         </div>
       </div>
     </div>
