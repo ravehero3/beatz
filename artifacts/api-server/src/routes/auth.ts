@@ -102,6 +102,8 @@ router.get("/auth/google/callback", async (req, res) => {
       ),
     });
 
+    let isNewUser = false;
+
     if (user) {
       if (!user.googleId) {
         await db.update(profilesTable)
@@ -121,6 +123,7 @@ router.get("/auth/google/callback", async (req, res) => {
         role: "buyer",
       }).returning();
       user = created;
+      isNewUser = true;
     }
 
     if (!user) {
@@ -129,9 +132,9 @@ router.get("/auth/google/callback", async (req, res) => {
     }
 
     const token = signToken({ userId: user.id, role: user.role });
-    req.log.info({ userId: user.id }, "User signed in with Google");
+    req.log.info({ userId: user.id, isNewUser }, "User signed in with Google");
 
-    const params = new URLSearchParams({ token });
+    const params = new URLSearchParams({ token, ...(isNewUser ? { new: "1" } : {}) });
     res.redirect(`${APP_URL}/auth/google/callback?${params}`);
   } catch (err) {
     req.log.error({ err }, "Google OAuth error");

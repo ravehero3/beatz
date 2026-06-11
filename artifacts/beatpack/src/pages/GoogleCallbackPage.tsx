@@ -14,6 +14,7 @@ export default function GoogleCallbackPage() {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
     const error = params.get("error");
+    const isNew = params.get("new") === "1";
 
     if (error || !token) {
       setLocation("/login");
@@ -28,7 +29,7 @@ export default function GoogleCallbackPage() {
       .then((r) => r.json())
       .then((user) => {
         setAuth(user, token);
-        setLocation("/");
+        setLocation(isNew ? "/onboarding" : "/");
       })
       .catch(() => {
         setLocation("/login");
