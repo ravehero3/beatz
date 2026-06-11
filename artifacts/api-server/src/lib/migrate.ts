@@ -28,11 +28,6 @@ export async function runMigrations(): Promise<void> {
 
   const pool = new Pool({ connectionString: DATABASE_URL });
   try {
-    const { rows } = await pool.query(
-      `SELECT 1 FROM information_schema.tables WHERE table_name = 'profiles' AND table_schema = 'public'`,
-    );
-    if (rows.length === 0) return;
-
     for (const sql of migrations) {
       await pool.query(sql);
     }
