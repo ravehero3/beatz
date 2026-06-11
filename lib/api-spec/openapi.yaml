@@ -683,6 +683,7 @@ components:
           items: { type: string }
         coverUrl:    { type: ["string", "null"] }
         audioPreviewUrl: { type: ["string", "null"] }
+        audioFullUrl: { type: ["string", "null"] }
         priceBasic:  { type: ["number", "null"] }
         pricePremium: { type: ["number", "null"] }
         priceExclusive: { type: ["number", "null"] }

@@ -42,6 +42,8 @@ export interface Beat {
   /** @nullable */
   audioPreviewUrl?: string | null;
   /** @nullable */
+  audioFullUrl?: string | null;
+  /** @nullable */
   priceBasic?: number | null;
   /** @nullable */
   pricePremium?: number | null;

@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Play, Heart } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 
 interface BeatCardProps {
@@ -15,6 +15,7 @@ interface BeatCardProps {
   pricePremium?: number | null;
   priceExclusive?: number | null;
   isExclusiveSold?: boolean;
+  isPlaying?: boolean;
   onPlay?: () => void;
 }
 
@@ -31,6 +32,7 @@ export default function BeatCard({
   pricePremium,
   priceExclusive,
   isExclusiveSold,
+  isPlaying,
   onPlay,
 }: BeatCardProps) {
   const lowestPrice = priceBasic ?? pricePremium ?? priceExclusive;
@@ -137,17 +139,20 @@ export default function BeatCard({
                 width: "32px",
                 height: "32px",
                 borderRadius: "50%",
-                background: "#0A0A0A",
+                background: isPlaying ? "#555555" : "#0A0A0A",
                 border: "none",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
                 flexShrink: 0,
-                transition: "opacity 0.15s ease",
+                transition: "background 0.15s ease",
               }}
             >
-              <Play size={14} fill="#FFFFFF" color="#FFFFFF" />
+              {isPlaying
+                ? <Pause size={14} fill="#FFFFFF" color="#FFFFFF" />
+                : <Play size={14} fill="#FFFFFF" color="#FFFFFF" />
+              }
             </button>
           )}
         </div>

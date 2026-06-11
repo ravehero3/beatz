@@ -2,15 +2,25 @@ import { useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { useListBeats, useListGenres } from "@workspace/api-client-react";
 import BeatCard from "@/components/BeatCard";
+import BottomPlayer from "@/components/BottomPlayer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useT } from "@/lib/i18n";
+
+interface ActiveBeat {
+  id: string;
+  title: string;
+  artistName?: string | null;
+  coverUrl?: string | null;
+  audioUrl: string;
+}
 
 export default function BrowseBeatsPage() {
   const [search, setSearch] = useState("");
   const [genre, setGenre] = useState("all");
   const [bpmMin, setBpmMin] = useState("");
   const [bpmMax, setBpmMax] = useState("");
+  const [activeBeat, setActiveBeat] = useState<ActiveBeat | null>(null);
   const t = useT();
 
   const { data: beats, isLoading } = useListBeats({
@@ -123,7 +133,7 @@ export default function BrowseBeatsPage() {
       </div>
 
       {/* Beat grid */}
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px" }}>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px", paddingBottom: activeBeat ? "104px" : "32px" }}>
         {isLoading ? (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "24px" }}>
             {Array(12).fill(0).map((_, i) => (
@@ -170,12 +180,35 @@ export default function BrowseBeatsPage() {
                   coverUrl={beat.coverUrl}
                   priceBasic={beat.priceBasic !== undefined ? Number(beat.priceBasic) : null}
                   isExclusiveSold={beat.isExclusiveSold}
+                  isPlaying={activeBeat?.id === beat.id}
+                  onPlay={() => {
+                    const audioUrl = beat.audioFullUrl ?? beat.audioPreviewUrl;
+                    if (!audioUrl) return;
+                    if (activeBeat?.id === beat.id) {
+                      setActiveBeat(null);
+                    } else {
+                      setActiveBeat({
+                        id: beat.id,
+                        title: beat.title,
+                        artistName: beat.artistName ?? null,
+                        coverUrl: beat.coverUrl ?? null,
+                        audioUrl,
+                      });
+                    }
+                  }}
                 />
               ))}
             </div>
           </>
         )}
       </div>
+
+      {activeBeat && (
+        <BottomPlayer
+          beat={activeBeat}
+          onClose={() => setActiveBeat(null)}
+        />
+      )}
     </div>
   );
 }

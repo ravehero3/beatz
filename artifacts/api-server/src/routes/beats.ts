@@ -20,6 +20,7 @@ function beatWithArtist(beat: typeof beatsTable.$inferSelect & { artistName?: st
     tags: beat.tags,
     coverUrl: beat.coverUrl,
     audioPreviewUrl: beat.audioPreviewUrl,
+    audioFullUrl: beat.audioFullUrl,
     priceBasic: beat.priceBasic !== null ? Number(beat.priceBasic) : null,
     pricePremium: beat.pricePremium !== null ? Number(beat.pricePremium) : null,
     priceExclusive: beat.priceExclusive !== null ? Number(beat.priceExclusive) : null,
