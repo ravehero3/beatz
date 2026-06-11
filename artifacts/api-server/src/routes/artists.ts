@@ -74,6 +74,7 @@ router.get("/artists/me", requireAuth, async (req, res) => {
     profilePictureUrl: artist.profilePictureUrl,
     storeTemplate: artist.storeTemplate,
     storePrimaryColor: artist.storePrimaryColor,
+    playerStyle: artist.playerStyle ?? "classic",
     socialInstagram: artist.socialInstagram,
     socialSoundcloud: artist.socialSoundcloud,
     socialYoutube: artist.socialYoutube,
@@ -86,7 +87,7 @@ router.get("/artists/me", requireAuth, async (req, res) => {
 });
 
 router.patch("/artists/me", requireAuth, async (req, res) => {
-  const { displayName, bio, bannerUrl, profilePictureUrl, storeTemplate, storePrimaryColor, socialInstagram, socialYoutube, socialSoundcloud, bankIban, bankAccountName } = req.body;
+  const { displayName, bio, bannerUrl, profilePictureUrl, storeTemplate, storePrimaryColor, playerStyle, socialInstagram, socialYoutube, socialSoundcloud, bankIban, bankAccountName } = req.body;
 
   const [updated] = await db.update(artistsTable).set({
     ...(displayName !== undefined && { displayName }),
@@ -95,6 +96,7 @@ router.patch("/artists/me", requireAuth, async (req, res) => {
     ...(profilePictureUrl !== undefined && { profilePictureUrl }),
     ...(storeTemplate !== undefined && { storeTemplate }),
     ...(storePrimaryColor !== undefined && { storePrimaryColor }),
+    ...(playerStyle !== undefined && { playerStyle }),
     ...(socialInstagram !== undefined && { socialInstagram }),
     ...(socialYoutube !== undefined && { socialYoutube }),
     ...(socialSoundcloud !== undefined && { socialSoundcloud }),
@@ -134,6 +136,8 @@ router.get("/artists/:slug", async (req, res) => {
     bio: artist.bio,
     bannerUrl: artist.bannerUrl,
     profilePictureUrl: artist.profilePictureUrl,
+    storeTemplate: artist.storeTemplate ?? "light",
+    playerStyle: artist.playerStyle ?? "classic",
     socialInstagram: artist.socialInstagram,
     socialYoutube: artist.socialYoutube,
     socialSoundcloud: artist.socialSoundcloud,

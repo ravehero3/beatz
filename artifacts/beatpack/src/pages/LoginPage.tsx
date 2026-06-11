@@ -251,9 +251,14 @@ export default function LoginPage() {
           </button>
         </form>
 
+        <p style={{ textAlign: "center", marginTop: "16px", fontFamily: "'Figtree', sans-serif", fontSize: "14px", color: "#888888" }}>
+          <Link href="/forgot-password" style={{ color: "#888888", textDecoration: "none" }}>
+            Forgot password?
+          </Link>
+        </p>
         <p style={{
           textAlign: "center",
-          marginTop: "24px",
+          marginTop: "12px",
           fontFamily: "'Figtree', sans-serif",
           fontSize: "14px",
           color: "#888888",

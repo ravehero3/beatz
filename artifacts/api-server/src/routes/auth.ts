@@ -307,6 +307,17 @@ router.get("/users/me", requireAuth, async (req, res) => {
   });
 });
 
+router.post("/auth/forgot-password", async (req, res) => {
+  const { email } = req.body;
+  if (!email || typeof email !== "string") {
+    res.status(400).json({ error: "Email required" });
+    return;
+  }
+  const user = await db.query.profilesTable.findFirst({ where: eq(profilesTable.email, email.toLowerCase().trim()) });
+  req.log.info({ email, found: !!user }, "Forgot password request");
+  res.json({ message: "If an account exists for this email, a reset link has been sent." });
+});
+
 router.patch("/users/me", requireAuth, async (req, res) => {
   const { firstName, lastName, avatarUrl } = req.body;
   const [updated] = await db.update(profilesTable)

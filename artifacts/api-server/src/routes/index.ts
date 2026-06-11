@@ -7,11 +7,13 @@ import ordersRouter from "./orders";
 import withdrawalsRouter from "./withdrawals";
 import savedRouter from "./saved";
 import dashboardRouter from "./dashboard";
+import uploadRouter from "./upload";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(authRouter);
+router.use(uploadRouter);
 router.use(beatsRouter);
 router.use(artistsRouter);
 router.use(ordersRouter);

@@ -12,6 +12,7 @@ export const artistsTable = pgTable("artists", {
   profilePictureUrl: text("profile_picture_url"),
   storeTemplate: text("store_template").default("light"),
   storePrimaryColor: text("store_primary_color").default("#0A0A0A"),
+  playerStyle: text("player_style").default("classic"),
   socialInstagram: text("social_instagram"),
   socialSoundcloud: text("social_soundcloud"),
   socialYoutube: text("social_youtube"),
