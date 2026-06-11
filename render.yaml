@@ -3,6 +3,7 @@ services:
     name: beatpack
     env: node
     buildCommand: pnpm install --frozen-lockfile && pnpm run build
+    preDeployCommand: node migrate.mjs
     startCommand: node artifacts/api-server/dist/index.mjs
     envVars:
       - key: PORT
