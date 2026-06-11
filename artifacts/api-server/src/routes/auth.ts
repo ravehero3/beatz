@@ -10,7 +10,7 @@ import { eq, or } from "drizzle-orm";
 const router: IRouter = Router();
 
 const JWT_SECRET = process.env["SESSION_SECRET"] ?? "beatpack-dev-secret-change-in-prod";
-const APP_URL = process.env["APP_URL"] ?? "http://localhost:18143";
+const APP_URL = (process.env["APP_URL"] ?? "http://localhost:18143").replace(/\/$/, "");
 const GOOGLE_CLIENT_ID = process.env["GOOGLE_CLIENT_ID"] ?? "";
 const GOOGLE_CLIENT_SECRET = process.env["GOOGLE_CLIENT_SECRET"] ?? "";
 const GOOGLE_REDIRECT_URI = `${APP_URL}/api/auth/google/callback`;
