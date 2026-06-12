@@ -1,0 +1,98 @@
+Here's a clean brief you can paste straight into Replit:
+
+---
+
+**BEATPACK PLATFORM — BUILD BRIEF**
+
+**What we're building:**
+Shoptet-style platform for Czech beat makers. Producers get their own prebuilt beat store (subdomain like jmeno.beatpack.cz), drive their own traffic via YouTube type beat videos, and collect payments directly. We are not a marketplace — we are a tool.
+
+---
+
+**Storage:**
+- Use Cloudflare R2 for beat file storage (10GB free, zero egress fees)
+- Enforce hard storage limits per user at upload time
+- Track usage in database, reject upload if user is at quota
+- Each beat is roughly 10-20mb, 10 beats per free user = ~200mb max per free account
+
+---
+
+**Free tier limits:**
+- 10 beats maximum (not 5)
+- Basic profile page
+- Subdomain included: jmeno.beatpack.cz
+- QR payment only
+- Basic play count analytics only (not full dashboard)
+- No custom templates, no white-label
+
+---
+
+**Pricing (update these on the pricing page):**
+
+Free — 0 CZK forever
+- 10 beats
+- Basic store
+- jmeno.beatpack.cz subdomain
+- QR platba only
+- Play count only
+
+Pro — 249 CZK/month or 2490 CZK/year (2 months free, show savings clearly)
+- Unlimited beats
+- All templates (remove the "3 šablony" limit)
+- Full analytics dashboard
+- QR + GoPay + Lemon Squeezy
+- Automatic invoices + licenses
+- Custom store URL
+- Priority support
+
+Pro+/Label — 699 CZK/month or 6990 CZK/year (2 months free, show savings clearly)
+- Everything from Pro
+- Up to 5 artist profiles
+- White-label store (no Beatpack logo)
+- Fio Bank API automatic payment confirmations
+- Custom domain support
+- Dedicated support
+
+---
+
+**Pricing page behaviour:**
+- Annual billing selected by default (not monthly)
+- Monthly is the opt-in toggle
+- Show crossed out annual price vs discounted price clearly, e.g. ~~2988 CZK~~ 2490 CZK/year
+- Show "ušetříte X CZK" (you save X CZK) next to annual option
+
+---
+
+**Payment integrations:**
+- QR platba — generate QR from IBAN, buyer pays via banking app, free tier only
+- GoPay — cards, bank transfers, Apple Pay, ~2-3% fee, Pro and above
+- Fio Bank API — automatic payment confirmation, Pro+ only
+- Lemon Squeezy — for international payments, Pro and above
+- Stripe — add later when expanding globally
+
+---
+
+**Beat store flow:**
+1. Producer signs up → gets subdomain automatically
+2. Uploads beats → sets price per beat → chooses payment method
+3. Posts YouTube type beat videos → links to their beatpack store
+4. Buyer visits store → browses → pays → gets license PDF automatically
+5. Money goes directly to producer (we do not hold funds)
+
+---
+
+**Key things to enforce in code:**
+- File size check before upload, reject if over quota
+- Storage usage tracked in database per user
+- Hard block on upload when free tier limit reached with upsell prompt to Pro
+- Annual billing as default on pricing toggle
+- Subdomain provisioned automatically on registration
+
+---
+
+**Stack staying free as long as possible:**
+- Replit free for development
+- GitHub public repo
+- Render free tier for hosting
+- Cloudflare R2 for storage
+- No paid services until revenue justifies it
