@@ -161,6 +161,7 @@ const SPARKLE_POSITIONS: React.CSSProperties[] = [
 export default function PricingPage() {
   const [billing, setBilling] = useState<BillingPeriod>("yearly");
   const [proplusHovered, setProplusHovered] = useState(false);
+  const [proHovered, setProHovered] = useState(false);
   const t = useT();
 
   const plans = [
@@ -279,28 +280,16 @@ export default function PricingPage() {
                   display: "flex",
                   flexDirection: "column",
                 }
-              : isPro
-              ? {
-                  background: "rgba(255,255,255,0.92)",
-                  backdropFilter: "blur(16px)",
-                  WebkitBackdropFilter: "blur(16px)",
-                  border: "1px solid rgba(59,130,246,0.25)",
-                  borderRadius: "20px",
-                  padding: "28px",
-                  display: "flex",
-                  flexDirection: "column",
-                  boxShadow: "0 20px 50px rgba(59, 130, 246, 0.14), 0 4px 16px rgba(59, 130, 246, 0.07)",
-                }
               : {
-                  background: "rgba(255,255,255,0.38)",
-                  backdropFilter: "blur(20px)",
-                  WebkitBackdropFilter: "blur(20px)",
-                  border: "1px solid rgba(255,255,255,0.72)",
+                  background: "rgba(255,255,255,0.65)",
+                  backdropFilter: "blur(24px)",
+                  WebkitBackdropFilter: "blur(24px)",
+                  border: "1px solid rgba(255,255,255,0.32)",
                   borderRadius: "20px",
                   padding: "28px",
                   display: "flex",
                   flexDirection: "column",
-                  boxShadow: "0 8px 32px rgba(80,100,200,.10), inset 0 1px 0 rgba(255,255,255,0.95)",
+                  boxShadow: "0 16px 48px rgba(0,0,30,.45), inset 0 1px 0 rgba(255,255,255,0.90), inset 0 -1px 0 rgba(255,255,255,0.12)",
                   position: "relative",
                   zIndex: 1,
                   flex: 1,
@@ -316,23 +305,23 @@ export default function PricingPage() {
                     padding: "8px",
                     display: "flex",
                     flexDirection: "column",
-                    background: "hsl(240,30%,98.5%)",
+                    background: "linear-gradient(135deg, #0d1020 0%, #17082e 50%, #091628 100%)",
                     overflow: "hidden",
                   }}
                   onMouseEnter={() => setProplusHovered(true)}
                   onMouseLeave={() => setProplusHovered(false)}
                 >
-                  {/* Conic gradient colour wash */}
+                  {/* Subtle nebula colour wash */}
                   <div style={{
                     position: "absolute", inset: 0, borderRadius: "26px", pointerEvents: "none",
-                    background: "conic-gradient(from 210deg at 25% 75%, rgba(180,200,255,.28), rgba(255,230,200,.22), rgba(200,255,220,.18), rgba(230,200,255,.26), rgba(180,200,255,.28))",
+                    background: "conic-gradient(from 210deg at 25% 75%, rgba(80,60,160,.22), rgba(60,100,200,.14), rgba(100,40,180,.18), rgba(40,80,200,.12), rgba(80,60,160,.22))",
                   }} />
-                  {/* Radial highlight top-left */}
+                  {/* Radial bloom top-left */}
                   <div style={{
                     position: "absolute", inset: 0, borderRadius: "26px", pointerEvents: "none",
-                    background: "radial-gradient(ellipse 70% 55% at top left, rgba(190,210,255,.35), transparent 60%)",
+                    background: "radial-gradient(ellipse 70% 55% at top left, rgba(120,80,200,.22), transparent 60%)",
                   }} />
-                  {/* Star field */}
+                  {/* Star field — always visible on dark bg */}
                   <svg
                     aria-hidden="true"
                     style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
@@ -340,7 +329,7 @@ export default function PricingPage() {
                     viewBox="0 0 100 100"
                   >
                     {PROPLUS_STARS.map((s, i) => (
-                      <circle key={i} cx={s.x} cy={s.y} r={s.r * 0.55} fill="white" opacity={s.opacity} />
+                      <circle key={i} cx={s.x} cy={s.y} r={s.r * 0.80} fill="white" opacity={s.opacity} />
                     ))}
                   </svg>
                   {/* Sparkles on hover */}
@@ -540,138 +529,228 @@ export default function PricingPage() {
               );
             }
 
+            if (isPro) {
+              return (
+                <div
+                  key={plan.key}
+                  style={{
+                    position: "relative",
+                    borderRadius: "24px",
+                    padding: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                    background: proHovered ? "#0d1225" : "#EEF2FF",
+                    overflow: "hidden",
+                    transition: "background 0.5s cubic-bezier(0.4,0,0.2,1)",
+                  }}
+                  onMouseEnter={() => setProHovered(true)}
+                  onMouseLeave={() => setProHovered(false)}
+                >
+                  {/* Stars — fade in on hover */}
+                  <svg aria-hidden="true" style={{
+                    position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none",
+                    opacity: proHovered ? 1 : 0,
+                    transition: "opacity 0.55s ease",
+                  }} preserveAspectRatio="none" viewBox="0 0 100 100">
+                    {PROPLUS_STARS.map((s, i) => (
+                      <circle key={i} cx={s.x} cy={s.y} r={s.r * 0.75} fill="white" opacity={s.opacity} />
+                    ))}
+                  </svg>
+                  {/* Sparkles on hover */}
+                  {proHovered && SPARKLE_POSITIONS.map((pos, i) => (
+                    <SparkleIcon key={i} style={{ position: "absolute", ...pos }} />
+                  ))}
+                  {/* Glass card */}
+                  <div
+                    data-testid="card-plan-pro"
+                    style={{
+                      ...cardStyle,
+                      background: proHovered ? "rgba(255,255,255,0.72)" : "rgba(255,255,255,0.96)",
+                      border: proHovered ? "1px solid rgba(255,255,255,0.30)" : "1px solid rgba(59,130,246,0.25)",
+                      boxShadow: proHovered
+                        ? "0 16px 40px rgba(0,0,30,.35), inset 0 1px 0 rgba(255,255,255,0.90)"
+                        : "0 20px 50px rgba(59,130,246,0.14), 0 4px 16px rgba(59,130,246,0.07)",
+                      transition: "background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease",
+                    }}
+                  >
+                    <div style={{ marginBottom: "20px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                        <span style={{
+                          fontFamily: "'Figtree', sans-serif",
+                          fontWeight: 700,
+                          fontSize: "17px",
+                          color: "#0A0A0A",
+                          letterSpacing: "-0.02em",
+                        }}>
+                          {plan.name}
+                        </span>
+                        <span style={{
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          letterSpacing: "0.04em",
+                          background: proHovered ? "rgba(255,255,255,0.20)" : "rgba(59,130,246,0.12)",
+                          color: proHovered ? "#FFFFFF" : "#3B82F6",
+                          borderRadius: "9999px",
+                          padding: "2px 8px",
+                          transition: "all 0.5s ease",
+                        }}>
+                          {t("pricing.mostPopular")}
+                        </span>
+                      </div>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: "6px", flexWrap: "wrap" }}>
+                          <span style={{
+                            fontFamily: "'Figtree', sans-serif",
+                            fontWeight: 800,
+                            fontSize: "32px",
+                            color: "#0A0A0A",
+                            letterSpacing: "-0.03em",
+                            lineHeight: 1,
+                          }}>
+                            {displayPrice.toLocaleString("cs-CZ")} Kč
+                          </span>
+                          <span style={{
+                            fontFamily: "'Figtree', sans-serif",
+                            fontSize: "13px",
+                            fontWeight: 400,
+                            color: "#888888",
+                          }}>
+                            {billing === "monthly" ? t("pricing.perMonth") : t("pricing.perYear")}
+                          </span>
+                        </div>
+                        {billing === "yearly" && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "6px", flexWrap: "wrap" }}>
+                            <span style={{
+                              fontFamily: "'Figtree', sans-serif",
+                              fontSize: "13px",
+                              color: "#AAAAAA",
+                              textDecoration: "line-through",
+                            }}>
+                              {paidPlan.yearlyFull.toLocaleString("cs-CZ")} Kč
+                            </span>
+                            <span style={{
+                              fontFamily: "'Figtree', sans-serif",
+                              fontSize: "11px",
+                              fontWeight: 700,
+                              color: "#16A34A",
+                              background: "rgba(22,163,74,0.10)",
+                              borderRadius: "9999px",
+                              padding: "2px 8px",
+                            }}>
+                              {lang === "cs"
+                                ? `Ušetříte ${paidPlan.savingsPerYear.toLocaleString("cs-CZ")} Kč`
+                                : `Save ${paidPlan.savingsPerYear.toLocaleString("en")} CZK`}
+                            </span>
+                          </div>
+                        )}
+                        {billing === "yearly" && (
+                          <div style={{
+                            fontFamily: "'Figtree', sans-serif",
+                            fontSize: "12px",
+                            color: "#AAAAAA",
+                            marginTop: "4px",
+                          }}>
+                            ≈ {Math.round(displayPrice / 12).toLocaleString("cs-CZ")} Kč{t("pricing.perMonth")}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "9px", flex: 1 }}>
+                      {plan.features.map((feature, i) => (
+                        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                          <span style={{
+                            flexShrink: 0, display: "flex", alignItems: "center", marginTop: "1px",
+                            color: feature.included ? "#3B82F6" : "#DDDDDD",
+                          }}>
+                            {feature.included ? <Check size={14} strokeWidth={2.5} /> : <X size={14} strokeWidth={2} />}
+                          </span>
+                          <span style={{
+                            fontFamily: "'Figtree', sans-serif",
+                            fontSize: "13.5px",
+                            color: feature.included ? "#333333" : "#C0C0C0",
+                            lineHeight: 1.45,
+                          }}>
+                            {feature.text}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ marginTop: "24px" }}>
+                      <Link href="/register">
+                        <button
+                          data-testid="btn-cta-pro"
+                          style={{
+                            width: "100%",
+                            height: "44px",
+                            borderRadius: "9999px",
+                            background: "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)",
+                            color: "#FFFFFF",
+                            border: "none",
+                            fontFamily: "'Figtree', sans-serif",
+                            fontWeight: 600,
+                            fontSize: "14px",
+                            cursor: "pointer",
+                            transition: "opacity 0.15s ease, transform 0.15s ease",
+                            boxShadow: "0 4px 14px rgba(37,99,235,0.35), inset 0 1px 0 rgba(255,255,255,0.15)",
+                          }}
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLButtonElement).style.opacity = "0.88";
+                            (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)";
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLButtonElement).style.opacity = "1";
+                            (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
+                          }}
+                        >
+                          {t("pricing.pro.cta")}
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <div
                 key={plan.key}
-                data-testid={`card-plan-${plan.key}`}
+                data-testid="card-plan-free"
                 style={cardStyle}
               >
-                {/* Plan name + badge */}
                 <div style={{ marginBottom: "20px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
                     <span style={{
                       fontFamily: "'Figtree', sans-serif",
                       fontWeight: 700,
                       fontSize: "17px",
-                      color: isFree ? "#666666" : "#0A0A0A",
+                      color: "#666666",
                       letterSpacing: "-0.02em",
                     }}>
                       {plan.name}
                     </span>
-                    {(plan as { nameSub?: string }).nameSub && (
-                      <span style={{
-                        fontFamily: "'Figtree', sans-serif",
-                        fontWeight: 400,
-                        fontSize: "13px",
-                        color: "#888888",
-                      }}>/ {(plan as { nameSub?: string }).nameSub}</span>
-                    )}
-                    {isPro && (
-                      <span style={{
-                        fontSize: "10px",
-                        fontWeight: 700,
-                        letterSpacing: "0.04em",
-                        background: "rgba(59,130,246,0.12)",
-                        color: "#3B82F6",
-                        borderRadius: "9999px",
-                        padding: "2px 8px",
-                      }}>
-                        {t("pricing.mostPopular")}
-                      </span>
-                    )}
                   </div>
-                  {isFree ? (
-                    <div>
-                      <span style={{ fontFamily: "'Figtree', sans-serif", fontWeight: 700, fontSize: "30px", color: "#666666" }}>
-                        {t("pricing.freeLabel")}
-                      </span>
-                      <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "13px", color: "#AAAAAA", marginLeft: "6px" }}>
-                        {t("pricing.forever")}
-                      </span>
-                    </div>
-                  ) : (
-                    <div>
-                      <div style={{ display: "flex", alignItems: "baseline", gap: "6px", flexWrap: "wrap" }}>
-                        <span style={{
-                          fontFamily: "'Figtree', sans-serif",
-                          fontWeight: 800,
-                          fontSize: "32px",
-                          color: "#0A0A0A",
-                          letterSpacing: "-0.03em",
-                          lineHeight: 1,
-                        }}>
-                          {displayPrice.toLocaleString("cs-CZ")} Kč
-                        </span>
-                        <span style={{
-                          fontFamily: "'Figtree', sans-serif",
-                          fontSize: "13px",
-                          fontWeight: 400,
-                          color: "#888888",
-                        }}>
-                          {billing === "monthly" ? t("pricing.perMonth") : t("pricing.perYear")}
-                        </span>
-                      </div>
-                      {billing === "yearly" && (
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "6px", flexWrap: "wrap" }}>
-                          <span style={{
-                            fontFamily: "'Figtree', sans-serif",
-                            fontSize: "13px",
-                            color: "#AAAAAA",
-                            textDecoration: "line-through",
-                          }}>
-                            {paidPlan.yearlyFull.toLocaleString("cs-CZ")} Kč
-                          </span>
-                          <span style={{
-                            fontFamily: "'Figtree', sans-serif",
-                            fontSize: "11px",
-                            fontWeight: 700,
-                            color: "#16A34A",
-                            background: "rgba(22,163,74,0.10)",
-                            borderRadius: "9999px",
-                            padding: "2px 8px",
-                          }}>
-                            {lang === "cs"
-                              ? `Ušetříte ${paidPlan.savingsPerYear.toLocaleString("cs-CZ")} Kč`
-                              : `Save ${paidPlan.savingsPerYear.toLocaleString("en")} CZK`}
-                          </span>
-                        </div>
-                      )}
-                      {billing === "yearly" && (
-                        <div style={{
-                          fontFamily: "'Figtree', sans-serif",
-                          fontSize: "12px",
-                          color: "#AAAAAA",
-                          marginTop: "4px",
-                        }}>
-                          ≈ {Math.round(displayPrice / 12).toLocaleString("cs-CZ")} Kč{t("pricing.perMonth")}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <div>
+                    <span style={{ fontFamily: "'Figtree', sans-serif", fontWeight: 700, fontSize: "30px", color: "#666666" }}>
+                      {t("pricing.freeLabel")}
+                    </span>
+                    <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "13px", color: "#AAAAAA", marginLeft: "6px" }}>
+                      {t("pricing.forever")}
+                    </span>
+                  </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "9px", flex: 1 }}>
                   {plan.features.map((feature, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
                       <span style={{
-                        flexShrink: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        marginTop: "1px",
-                        color: feature.included
-                          ? isFree ? "#888888" : "#3B82F6"
-                          : "#DDDDDD",
+                        flexShrink: 0, display: "flex", alignItems: "center", marginTop: "1px",
+                        color: feature.included ? "#888888" : "#DDDDDD",
                       }}>
-                        {feature.included
-                          ? <Check size={14} strokeWidth={2.5} />
-                          : <X size={14} strokeWidth={2} />
-                        }
+                        {feature.included ? <Check size={14} strokeWidth={2.5} /> : <X size={14} strokeWidth={2} />}
                       </span>
                       <span style={{
                         fontFamily: "'Figtree', sans-serif",
                         fontSize: "13.5px",
-                        color: feature.included
-                          ? isFree ? "#666666" : "#333333"
-                          : "#C0C0C0",
+                        color: feature.included ? "#666666" : "#C0C0C0",
                         lineHeight: 1.45,
                       }}>
                         {feature.text}
@@ -682,27 +761,22 @@ export default function PricingPage() {
                 <div style={{ marginTop: "24px" }}>
                   <Link href="/register">
                     <button
-                      data-testid={`btn-cta-${plan.key}`}
+                      data-testid="btn-cta-free"
                       style={{
                         width: "100%",
                         height: "44px",
                         borderRadius: "9999px",
-                        background: isFree
-                          ? "rgba(0,0,0,0.07)"
-                          : "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)",
-                        color: isFree ? "#555555" : "#FFFFFF",
+                        background: "rgba(0,0,0,0.07)",
+                        color: "#555555",
                         border: "none",
                         fontFamily: "'Figtree', sans-serif",
                         fontWeight: 600,
                         fontSize: "14px",
                         cursor: "pointer",
                         transition: "opacity 0.15s ease, transform 0.15s ease",
-                        boxShadow: isFree
-                          ? "none"
-                          : "0 4px 14px rgba(37,99,235,0.35), inset 0 1px 0 rgba(255,255,255,0.15)",
                       }}
                       onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.opacity = "0.88";
+                        (e.currentTarget as HTMLButtonElement).style.opacity = "0.80";
                         (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)";
                       }}
                       onMouseLeave={(e) => {
@@ -710,7 +784,7 @@ export default function PricingPage() {
                         (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
                       }}
                     >
-                      {isFree ? t("pricing.free.cta") : t("pricing.pro.cta")}
+                      {t("pricing.free.cta")}
                     </button>
                   </Link>
                 </div>

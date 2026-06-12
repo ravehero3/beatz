@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/authStore";
 import beatpackLogo from "@assets/beatpack_logo_1_1781012889607.png";
@@ -21,14 +21,12 @@ export default function BecomeSellerPage() {
   const [, setLocation] = useLocation();
   const t = useT();
 
-  if (!user) {
-    setLocation("/register");
-    return null;
-  }
-  if (user.role === "artist" || user.role === "admin") {
-    setLocation("/studio");
-    return null;
-  }
+  useEffect(() => {
+    if (!user) setLocation("/register");
+    else if (user.role === "artist" || user.role === "admin") setLocation("/studio");
+  }, [user, setLocation]);
+
+  if (!user || user.role === "artist" || user.role === "admin") return null;
 
   const slug = slugify(displayName);
 

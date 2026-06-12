@@ -1,0 +1,76 @@
+{"level":30,"time":1781260320696,"pid":72,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-8699c767f8-zsnjr","req":{"id":24,"method":"GET","url":"/robots.txt"},"res":{"statusCode":200},"responseTime":2,"msg":"request completed"}
+{"level":30,"time":1781260321266,"pid":72,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-8699c767f8-zsnjr","req":{"id":25,"method":"GET","url":"/pricing"},"res":{"statusCode":200},"responseTime":3,"msg":"request completed"}
+==> Deploying...
+==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+==> Running 'node artifacts/api-server/dist/index.mjs'
+{"level":30,"time":1781260961474,"pid":71,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-664c8f5f69-nd5ll","msg":"Migrations applied"}
+{"level":30,"time":1781260961478,"pid":71,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-664c8f5f69-nd5ll","port":10000,"msg":"Server listening"}
+{"level":30,"time":1781260962037,"pid":71,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-664c8f5f69-nd5ll","req":{"id":1,"method":"HEAD","url":"/"},"res":{"statusCode":200},"responseTime":4,"msg":"request completed"}
+==> Your service is live 🎉
+{"level":30,"time":1781260965460,"pid":71,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-664c8f5f69-nd5ll","req":{"id":2,"method":"GET","url":"/"},"res":{"statusCode":200},"responseTime":4,"msg":"request completed"}
+==> 
+==> ///////////////////////////////////////////////////////////
+==> 
+==> Available at your primary URL https://beatpack.onrender.com
+==> 
+==> ///////////////////////////////////////////////////////////
+==> Detected service running on port 10000
+==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+==> Running 'node artifacts/api-server/dist/index.mjs'
+{"level":30,"time":1781272544944,"pid":52,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-6fd74fb69-ltr74","msg":"Migrations applied"}
+{"level":30,"time":1781272544947,"pid":52,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-6fd74fb69-ltr74","port":10000,"msg":"Server listening"}
+{"level":30,"time":1781272549051,"pid":52,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-6fd74fb69-ltr74","req":{"id":1,"method":"HEAD","url":"/pricing"},"res":{"statusCode":200},"responseTime":5,"msg":"request completed"}
+{"level":30,"time":1781272549257,"pid":52,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-6fd74fb69-ltr74","req":{"id":2,"method":"GET","url":"/pricing"},"res":{"statusCode":200},"responseTime":3,"msg":"request completed"}
+{"level":30,"time":1781272549485,"pid":52,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-6fd74fb69-ltr74","req":{"id":3,"method":"GET","url":"/assets/index-DBkTNzmc.js"},"res":{"statusCode":200},"responseTime":5,"msg":"request completed"}
+{"level":30,"time":1781272549823,"pid":52,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-6fd74fb69-ltr74","req":{"id":4,"method":"GET","url":"/assets/index-OAz2RbTX.css"},"res":{"statusCode":200},"responseTime":2,"msg":"request completed"}
+{"level":30,"time":1781272550470,"pid":52,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-6fd74fb69-ltr74","req":{"id":5,"method":"GET","url":"/assets/beatpack_logo_1_1781012889607-Boq4MnU-.png"},"res":{"statusCode":200},"responseTime":3,"msg":"request completed"}
+==> Deploying...
+==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+==> Your service is live 🎉
+==> 
+==> ///////////////////////////////////////////////////////////
+==> 
+==> Available at your primary URL https://beatpack.onrender.com
+==> 
+==> ///////////////////////////////////////////////////////////
+{"level":30,"time":1781274373449,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":13,"method":"GET","url":"/auth/google/callback"},"res":{"statusCode":200},"responseTime":3,"msg":"request completed"}
+{"level":30,"time":1781274373690,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":14,"method":"GET","url":"/assets/index-CzlmfnS4.js"},"res":{"statusCode":304},"responseTime":1,"msg":"request completed"}
+{"level":30,"time":1781274373692,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":15,"method":"GET","url":"/assets/index-_nMq4akJ.css"},"res":{"statusCode":304},"responseTime":0,"msg":"request completed"}
+{"level":30,"time":1781274374091,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":16,"method":"GET","url":"/api/users/me"},"res":{"statusCode":200},"responseTime":147,"msg":"request completed"}
+{"level":30,"time":1781274374371,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":17,"method":"GET","url":"/assets/beatpack_logo_1_1781012889607-Boq4MnU-.png"},"res":{"statusCode":304},"responseTime":1,"msg":"request completed"}
+{"level":30,"time":1781274374527,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":18,"method":"GET","url":"/api/artists/featured"},"res":{"statusCode":304},"responseTime":148,"msg":"request completed"}
+{"level":30,"time":1781274375123,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":19,"method":"GET","url":"/api/beats/featured"},"res":{"statusCode":304},"responseTime":727,"msg":"request completed"}
+==> Detected service running on port 10000
+==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+{"level":30,"time":1781274581309,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":20,"method":"GET","url":"/"},"res":{"statusCode":200},"responseTime":2,"msg":"request completed"}
+{"level":30,"time":1781274581546,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":21,"method":"GET","url":"/assets/index-_nMq4akJ.css"},"res":{"statusCode":304},"responseTime":1,"msg":"request completed"}
+{"level":30,"time":1781274581557,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":22,"method":"GET","url":"/assets/beatpack_logo_1_1781012889607-Boq4MnU-.png"},"res":{"statusCode":200},"responseTime":10,"msg":"request completed"}
+{"level":30,"time":1781274581562,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":23,"method":"GET","url":"/assets/index-CzlmfnS4.js"},"res":{"statusCode":304},"responseTime":1,"msg":"request completed"}
+{"level":30,"time":1781274582711,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":24,"method":"GET","url":"/api/beats/featured"},"res":{"statusCode":304},"responseTime":740,"msg":"request completed"}
+{"level":30,"time":1781274583072,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":25,"method":"GET","url":"/api/artists/featured"},"res":{"statusCode":200},"responseTime":746,"msg":"request completed"}
+{"level":30,"time":1781274614842,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":26,"method":"POST","url":"/api/auth/become-artist"},"userId":"9ab868c0-1ee6-49f6-a9df-20ee29e9f514","msg":"User became artist"}
+{"level":30,"time":1781274614842,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":26,"method":"POST","url":"/api/auth/become-artist"},"res":{"statusCode":200},"responseTime":1186,"msg":"request completed"}
+{"level":30,"time":1781274615076,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":29,"method":"GET","url":"/api/dashboard/earnings"},"res":{"statusCode":200},"responseTime":2,"msg":"request completed"}
+{"level":30,"time":1781274615193,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":27,"method":"GET","url":"/api/orders"},"res":{"statusCode":200},"responseTime":147,"msg":"request completed"}
+{"level":30,"time":1781274615294,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":28,"method":"GET","url":"/api/dashboard/stats"},"res":{"statusCode":null},"responseTime":246,"msg":"request aborted"}
+{"level":30,"time":1781274632739,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":30,"method":"GET","url":"/studio"},"res":{"statusCode":200},"responseTime":5,"msg":"request completed"}
+{"level":30,"time":1781274632971,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":31,"method":"GET","url":"/assets/index-CzlmfnS4.js"},"res":{"statusCode":304},"responseTime":2,"msg":"request completed"}
+{"level":30,"time":1781274632972,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":32,"method":"GET","url":"/assets/index-_nMq4akJ.css"},"res":{"statusCode":304},"responseTime":1,"msg":"request completed"}
+{"level":30,"time":1781274633369,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":33,"method":"GET","url":"/assets/beatpack_logo_1_1781012889607-Boq4MnU-.png"},"res":{"statusCode":304},"responseTime":11,"msg":"request completed"}
+{"level":30,"time":1781274633698,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":35,"method":"GET","url":"/api/dashboard/earnings"},"res":{"statusCode":304},"responseTime":5,"msg":"request completed"}
+{"level":30,"time":1781274633906,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":36,"method":"GET","url":"/api/dashboard/stats"},"res":{"statusCode":null},"responseTime":179,"msg":"request aborted"}
+{"level":30,"time":1781274633909,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":34,"method":"GET","url":"/api/orders"},"res":{"statusCode":null},"responseTime":550,"msg":"request aborted"}
+{"level":30,"time":1781274634773,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":37,"method":"GET","url":"/studio"},"res":{"statusCode":200},"responseTime":1,"msg":"request completed"}
+{"level":30,"time":1781274634996,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":38,"method":"GET","url":"/assets/index-_nMq4akJ.css"},"res":{"statusCode":304},"responseTime":0,"msg":"request completed"}
+{"level":30,"time":1781274635018,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":39,"method":"GET","url":"/assets/index-CzlmfnS4.js"},"res":{"statusCode":304},"responseTime":0,"msg":"request completed"}
+{"level":30,"time":1781274635341,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":42,"method":"GET","url":"/api/dashboard/earnings"},"res":{"statusCode":304},"responseTime":1,"msg":"request completed"}
+{"level":30,"time":1781274635349,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":43,"method":"GET","url":"/assets/beatpack_logo_1_1781012889607-Boq4MnU-.png"},"res":{"statusCode":304},"responseTime":0,"msg":"request completed"}
+{"level":30,"time":1781274635485,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":41,"method":"GET","url":"/api/orders"},"res":{"statusCode":200},"responseTime":147,"msg":"request completed"}
+{"level":30,"time":1781274635549,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":40,"method":"GET","url":"/api/dashboard/stats"},"res":{"statusCode":null},"responseTime":220,"msg":"request aborted"}
+{"level":30,"time":1781274639179,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":44,"method":"GET","url":"/studio"},"res":{"statusCode":304},"responseTime":1,"msg":"request completed"}
+{"level":30,"time":1781274639392,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":45,"method":"GET","url":"/assets/index-CzlmfnS4.js"},"res":{"statusCode":304},"responseTime":1,"msg":"request completed"}
+{"level":30,"time":1781274639397,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":46,"method":"GET","url":"/assets/index-_nMq4akJ.css"},"res":{"statusCode":304},"responseTime":1,"msg":"request completed"}
+{"level":30,"time":1781274639625,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":47,"method":"GET","url":"/assets/beatpack_logo_1_1781012889607-Boq4MnU-.png"},"res":{"statusCode":304},"responseTime":0,"msg":"request completed"}
+{"level":30,"time":1781274639640,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":49,"method":"GET","url":"/api/dashboard/earnings"},"res":{"statusCode":304},"responseTime":1,"msg":"request completed"}
+{"level":30,"time":1781274639787,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":50,"method":"GET","url":"/api/orders"},"res":{"statusCode":200},"responseTime":146,"msg":"request completed"}
+{"level":30,"time":1781274639953,"pid":69,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-546cb47fb-zm5rj","req":{"id":48,"method":"GET","url":"/api/dashboard/stats"},"res":{"statusCode":null},"responseTime":326,"msg":"request aborted"}
