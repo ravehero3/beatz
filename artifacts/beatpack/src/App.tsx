@@ -32,6 +32,7 @@ import AdminPayoutsPage from "@/pages/admin/AdminPayoutsPage";
 import GoogleCallbackPage from "@/pages/GoogleCallbackPage";
 import OnboardingPage from "@/pages/OnboardingPage";
 import ProfileSetupPage from "@/pages/ProfileSetupPage";
+import BecomeSellerPage from "@/pages/BecomeSellerPage";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30000 } },
@@ -94,8 +95,7 @@ function AppRouter() {
       <Route path="/admin/beats" component={() => <ProtectedRoute component={AdminBeatsPage} roles={["admin"]} />} />
       <Route path="/admin/payouts" component={() => <ProtectedRoute component={AdminPayoutsPage} roles={["admin"]} />} />
 
-      {/* /become-a-seller → redirect to register */}
-      <Route path="/become-a-seller" component={() => <Redirect to="/register" />} />
+      <Route path="/become-a-seller" component={BecomeSellerPage} />
 
       {/* OAuth callbacks — no chrome */}
       <Route path="/auth/google/callback" component={GoogleCallbackPage} />

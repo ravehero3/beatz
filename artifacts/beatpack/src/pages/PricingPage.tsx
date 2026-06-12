@@ -134,11 +134,12 @@ export default function PricingPage() {
       price: 0,
       features: [
         { text: t("pricing.free.f1"), icon: <Music2 size={14} />, included: true },
-        { text: t("pricing.free.f2"), icon: <User size={14} />, included: true },
+        { text: t("pricing.free.f2"), icon: <Globe size={14} />, included: true },
         { text: t("pricing.free.f3"), icon: <CreditCard size={14} />, included: true },
-        { text: t("pricing.free.f4"), icon: <Paintbrush size={14} />, included: false },
-        { text: t("pricing.free.f5"), icon: <BarChart2 size={14} />, included: false },
-        { text: t("pricing.free.f6"), icon: <Headphones size={14} />, included: false },
+        { text: t("pricing.free.f4"), icon: <BarChart2 size={14} />, included: true },
+        { text: t("pricing.free.f5"), icon: <Zap size={14} />, included: false },
+        { text: t("pricing.free.f6"), icon: <CreditCard size={14} />, included: false },
+        { text: t("pricing.free.f7"), icon: <BarChart2 size={14} />, included: false },
       ],
     },
     {
@@ -150,12 +151,12 @@ export default function PricingPage() {
       savingsPerYear: SAVE_PRO,
       features: [
         { text: t("pricing.pro.f1"), icon: <Zap size={14} />, included: true },
-        { text: t("pricing.pro.f2"), icon: <Paintbrush size={14} />, included: true },
+        { text: t("pricing.pro.f2"), icon: <CreditCard size={14} />, included: true },
         { text: t("pricing.pro.f3"), icon: <BarChart2 size={14} />, included: true },
-        { text: t("pricing.pro.f4"), icon: <CreditCard size={14} />, included: true },
+        { text: t("pricing.pro.f4"), icon: <Paintbrush size={14} />, included: true },
         { text: t("pricing.pro.f5"), icon: <FileText size={14} />, included: true },
-        { text: t("pricing.pro.f6"), icon: <Headphones size={14} />, included: true },
-        { text: t("pricing.pro.f7"), icon: <Link2 size={14} />, included: true },
+        { text: t("pricing.pro.f6"), icon: <Link2 size={14} />, included: true },
+        { text: t("pricing.pro.f7"), icon: <Headphones size={14} />, included: true },
       ],
     },
     {

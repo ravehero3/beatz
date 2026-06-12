@@ -132,16 +132,48 @@ export default function BecomeSellerPage() {
 
           {slug && (
             <div style={{
-              background: "#F9F9F9",
-              border: "1px solid #E5E5E5",
-              borderRadius: "10px",
-              padding: "12px 14px",
+              background: "linear-gradient(135deg, #F0F4FF 0%, #F8F0FF 100%)",
+              border: "1px solid rgba(99,102,241,0.2)",
+              borderRadius: "12px",
+              padding: "14px 16px",
             }}>
-              <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "12px", color: "#888888", marginBottom: "2px" }}>
+              <div style={{
+                fontFamily: "'Figtree', sans-serif",
+                fontSize: "11px",
+                fontWeight: 600,
+                color: "#7C3AED",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                marginBottom: "6px",
+              }}>
                 {t("seller.urlLabel")}
               </div>
-              <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "13px", color: "#0A0A0A" }}>
-                beatpack.cz/artists/<strong>{slug}</strong>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0",
+                background: "rgba(255,255,255,0.7)",
+                borderRadius: "8px",
+                padding: "7px 12px",
+                border: "1px solid rgba(99,102,241,0.15)",
+              }}>
+                <span style={{
+                  fontFamily: "'Figtree', sans-serif",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  color: "#4F46E5",
+                  letterSpacing: "-0.01em",
+                }}>
+                  {slug}
+                </span>
+                <span style={{
+                  fontFamily: "'Figtree', sans-serif",
+                  fontSize: "14px",
+                  fontWeight: 400,
+                  color: "#888888",
+                }}>
+                  .beatpack.cz
+                </span>
               </div>
             </div>
           )}
