@@ -1,9 +1,17 @@
+import { useState } from "react";
 import { useAdminListUsers } from "@workspace/api-client-react";
 import AdminLayout from "./AdminLayout";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuthStore } from "@/store/authStore";
+import { Download } from "lucide-react";
+
+const ROLES = ["buyer", "artist", "admin"] as const;
 
 export default function AdminUsersPage() {
-  const { data: users, isLoading } = useAdminListUsers();
+  const { data: users, isLoading, refetch } = useAdminListUsers();
+  const token = useAuthStore((s) => s.token);
+  const [downloading, setDownloading] = useState(false);
+  const [changingRole, setChangingRole] = useState<string | null>(null);
 
   const roleColor = (r: string) => {
     if (r === "admin") return { bg: "#EEF2FF", color: "#6366F1" };
@@ -11,12 +19,80 @@ export default function AdminUsersPage() {
     return { bg: "#F2F2F2", color: "#888888" };
   };
 
+  async function handleExportEmails() {
+    setDownloading(true);
+    try {
+      const res = await fetch("/api/admin/emails/export", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "beatpack-emails.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("Export failed. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  }
+
+  async function handleRoleChange(userId: string, newRole: string) {
+    setChangingRole(userId);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/role`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ role: newRole }),
+      });
+      if (!res.ok) throw new Error("Role change failed");
+      await refetch();
+    } catch {
+      alert("Failed to change role. Please try again.");
+    } finally {
+      setChangingRole(null);
+    }
+  }
+
   return (
     <AdminLayout>
       <div style={{ padding: "32px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" }}>
-          <h1 style={{ fontFamily: "'Figtree', sans-serif", fontWeight: 700, fontSize: "22px", color: "#0A0A0A", letterSpacing: "-0.02em" }}>Users</h1>
-          <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "14px", color: "#888888" }}>{(users ?? []).length} total</div>
+          <div>
+            <h1 style={{ fontFamily: "'Figtree', sans-serif", fontWeight: 700, fontSize: "22px", color: "#0A0A0A", letterSpacing: "-0.02em", marginBottom: "2px" }}>Users</h1>
+            <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "13px", color: "#AAAAAA" }}>{(users ?? []).length} total</div>
+          </div>
+          <button
+            onClick={handleExportEmails}
+            disabled={downloading}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "7px",
+              height: "38px",
+              padding: "0 16px",
+              borderRadius: "10px",
+              background: downloading ? "#F2F2F2" : "#0A0A0A",
+              color: downloading ? "#888888" : "#FFFFFF",
+              border: "none",
+              fontFamily: "'Figtree', sans-serif",
+              fontWeight: 600,
+              fontSize: "13px",
+              cursor: downloading ? "not-allowed" : "pointer",
+              transition: "opacity 0.15s ease",
+            }}
+          >
+            <Download size={14} />
+            {downloading ? "Exporting…" : "Export Emails CSV"}
+          </button>
         </div>
 
         <div style={{ background: "#FFFFFF", border: "1px solid #E5E5E5", borderRadius: "16px", overflow: "hidden" }}>
@@ -28,7 +104,7 @@ export default function AdminUsersPage() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid #F2F2F2", background: "#F9F9F9" }}>
-                  {["User", "Email", "Role", "Joined"].map((h) => (
+                  {["User", "Email", "Role", "Joined", "Actions"].map((h) => (
                     <th key={h} style={{ fontFamily: "'Figtree', sans-serif", fontSize: "11px", fontWeight: 500, color: "#888888", textAlign: "left", padding: "10px 16px", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</th>
                   ))}
                 </tr>
@@ -36,6 +112,7 @@ export default function AdminUsersPage() {
               <tbody>
                 {(users ?? []).map((user) => {
                   const rc = roleColor(user.role);
+                  const isChanging = changingRole === user.id;
                   return (
                     <tr key={user.id} data-testid={`row-user-${user.id}`} style={{ borderBottom: "1px solid #F2F2F2" }}>
                       <td style={{ padding: "12px 16px" }}>
@@ -53,6 +130,29 @@ export default function AdminUsersPage() {
                         <span style={{ padding: "3px 8px", borderRadius: "9999px", fontFamily: "'Figtree', sans-serif", fontSize: "11px", fontWeight: 600, background: rc.bg, color: rc.color }}>{user.role}</span>
                       </td>
                       <td style={{ padding: "12px 16px", fontFamily: "'Figtree', sans-serif", fontSize: "12px", color: "#888888" }}>{new Date(user.createdAt).toLocaleDateString("cs-CZ")}</td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <select
+                          value={user.role}
+                          disabled={isChanging}
+                          onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                          style={{
+                            height: "30px",
+                            padding: "0 8px",
+                            borderRadius: "8px",
+                            border: "1px solid #E5E5E5",
+                            fontFamily: "'Figtree', sans-serif",
+                            fontSize: "12px",
+                            color: "#0A0A0A",
+                            background: isChanging ? "#F9F9F9" : "#FFFFFF",
+                            cursor: isChanging ? "not-allowed" : "pointer",
+                            outline: "none",
+                          }}
+                        >
+                          {ROLES.map((r) => (
+                            <option key={r} value={r}>{r}</option>
+                          ))}
+                        </select>
+                      </td>
                     </tr>
                   );
                 })}

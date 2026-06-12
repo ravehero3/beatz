@@ -1,1 +1,3 @@
 - [Beatpack project overview](beatpack-overview.md) — Czech beat marketplace SaaS; key quirks for Express 5, BeatCard props, Radix Select, lib build order
+- [DB migrations without TTY](db-migrations.md) — drizzle-kit push requires interactive TTY; use direct SQL ALTER TABLE instead in Replit
+- [Global audio player pattern](global-audio-player.md) — Zustand audioStore + BottomPlayer in Layout for cross-page persistence

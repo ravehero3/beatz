@@ -120,4 +120,58 @@ router.get("/admin/users", requireRole("admin"), async (_req, res) => {
   })));
 });
 
+router.patch("/admin/users/:id/role", requireRole("admin"), async (req, res) => {
+  const id = req.params["id"] as string;
+  const { role } = req.body as { role: string };
+
+  if (!["buyer", "artist", "admin"].includes(role)) {
+    res.status(400).json({ error: "Invalid role" });
+    return;
+  }
+
+  const [updated] = await db
+    .update(profilesTable)
+    .set({ role })
+    .where(eq(profilesTable.id, id))
+    .returning({ id: profilesTable.id, role: profilesTable.role });
+
+  if (!updated) {
+    res.status(404).json({ error: "User not found" });
+    return;
+  }
+
+  res.json({ id: updated.id, role: updated.role });
+});
+
+router.get("/admin/emails/export", requireRole("admin"), async (_req, res) => {
+  const users = await db
+    .select({
+      email: profilesTable.email,
+      firstName: profilesTable.firstName,
+      lastName: profilesTable.lastName,
+      role: profilesTable.role,
+      createdAt: profilesTable.createdAt,
+    })
+    .from(profilesTable)
+    .where(eq(profilesTable.marketingOptIn, true))
+    .orderBy(profilesTable.createdAt);
+
+  const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
+  const header = "email,first_name,last_name,role,joined_at";
+  const rows = users
+    .filter((u) => u.email)
+    .map((u) => [
+      escape(u.email ?? ""),
+      escape(u.firstName ?? ""),
+      escape(u.lastName ?? ""),
+      escape(u.role),
+      escape(u.createdAt.toISOString()),
+    ].join(","));
+
+  const csv = [header, ...rows].join("\n");
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", 'attachment; filename="beatpack-emails.csv"');
+  res.send(csv);
+});
+
 export default router;

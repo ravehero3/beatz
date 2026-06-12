@@ -7,8 +7,6 @@ import {
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
-type BillingPeriod = "monthly" | "yearly";
-
 const MONTHLY_PRO = 249;
 const MONTHLY_PROPLUS = 699;
 const YEARLY_PRO = 2490;
@@ -18,81 +16,46 @@ const YEARLY_PROPLUS_FULL = MONTHLY_PROPLUS * 12; // 8388
 const SAVE_PRO = YEARLY_PRO_FULL - YEARLY_PRO;     // 498
 const SAVE_PROPLUS = YEARLY_PROPLUS_FULL - YEARLY_PROPLUS; // 1398
 
-function BillingToggle({
-  billing,
-  setBilling,
-  t,
-}: {
-  billing: BillingPeriod;
-  setBilling: (b: BillingPeriod) => void;
-  t: (k: Parameters<ReturnType<typeof useT>>[0]) => string;
-}) {
+function CardAnnualToggle({ annual, onToggle, lang }: { annual: boolean; onToggle: () => void; lang: string }) {
   return (
-    <div style={{
-      display: "inline-flex",
-      alignItems: "center",
-      background: "rgba(0,0,0,0.07)",
-      borderRadius: "9999px",
-      padding: "3px",
-      gap: "0",
-      position: "relative",
-    }}>
-      <div
-        style={{
+    <button
+      onClick={onToggle}
+      style={{ display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+    >
+      <div style={{
+        width: "38px",
+        height: "22px",
+        borderRadius: "11px",
+        background: annual ? "#0A0A0A" : "#D4D4D4",
+        position: "relative",
+        transition: "background 0.2s ease",
+        flexShrink: 0,
+        boxShadow: annual ? "inset 0 1px 3px rgba(0,0,0,0.3)" : "inset 0 1px 2px rgba(0,0,0,0.12)",
+      }}>
+        <div style={{
           position: "absolute",
           top: "3px",
-          left: billing === "monthly" ? "3px" : "calc(50% + 0px)",
-          width: "calc(50% - 3px)",
-          height: "calc(100% - 6px)",
+          left: annual ? "19px" : "3px",
+          width: "16px",
+          height: "16px",
+          borderRadius: "50%",
           background: "#FFFFFF",
-          borderRadius: "9999px",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.20), 0 0 0 0.5px rgba(0,0,0,0.05)",
-          transition: "left 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)",
-          pointerEvents: "none",
-        }}
-      />
-      {(["monthly", "yearly"] as const).map((b) => (
-        <button
-          key={b}
-          onClick={() => setBilling(b)}
-          style={{
-            height: "30px",
-            padding: "0 18px",
-            borderRadius: "9999px",
-            border: "none",
-            fontFamily: "'Figtree', sans-serif",
-            fontWeight: 500,
-            fontSize: "13px",
-            cursor: "pointer",
-            background: "transparent",
-            color: billing === b ? "#0A0A0A" : "#777777",
-            whiteSpace: "nowrap",
-            position: "relative",
-            zIndex: 1,
-            transition: "color 0.15s ease",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
-          {b === "monthly" ? t("pricing.monthly") : t("pricing.yearly")}
-          {b === "yearly" && (
-            <span style={{
-              fontSize: "10px",
-              fontWeight: 700,
-              color: billing === "yearly" ? "#16A34A" : "#888888",
-              background: billing === "yearly" ? "rgba(22,163,74,0.10)" : "transparent",
-              borderRadius: "9999px",
-              padding: "1px 6px",
-              transition: "all 0.15s ease",
-              letterSpacing: "0.01em",
-            }}>
-              {t("pricing.save")}
-            </span>
-          )}
-        </button>
-      ))}
-    </div>
+          transition: "left 0.2s cubic-bezier(0.34,1.56,0.64,1)",
+          boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
+        }} />
+      </div>
+      <span style={{
+        fontFamily: "'Figtree', sans-serif",
+        fontSize: "11px",
+        fontWeight: 700,
+        color: annual ? "#0A0A0A" : "#AAAAAA",
+        letterSpacing: "0.07em",
+        textTransform: "uppercase",
+        transition: "color 0.2s ease",
+      }}>
+        {lang === "cs" ? "Roční" : "Annual"}
+      </span>
+    </button>
   );
 }
 
@@ -159,7 +122,8 @@ const SPARKLE_POSITIONS: React.CSSProperties[] = [
 ];
 
 export default function PricingPage() {
-  const [billing, setBilling] = useState<BillingPeriod>("yearly");
+  const [proBillingAnnual, setProBillingAnnual] = useState(true);
+  const [proplusBillingAnnual, setProplusBillingAnnual] = useState(true);
   const [proplusHovered, setProplusHovered] = useState(false);
   const [proHovered, setProHovered] = useState(false);
   const t = useT();
@@ -244,8 +208,6 @@ export default function PricingPage() {
             {t("pricing.sub")}
           </p>
 
-          {/* Single top-level billing toggle */}
-          <BillingToggle billing={billing} setBilling={setBilling} t={t} />
         </div>
 
         {/* Plans grid */}
@@ -264,10 +226,6 @@ export default function PricingPage() {
               monthlyPrice: number; yearlyPrice: number;
               yearlyFull: number; savingsPerYear: number;
             };
-
-            const displayPrice = isFree ? 0
-              : billing === "monthly" ? paidPlan.monthlyPrice
-              : paidPlan.yearlyPrice;
 
             const cardStyle: React.CSSProperties = isFree
               ? {
@@ -377,79 +335,60 @@ export default function PricingPage() {
                     )}
                   </div>
 
+                  {/* Annual toggle */}
+                  <div style={{ marginBottom: "12px" }}>
+                    <CardAnnualToggle annual={proplusBillingAnnual} onToggle={() => setProplusBillingAnnual((a) => !a)} lang={lang} />
+                  </div>
+
                   {/* Price display */}
-                  {isFree ? (
-                    <div>
-                      <span style={{ fontFamily: "'Figtree', sans-serif", fontWeight: 700, fontSize: "30px", color: "#666666" }}>
-                        {t("pricing.freeLabel")}
+                  <div>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: "6px", flexWrap: "wrap" }}>
+                      <span style={{
+                        fontFamily: "'Figtree', sans-serif",
+                        fontWeight: 800,
+                        fontSize: "32px",
+                        color: "#0A0A0A",
+                        letterSpacing: "-0.03em",
+                        lineHeight: 1,
+                      }}>
+                        {(proplusBillingAnnual ? Math.round(paidPlan.yearlyPrice / 12) : paidPlan.monthlyPrice).toLocaleString("cs-CZ")} Kč
                       </span>
-                      <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "13px", color: "#AAAAAA", marginLeft: "6px" }}>
-                        {t("pricing.forever")}
+                      <span style={{
+                        fontFamily: "'Figtree', sans-serif",
+                        fontSize: "13px",
+                        fontWeight: 400,
+                        color: "#888888",
+                      }}>
+                        / {lang === "cs" ? "měsíc" : "month"}
                       </span>
                     </div>
-                  ) : (
-                    <div>
-                      <div style={{ display: "flex", alignItems: "baseline", gap: "6px", flexWrap: "wrap" }}>
-                        <span style={{
-                          fontFamily: "'Figtree', sans-serif",
-                          fontWeight: 800,
-                          fontSize: "32px",
-                          color: "#0A0A0A",
-                          letterSpacing: "-0.03em",
-                          lineHeight: 1,
-                        }}>
-                          {displayPrice.toLocaleString("cs-CZ")} Kč
-                        </span>
+
+                    {proplusBillingAnnual && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "6px", flexWrap: "wrap" }}>
                         <span style={{
                           fontFamily: "'Figtree', sans-serif",
                           fontSize: "13px",
-                          fontWeight: 400,
-                          color: "#888888",
+                          color: "#AAAAAA",
+                          textDecoration: "line-through",
                         }}>
-                          {billing === "monthly" ? t("pricing.perMonth") : t("pricing.perYear")}
+                          {paidPlan.yearlyFull.toLocaleString("cs-CZ")} Kč
+                        </span>
+                        <span style={{
+                          fontFamily: "'Figtree', sans-serif",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          color: "#16A34A",
+                          background: "rgba(22,163,74,0.10)",
+                          borderRadius: "9999px",
+                          padding: "2px 8px",
+                        }}>
+                          {lang === "cs"
+                            ? `Ušetříte ${paidPlan.savingsPerYear.toLocaleString("cs-CZ")} Kč`
+                            : `Save ${paidPlan.savingsPerYear.toLocaleString("en")} CZK`}
                         </span>
                       </div>
-
-                      {/* Crossed-out + savings — only on yearly */}
-                      {billing === "yearly" && (
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "6px", flexWrap: "wrap" }}>
-                          <span style={{
-                            fontFamily: "'Figtree', sans-serif",
-                            fontSize: "13px",
-                            color: "#AAAAAA",
-                            textDecoration: "line-through",
-                          }}>
-                            {paidPlan.yearlyFull.toLocaleString("cs-CZ")} Kč
-                          </span>
-                          <span style={{
-                            fontFamily: "'Figtree', sans-serif",
-                            fontSize: "11px",
-                            fontWeight: 700,
-                            color: "#16A34A",
-                            background: "rgba(22,163,74,0.10)",
-                            borderRadius: "9999px",
-                            padding: "2px 8px",
-                          }}>
-                            {lang === "cs"
-                              ? `Ušetříte ${paidPlan.savingsPerYear.toLocaleString("cs-CZ")} Kč`
-                              : `Save ${paidPlan.savingsPerYear.toLocaleString("en")} CZK`}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Monthly equivalent when on yearly */}
-                      {billing === "yearly" && (
-                        <div style={{
-                          fontFamily: "'Figtree', sans-serif",
-                          fontSize: "12px",
-                          color: "#AAAAAA",
-                          marginTop: "4px",
-                        }}>
-                          ≈ {Math.round(displayPrice / 12).toLocaleString("cs-CZ")} Kč{t("pricing.perMonth")}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
 
                 {/* Features */}
@@ -584,18 +523,9 @@ export default function PricingPage() {
                         }}>
                           {plan.name}
                         </span>
-                        <span style={{
-                          fontSize: "10px",
-                          fontWeight: 700,
-                          letterSpacing: "0.04em",
-                          background: proHovered ? "rgba(255,255,255,0.20)" : "rgba(59,130,246,0.12)",
-                          color: proHovered ? "#FFFFFF" : "#3B82F6",
-                          borderRadius: "9999px",
-                          padding: "2px 8px",
-                          transition: "all 0.5s ease",
-                        }}>
-                          {t("pricing.mostPopular")}
-                        </span>
+                      </div>
+                      <div style={{ marginBottom: "12px", marginTop: "4px" }}>
+                        <CardAnnualToggle annual={proBillingAnnual} onToggle={() => setProBillingAnnual((a) => !a)} lang={lang} />
                       </div>
                       <div>
                         <div style={{ display: "flex", alignItems: "baseline", gap: "6px", flexWrap: "wrap" }}>
@@ -607,7 +537,7 @@ export default function PricingPage() {
                             letterSpacing: "-0.03em",
                             lineHeight: 1,
                           }}>
-                            {displayPrice.toLocaleString("cs-CZ")} Kč
+                            {(proBillingAnnual ? Math.round(paidPlan.yearlyPrice / 12) : paidPlan.monthlyPrice).toLocaleString("cs-CZ")} Kč
                           </span>
                           <span style={{
                             fontFamily: "'Figtree', sans-serif",
@@ -615,10 +545,10 @@ export default function PricingPage() {
                             fontWeight: 400,
                             color: "#888888",
                           }}>
-                            {billing === "monthly" ? t("pricing.perMonth") : t("pricing.perYear")}
+                            / {lang === "cs" ? "měsíc" : "month"}
                           </span>
                         </div>
-                        {billing === "yearly" && (
+                        {proBillingAnnual && (
                           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "6px", flexWrap: "wrap" }}>
                             <span style={{
                               fontFamily: "'Figtree', sans-serif",
@@ -641,16 +571,6 @@ export default function PricingPage() {
                                 ? `Ušetříte ${paidPlan.savingsPerYear.toLocaleString("cs-CZ")} Kč`
                                 : `Save ${paidPlan.savingsPerYear.toLocaleString("en")} CZK`}
                             </span>
-                          </div>
-                        )}
-                        {billing === "yearly" && (
-                          <div style={{
-                            fontFamily: "'Figtree', sans-serif",
-                            fontSize: "12px",
-                            color: "#AAAAAA",
-                            marginTop: "4px",
-                          }}>
-                            ≈ {Math.round(displayPrice / 12).toLocaleString("cs-CZ")} Kč{t("pricing.perMonth")}
                           </div>
                         )}
                       </div>

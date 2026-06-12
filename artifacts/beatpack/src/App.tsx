@@ -33,6 +33,7 @@ import GoogleCallbackPage from "@/pages/GoogleCallbackPage";
 import OnboardingPage from "@/pages/OnboardingPage";
 import ProfileSetupPage from "@/pages/ProfileSetupPage";
 import BecomeSellerPage from "@/pages/BecomeSellerPage";
+import BottomPlayer from "@/components/BottomPlayer";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30000 } },
@@ -118,6 +119,7 @@ function Layout() {
         <AppRouter />
       </main>
       {!hideChrome && <Footer />}
+      <BottomPlayer />
     </div>
   );
 }
