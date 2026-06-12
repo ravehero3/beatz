@@ -1,7 +1,101 @@
 import { Pool } from "pg";
 
-const migrations = [
-  `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS google_id text`,
+const createTableStatements = [
+  `CREATE TABLE IF NOT EXISTS profiles (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    email text,
+    first_name text,
+    last_name text,
+    role text NOT NULL DEFAULT 'buyer',
+    avatar_url text,
+    password_hash text,
+    google_id text UNIQUE,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS artists (
+    id uuid PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
+    slug text UNIQUE,
+    display_name text,
+    bio text,
+    banner_url text,
+    profile_picture_url text,
+    store_template text DEFAULT 'light',
+    store_primary_color text DEFAULT '#0A0A0A',
+    player_style text DEFAULT 'classic',
+    social_instagram text,
+    social_soundcloud text,
+    social_youtube text,
+    bank_iban text,
+    bank_account_name text,
+    fio_api_token text,
+    subscription_tier text DEFAULT 'free',
+    subscription_status text,
+    subscription_ends_at timestamptz,
+    balance_czk numeric(10,2) DEFAULT 0,
+    total_earned_czk numeric(10,2) DEFAULT 0,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS beats (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    artist_id uuid NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+    title text NOT NULL,
+    slug text,
+    description text,
+    bpm integer,
+    key text,
+    genre text,
+    mood text,
+    tags text[],
+    cover_url text,
+    audio_preview_url text,
+    audio_full_url text,
+    audio_wav_url text,
+    price_basic numeric(10,2),
+    price_premium numeric(10,2),
+    price_exclusive numeric(10,2),
+    is_exclusive_sold boolean NOT NULL DEFAULT false,
+    plays integer NOT NULL DEFAULT 0,
+    status text NOT NULL DEFAULT 'active',
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS orders (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    buyer_id uuid NOT NULL REFERENCES profiles(id),
+    artist_id uuid NOT NULL REFERENCES artists(id),
+    beat_id uuid NOT NULL REFERENCES beats(id),
+    license_type text NOT NULL,
+    amount_czk numeric(10,2) NOT NULL,
+    payment_method text,
+    payment_status text NOT NULL DEFAULT 'pending',
+    variable_symbol text,
+    qr_code_data text,
+    license_pdf_url text,
+    confirmed_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS withdrawals (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    artist_id uuid NOT NULL REFERENCES artists(id),
+    amount_czk numeric(10,2) NOT NULL,
+    status text NOT NULL DEFAULT 'pending',
+    qr_code_data text,
+    requested_at timestamptz NOT NULL DEFAULT now(),
+    paid_at timestamptz
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS saved_beats (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    buyer_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    beat_id uuid NOT NULL REFERENCES beats(id) ON DELETE CASCADE,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`,
+];
+
+const alterTableStatements = [
   `CREATE UNIQUE INDEX IF NOT EXISTS profiles_google_id_unique ON profiles (google_id)`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS store_template text DEFAULT 'light'`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS store_primary_color text DEFAULT '#0A0A0A'`,
@@ -28,7 +122,10 @@ export async function runMigrations(): Promise<void> {
 
   const pool = new Pool({ connectionString: DATABASE_URL });
   try {
-    for (const sql of migrations) {
+    for (const sql of createTableStatements) {
+      await pool.query(sql);
+    }
+    for (const sql of alterTableStatements) {
       await pool.query(sql);
     }
   } finally {
