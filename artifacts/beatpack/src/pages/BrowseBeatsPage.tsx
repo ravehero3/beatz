@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, Music } from "lucide-react";
 import { useListBeats, useListGenres } from "@workspace/api-client-react";
 import BeatCard from "@/components/BeatCard";
 import BottomPlayer from "@/components/BottomPlayer";
@@ -33,22 +33,30 @@ export default function BrowseBeatsPage() {
 
   const { data: genres } = useListGenres();
 
+  const filterKey = `${search}-${genre}-${bpmMin}-${bpmMax}`;
+
   return (
     <div style={{ paddingTop: "44px", minHeight: "100vh" }}>
       {/* Page header */}
       <div style={{
-        borderBottom: "1px solid #F2F2F2",
+        borderBottom: "1px solid rgba(0,0,0,0.06)",
         padding: "32px 24px 24px",
-        background: "#FFFFFF",
+        background: "rgba(255,255,255,0.7)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
       }}>
         <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
           <h1 style={{
             fontFamily: "'Figtree', sans-serif",
-            fontWeight: 700,
-            fontSize: "28px",
+            fontWeight: 800,
+            fontSize: "clamp(1.75rem, 4vw, 2.25rem)",
             color: "#0A0A0A",
-            letterSpacing: "-0.02em",
+            letterSpacing: "-0.03em",
             marginBottom: "20px",
+            background: "linear-gradient(135deg, #0A0A0A 0%, #3D3D3D 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
           }}>{t("browse.title")}</h1>
           {/* Search + filters */}
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
@@ -67,14 +75,15 @@ export default function BrowseBeatsPage() {
                   paddingRight: "12px",
                   borderRadius: "10px",
                   border: "1px solid #E5E5E5",
+                  background: "rgba(255,255,255,0.9)",
                   fontFamily: "'Figtree', sans-serif",
                   fontSize: "14px",
                   outline: "none",
-                  transition: "border-color 0.15s ease",
+                  transition: "border-color 0.15s ease, box-shadow 0.15s ease",
                   boxSizing: "border-box",
                 }}
-                onFocus={(e) => (e.target.style.borderColor = "#0A0A0A")}
-                onBlur={(e) => (e.target.style.borderColor = "#E5E5E5")}
+                onFocus={(e) => { e.target.style.borderColor = "#0A0A0A"; e.target.style.boxShadow = "0 0 0 3px rgba(0,0,0,0.06)"; }}
+                onBlur={(e) => { e.target.style.borderColor = "#E5E5E5"; e.target.style.boxShadow = "none"; }}
               />
             </div>
 
@@ -107,6 +116,7 @@ export default function BrowseBeatsPage() {
                   fontFamily: "'Figtree', sans-serif",
                   fontSize: "14px",
                   outline: "none",
+                  background: "rgba(255,255,255,0.9)",
                 }}
               />
               <span style={{ color: "#888888", fontSize: "12px" }}>–</span>
@@ -125,6 +135,7 @@ export default function BrowseBeatsPage() {
                   fontFamily: "'Figtree', sans-serif",
                   fontSize: "14px",
                   outline: "none",
+                  background: "rgba(255,255,255,0.9)",
                 }}
               />
             </div>
@@ -133,7 +144,7 @@ export default function BrowseBeatsPage() {
       </div>
 
       {/* Beat grid */}
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px", paddingBottom: activeBeat ? "104px" : "32px" }}>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px", paddingBottom: activeBeat ? "120px" : "48px" }}>
         {isLoading ? (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "24px" }}>
             {Array(12).fill(0).map((_, i) => (
@@ -147,12 +158,25 @@ export default function BrowseBeatsPage() {
             ))}
           </div>
         ) : (beats ?? []).length === 0 ? (
-          <div style={{ textAlign: "center", padding: "80px 24px", color: "#888888" }}>
-            <div style={{ fontSize: "40px", marginBottom: "16px" }}>♪</div>
-            <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "16px", fontWeight: 600, color: "#0A0A0A", marginBottom: "8px" }}>
+          <div style={{ textAlign: "center", padding: "96px 24px" }}>
+            <div style={{
+              width: "72px",
+              height: "72px",
+              borderRadius: "20px",
+              background: "rgba(0,0,0,0.05)",
+              backdropFilter: "blur(12px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 20px",
+              border: "1px solid rgba(0,0,0,0.06)",
+            }}>
+              <Music size={28} color="#AAAAAA" />
+            </div>
+            <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "18px", fontWeight: 700, color: "#0A0A0A", marginBottom: "8px", letterSpacing: "-0.02em" }}>
               {t("browse.noBeats")}
             </div>
-            <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "14px" }}>
+            <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "14px", color: "#888888", maxWidth: "320px", margin: "0 auto", lineHeight: 1.6 }}>
               {t("browse.noBeatsHint")}
             </div>
           </div>
@@ -161,42 +185,51 @@ export default function BrowseBeatsPage() {
             <div style={{
               fontFamily: "'Figtree', sans-serif",
               fontSize: "13px",
-              color: "#888888",
+              color: "#AAAAAA",
               marginBottom: "20px",
+              fontWeight: 500,
             }}>
               {beats?.length ?? 0} {t("browse.beatsFound")}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "24px" }}>
-              {(beats ?? []).map((beat) => (
-                <BeatCard
+            <div
+              key={filterKey}
+              style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "28px" }}
+            >
+              {(beats ?? []).map((beat, index) => (
+                <div
                   key={beat.id}
-                  id={beat.id}
-                  title={beat.title}
-                  artistName={beat.artistName}
-                  artistSlug={beat.artistSlug}
-                  bpm={beat.bpm}
-                  musicalKey={beat.key}
-                  genre={beat.genre}
-                  coverUrl={beat.coverUrl}
-                  priceBasic={beat.priceBasic !== undefined ? Number(beat.priceBasic) : null}
-                  isExclusiveSold={beat.isExclusiveSold}
-                  isPlaying={activeBeat?.id === beat.id}
-                  onPlay={() => {
-                    const audioUrl = beat.audioFullUrl ?? beat.audioPreviewUrl;
-                    if (!audioUrl) return;
-                    if (activeBeat?.id === beat.id) {
-                      setActiveBeat(null);
-                    } else {
-                      setActiveBeat({
-                        id: beat.id,
-                        title: beat.title,
-                        artistName: beat.artistName ?? null,
-                        coverUrl: beat.coverUrl ?? null,
-                        audioUrl,
-                      });
-                    }
-                  }}
-                />
+                  className="beat-card-enter"
+                  style={{ animationDelay: `${Math.min(index * 0.045, 0.5)}s` }}
+                >
+                  <BeatCard
+                    id={beat.id}
+                    title={beat.title}
+                    artistName={beat.artistName}
+                    artistSlug={beat.artistSlug}
+                    bpm={beat.bpm}
+                    musicalKey={beat.key}
+                    genre={beat.genre}
+                    coverUrl={beat.coverUrl}
+                    priceBasic={beat.priceBasic !== undefined ? Number(beat.priceBasic) : null}
+                    isExclusiveSold={beat.isExclusiveSold}
+                    isPlaying={activeBeat?.id === beat.id}
+                    onPlay={() => {
+                      const audioUrl = beat.audioFullUrl ?? beat.audioPreviewUrl;
+                      if (!audioUrl) return;
+                      if (activeBeat?.id === beat.id) {
+                        setActiveBeat(null);
+                      } else {
+                        setActiveBeat({
+                          id: beat.id,
+                          title: beat.title,
+                          artistName: beat.artistName ?? null,
+                          coverUrl: beat.coverUrl ?? null,
+                          audioUrl,
+                        });
+                      }
+                    }}
+                  />
+                </div>
               ))}
             </div>
           </>

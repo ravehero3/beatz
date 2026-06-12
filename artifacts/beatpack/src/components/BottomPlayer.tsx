@@ -101,34 +101,40 @@ export default function BottomPlayer({ beat, onClose }: BottomPlayerProps) {
   }
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const volumePct = (muted ? 0 : volume) * 100;
 
   return (
     <div style={{
       position: "fixed",
-      bottom: 0,
-      left: 0,
-      right: 0,
+      bottom: "20px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "min(700px, calc(100vw - 32px))",
       zIndex: 100,
-      background: "#0A0A0A",
-      borderTop: "1px solid #222222",
-      padding: "0 24px",
+      background: "rgba(10, 10, 10, 0.86)",
+      backdropFilter: "blur(28px) saturate(180%)",
+      WebkitBackdropFilter: "blur(28px) saturate(180%)",
+      border: "1px solid rgba(255, 255, 255, 0.10)",
+      borderRadius: "20px",
+      padding: "0 16px",
       height: "72px",
       display: "flex",
       alignItems: "center",
-      gap: "16px",
-      boxShadow: "0 -4px 24px rgba(0,0,0,0.3)",
+      gap: "12px",
+      boxShadow: "0 8px 48px rgba(0,0,0,0.32), 0 2px 8px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.08)",
     }}>
       <audio ref={audioRef} preload="auto" />
 
       {/* Cover + info */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0, flex: "0 0 220px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: "0 0 auto", maxWidth: "180px" }}>
         <div style={{
-          width: "44px",
-          height: "44px",
-          borderRadius: "8px",
+          width: "42px",
+          height: "42px",
+          borderRadius: "10px",
           overflow: "hidden",
           background: "#222222",
           flexShrink: 0,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
         }}>
           {beat.coverUrl ? (
             <img src={beat.coverUrl} alt={beat.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -140,7 +146,7 @@ export default function BottomPlayer({ beat, onClose }: BottomPlayerProps) {
           <div style={{
             fontFamily: "'Figtree', sans-serif",
             fontWeight: 600,
-            fontSize: "13px",
+            fontSize: "12px",
             color: "#FFFFFF",
             whiteSpace: "nowrap",
             overflow: "hidden",
@@ -150,7 +156,7 @@ export default function BottomPlayer({ beat, onClose }: BottomPlayerProps) {
             <div style={{
               fontFamily: "'Figtree', sans-serif",
               fontSize: "11px",
-              color: "#888888",
+              color: "rgba(255,255,255,0.45)",
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -159,64 +165,71 @@ export default function BottomPlayer({ beat, onClose }: BottomPlayerProps) {
         </div>
       </div>
 
-      {/* Controls + scrubber */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", minWidth: 0 }}>
-        <button
-          onClick={togglePlay}
+      {/* Play button */}
+      <button
+        onClick={togglePlay}
+        style={{
+          width: "34px",
+          height: "34px",
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.95)",
+          border: "none",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.9)",
+          transition: "transform 0.1s ease, background 0.15s ease",
+        }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.08)"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)"; }}
+      >
+        {isPlaying
+          ? <Pause size={14} fill="#0A0A0A" color="#0A0A0A" />
+          : <Play size={14} fill="#0A0A0A" color="#0A0A0A" />
+        }
+      </button>
+
+      {/* Scrubber */}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+        <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "10px", color: "rgba(255,255,255,0.4)", flexShrink: 0, width: "28px", textAlign: "right" }}>
+          {fmt(currentTime)}
+        </span>
+        <input
+          type="range"
+          min={0}
+          max={duration || 0}
+          step={0.1}
+          value={currentTime}
+          onMouseDown={handleSeekStart}
+          onTouchStart={handleSeekStart}
+          onChange={handleSeekChange}
+          onMouseUp={(e) => commitSeek(Number((e.target as HTMLInputElement).value))}
+          onTouchEnd={(e) => commitSeek(Number((e.currentTarget as HTMLInputElement).value))}
           style={{
-            width: "36px",
-            height: "36px",
-            borderRadius: "50%",
-            background: "#FFFFFF",
-            border: "none",
+            flex: 1,
+            height: "3px",
+            WebkitAppearance: "none",
+            appearance: "none",
+            background: `linear-gradient(to right, rgba(255,255,255,0.9) ${progress}%, rgba(255,255,255,0.15) ${progress}%)`,
+            borderRadius: "2px",
+            outline: "none",
             cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
           }}
-        >
-          {isPlaying
-            ? <Pause size={16} fill="#0A0A0A" color="#0A0A0A" />
-            : <Play size={16} fill="#0A0A0A" color="#0A0A0A" />
-          }
-        </button>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", maxWidth: "600px" }}>
-          <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "11px", color: "#888888", flexShrink: 0, width: "32px", textAlign: "right" }}>
-            {fmt(currentTime)}
-          </span>
-          <input
-            type="range"
-            min={0}
-            max={duration || 0}
-            step={0.1}
-            value={currentTime}
-            onMouseDown={handleSeekStart}
-            onTouchStart={handleSeekStart}
-            onChange={handleSeekChange}
-            onMouseUp={(e) => commitSeek(Number((e.target as HTMLInputElement).value))}
-            onTouchEnd={(e) => commitSeek(Number((e.currentTarget as HTMLInputElement).value))}
-            style={{
-              flex: 1,
-              height: "4px",
-              WebkitAppearance: "none",
-              appearance: "none",
-              background: `linear-gradient(to right, #FFFFFF ${progress}%, #444444 ${progress}%)`,
-              borderRadius: "2px",
-              outline: "none",
-              cursor: "pointer",
-            }}
-          />
-          <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "11px", color: "#888888", flexShrink: 0, width: "32px" }}>
-            {fmt(duration)}
-          </span>
-        </div>
+        />
+        <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "10px", color: "rgba(255,255,255,0.4)", flexShrink: 0, width: "28px" }}>
+          {fmt(duration)}
+        </span>
       </div>
 
       {/* Volume */}
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: "0 0 120px" }}>
-        <button onClick={toggleMute} style={{ background: "none", border: "none", cursor: "pointer", color: "#888888", padding: "4px", display: "flex" }}>
-          {muted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
+      <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+        <button onClick={toggleMute} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.45)", padding: "4px", display: "flex", transition: "color 0.15s ease" }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.9)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.45)"; }}
+        >
+          {muted || volume === 0 ? <VolumeX size={14} /> : <Volume2 size={14} />}
         </button>
         <input
           type="range"
@@ -226,11 +239,11 @@ export default function BottomPlayer({ beat, onClose }: BottomPlayerProps) {
           value={muted ? 0 : volume}
           onChange={handleVolumeChange}
           style={{
-            width: "70px",
-            height: "4px",
+            width: "60px",
+            height: "3px",
             WebkitAppearance: "none",
             appearance: "none",
-            background: `linear-gradient(to right, #FFFFFF ${(muted ? 0 : volume) * 100}%, #444444 ${(muted ? 0 : volume) * 100}%)`,
+            background: `linear-gradient(to right, rgba(255,255,255,0.8) ${volumePct}%, rgba(255,255,255,0.15) ${volumePct}%)`,
             borderRadius: "2px",
             outline: "none",
             cursor: "pointer",
@@ -241,9 +254,11 @@ export default function BottomPlayer({ beat, onClose }: BottomPlayerProps) {
       {/* Close */}
       <button
         onClick={onClose}
-        style={{ background: "none", border: "none", cursor: "pointer", color: "#555555", padding: "4px", display: "flex", flexShrink: 0 }}
+        style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.35)", padding: "4px", display: "flex", flexShrink: 0, transition: "color 0.15s ease" }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.8)"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.35)"; }}
       >
-        <X size={18} />
+        <X size={16} />
       </button>
     </div>
   );
