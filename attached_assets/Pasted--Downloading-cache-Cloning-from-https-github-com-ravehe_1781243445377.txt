@@ -1,0 +1,26 @@
+==> Downloading cache...
+==> Cloning from https://github.com/ravehero3/beatz
+==> Checking out commit 6658fa3c10c3c06542350e46e5a1280e35a4759a in branch main
+==> Downloaded 99MB in 10s. Extraction took 4s.
+==> Using Node.js version 24.14.1 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'pnpm install --frozen-lockfile; pnpm run build'...
+> workspace@0.0.0 build /opt/render/project/src
+> pnpm run typecheck && pnpm -r --filter "!./artifacts/mockup-sandbox" --if-present run build
+> workspace@0.0.0 typecheck /opt/render/project/src
+> pnpm run typecheck:libs && pnpm -r --filter "./artifacts/**" --if-present run typecheck
+> workspace@0.0.0 typecheck:libs /opt/render/project/src
+> tsc --build
+==> Uploading build...
+==> Uploaded in 4.3s. Compression took 3.9s
+==> Build successful 🎉
+==> Deploying...
+==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+==> Running 'node artifacts/api-server/dist/index.mjs'
+{"level":50,"time":1781242719561,"pid":70,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-5654977c57-7vvgm","err":{"type":"Error","message":"connect ENETUNREACH 2a05:d014:128e:9500:544b:8f9d:90ea:2893:5432 - Local (:::0)","stack":"Error: connect ENETUNREACH 2a05:d014:128e:9500:544b:8f9d:90ea:2893:5432 - Local (:::0)\n    at file:///opt/render/project/src/artifacts/api-server/dist/index.mjs:36510:15\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async runMigrations (file:///opt/render/project/src/artifacts/api-server/dist/index.mjs:79846:7)","errno":-101,"code":"ENETUNREACH","syscall":"connect","address":"2a05:d014:128e:9500:544b:8f9d:90ea:2893","port":5432},"msg":"Migration failed, aborting startup"}
+==> Exited with status 1
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+==> Running 'node artifacts/api-server/dist/index.mjs'
+{"level":50,"time":1781242733132,"pid":52,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-5654977c57-7vvgm","err":{"type":"Error","message":"connect ENETUNREACH 2a05:d014:128e:9500:544b:8f9d:90ea:2893:5432 - Local (:::0)","stack":"Error: connect ENETUNREACH 2a05:d014:128e:9500:544b:8f9d:90ea:2893:5432 - Local (:::0)\n    at file:///opt/render/project/src/artifacts/api-server/dist/index.mjs:36510:15\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async runMigrations (file:///opt/render/project/src/artifacts/api-server/dist/index.mjs:79846:7)","errno":-101,"code":"ENETUNREACH","syscall":"connect","address":"2a05:d014:128e:9500:544b:8f9d:90ea:2893","port":5432},"msg":"Migration failed, aborting startup"}
+==> Running 'node artifacts/api-server/dist/index.mjs'
+{"level":50,"time":1781242756816,"pid":52,"hostname":"srv-d8k7ahrjdbms73efav5g-hibernate-5654977c57-7vvgm","err":{"type":"Error","message":"connect ENETUNREACH 2a05:d014:128e:9500:544b:8f9d:90ea:2893:5432 - Local (:::0)","stack":"Error: connect ENETUNREACH 2a05:d014:128e:9500:544b:8f9d:90ea:2893:5432 - Local (:::0)\n    at file:///opt/render/project/src/artifacts/api-server/dist/index.mjs:36510:15\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async runMigrations (file:///opt/render/project/src/artifacts/api-server/dist/index.mjs:79846:7)","errno":-101,"code":"ENETUNREACH","syscall":"connect","address":"2a05:d014:128e:9500:544b:8f9d:90ea:2893","port":5432},"msg":"Migration failed, aborting startup"}
