@@ -174,4 +174,53 @@ router.get("/admin/emails/export", requireRole("admin"), async (_req, res) => {
   res.send(csv);
 });
 
+/* ── Storefront Studio ── */
+router.get("/admin/storefronts", requireRole("admin"), async (_req, res) => {
+  const rows = await db
+    .select({
+      id: artistsTable.id,
+      slug: artistsTable.slug,
+      displayName: artistsTable.displayName,
+      storeTemplate: artistsTable.storeTemplate,
+      playerStyle: artistsTable.playerStyle,
+    })
+    .from(artistsTable)
+    .orderBy(artistsTable.displayName);
+  res.json(rows);
+});
+
+router.patch("/admin/storefronts/:id", requireRole("admin"), async (req, res) => {
+  const id = req.params["id"] as string;
+  const { storeTemplate, playerStyle } = req.body as { storeTemplate?: string; playerStyle?: string };
+
+  const validThemes = ["light", "grey", "dark"];
+  const validPlayers = ["classic", "minimal", "deck"];
+
+  if (storeTemplate && !validThemes.includes(storeTemplate)) {
+    res.status(400).json({ error: "Invalid storeTemplate" });
+    return;
+  }
+  if (playerStyle && !validPlayers.includes(playerStyle)) {
+    res.status(400).json({ error: "Invalid playerStyle" });
+    return;
+  }
+
+  const updates: Partial<{ storeTemplate: string; playerStyle: string }> = {};
+  if (storeTemplate) updates.storeTemplate = storeTemplate;
+  if (playerStyle) updates.playerStyle = playerStyle;
+
+  const [updated] = await db
+    .update(artistsTable)
+    .set(updates)
+    .where(eq(artistsTable.id, id))
+    .returning({ id: artistsTable.id, storeTemplate: artistsTable.storeTemplate, playerStyle: artistsTable.playerStyle });
+
+  if (!updated) {
+    res.status(404).json({ error: "Artist not found" });
+    return;
+  }
+
+  res.json(updated);
+});
+
 export default router;

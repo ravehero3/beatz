@@ -1,11 +1,52 @@
 import { useState } from "react";
-import { Search, SlidersHorizontal, Music } from "lucide-react";
-import { useListBeats, useListGenres } from "@workspace/api-client-react";
+import { Search, SlidersHorizontal, Music, ArrowRight } from "lucide-react";
+import { useListBeats, useListGenres, useGetFeaturedBeats } from "@workspace/api-client-react";
 import BeatCard from "@/components/BeatCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useT } from "@/lib/i18n";
 import { useAudioStore } from "@/store/audioStore";
+
+function FeaturedBeatsSection() {
+  const { data: featured, isLoading } = useGetFeaturedBeats();
+  const { setTrack } = useAudioStore();
+  if (!isLoading && (!featured || featured.length === 0)) return null;
+  return (
+    <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px 0" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+        <h2 style={{ fontFamily: "'Figtree', sans-serif", fontWeight: 700, fontSize: "18px", color: "#0A0A0A", letterSpacing: "-0.02em" }}>
+          Featured Beats
+        </h2>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "20px", marginBottom: "40px" }}>
+        {isLoading
+          ? Array(4).fill(0).map((_, i) => (
+            <div key={i} style={{ borderRadius: "16px", overflow: "hidden", border: "1px solid #E5E5E5" }}>
+              <Skeleton style={{ aspectRatio: "1" }} />
+              <div style={{ padding: "12px 16px 16px" }}><Skeleton style={{ height: "14px", marginBottom: "8px" }} /><Skeleton style={{ height: "12px", width: "60%" }} /></div>
+            </div>
+          ))
+          : (featured ?? []).map((beat) => (
+            <BeatCard
+              key={beat.id}
+              id={beat.id}
+              title={beat.title}
+              artistName={beat.artistName}
+              artistSlug={beat.artistSlug}
+              bpm={beat.bpm}
+              musicalKey={beat.key}
+              genre={beat.genre}
+              coverUrl={beat.coverUrl}
+              priceBasic={beat.priceBasic !== undefined ? Number(beat.priceBasic) : null}
+              isExclusiveSold={beat.isExclusiveSold}
+            />
+          ))
+        }
+      </div>
+      <div style={{ borderBottom: "1px solid #F0F0F0", marginBottom: "32px" }} />
+    </div>
+  );
+}
 
 export default function BrowseBeatsPage() {
   const [search, setSearch] = useState("");
@@ -134,6 +175,9 @@ export default function BrowseBeatsPage() {
           </div>
         </div>
       </div>
+
+      {/* Featured Beats — shown only when no filters active */}
+      {!search && genre === "all" && !bpmMin && !bpmMax && <FeaturedBeatsSection />}
 
       {/* Beat grid */}
       <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px", paddingBottom: currentBeat ? "120px" : "48px" }}>

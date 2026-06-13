@@ -1,12 +1,12 @@
 import { Link, useLocation } from "wouter";
-import { BarChart2, Users, UserCheck, Music, CreditCard, DollarSign, Flag, Settings, ArrowLeft } from "lucide-react";
+import { BarChart2, Users, UserCheck, Music, DollarSign, Flag, Settings, ArrowLeft, Store } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import beatpackLogo from "@assets/beatpack_logo_1_1781012889607.png";
 
 const navItems = [
   { href: "/admin", icon: <BarChart2 size={16} />, label: "Dashboard" },
   { href: "/admin/users", icon: <Users size={16} />, label: "Users" },
-  { href: "/admin/artists", icon: <UserCheck size={16} />, label: "Artists" },
+  { href: "/admin/storefronts", icon: <Store size={16} />, label: "Storefronts" },
   { href: "/admin/beats", icon: <Music size={16} />, label: "Beats" },
   { href: "/admin/payouts", icon: <DollarSign size={16} />, label: "Payouts" },
   { href: "/admin/reports", icon: <Flag size={16} />, label: "Reports" },
