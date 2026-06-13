@@ -114,6 +114,7 @@ const alterTableStatements = [
   `ALTER TABLE beats ADD COLUMN IF NOT EXISTS slug text`,
   `ALTER TABLE beats ADD COLUMN IF NOT EXISTS mood text`,
   `ALTER TABLE beats ADD COLUMN IF NOT EXISTS audio_wav_url text`,
+  `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS marketing_opt_in boolean NOT NULL DEFAULT true`,
 ];
 
 export async function runMigrations(): Promise<void> {
