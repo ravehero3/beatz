@@ -4,6 +4,7 @@ import { useGetFeaturedBeats, useGetFeaturedArtists } from "@workspace/api-clien
 import BeatCard from "@/components/BeatCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useT } from "@/lib/i18n";
+import heroBg from "@assets/beatpack_headline_background_1781332914315.jpg";
 
 export default function HomePage() {
   const { data: featuredBeats, isLoading: beatsLoading } = useGetFeaturedBeats();
@@ -18,7 +19,27 @@ export default function HomePage() {
         margin: "0 auto",
         padding: "104px 24px 88px",
         textAlign: "center",
+        position: "relative",
+        overflow: "hidden",
       }}>
+        {/* Background image */}
+        <img
+          src={heroBg}
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center",
+            zIndex: 0,
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        />
+        {/* Content sits above bg */}
+        <div style={{ position: "relative", zIndex: 1 }}>
         <h1 style={{
           fontFamily: "'Figtree', sans-serif",
           fontWeight: 800,
@@ -110,6 +131,7 @@ export default function HomePage() {
             </button>
           </Link>
         </div>
+        </div>{/* end content wrapper */}
       </section>
 
       {/* Featured Beats */}
