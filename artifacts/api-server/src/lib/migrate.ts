@@ -115,6 +115,15 @@ const alterTableStatements = [
   `ALTER TABLE beats ADD COLUMN IF NOT EXISTS mood text`,
   `ALTER TABLE beats ADD COLUMN IF NOT EXISTS audio_wav_url text`,
   `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS marketing_opt_in boolean NOT NULL DEFAULT true`,
+  `CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    profile_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    token text NOT NULL UNIQUE,
+    expires_at timestamptz NOT NULL,
+    used_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`,
+  `CREATE INDEX IF NOT EXISTS password_reset_tokens_token_idx ON password_reset_tokens (token)`,
 ];
 
 export async function runMigrations(): Promise<void> {

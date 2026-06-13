@@ -14,6 +14,7 @@ import ArtistStorePage from "@/pages/ArtistStorePage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import PricingPage from "@/pages/PricingPage";
 import CheckoutPage from "@/pages/CheckoutPage";
 import AccountPage from "@/pages/account/AccountPage";
@@ -72,6 +73,7 @@ function AppRouter() {
       <Route path="/login" component={() => <PublicOnlyRoute component={LoginPage} />} />
       <Route path="/register" component={() => <PublicOnlyRoute component={RegisterPage} />} />
       <Route path="/forgot-password" component={() => <PublicOnlyRoute component={ForgotPasswordPage} />} />
+      <Route path="/reset-password" component={ResetPasswordPage} />
 
       {/* Onboarding */}
       <Route path="/onboarding" component={OnboardingRoute} />
@@ -108,7 +110,7 @@ function AppRouter() {
   );
 }
 
-const HIDE_CHROME_PATHS = ["/studio", "/admin", "/login", "/register", "/onboarding", "/forgot-password", "/auth/"];
+const HIDE_CHROME_PATHS = ["/studio", "/admin", "/login", "/register", "/onboarding", "/forgot-password", "/reset-password", "/auth/"];
 
 function Layout() {
   const [location] = useLocation();

@@ -1,11 +1,14 @@
 import { Router, type IRouter } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "node:crypto";
 import { db } from "../lib/db";
 import { profilesTable, artistsTable } from "@workspace/db";
 import { signToken, requireAuth } from "../lib/auth";
 import { LoginUserBody, RegisterUserBody } from "@workspace/api-zod";
 import { eq, or } from "drizzle-orm";
+import { sendPasswordResetEmail } from "../lib/email";
+import { Pool } from "pg";
 
 const router: IRouter = Router();
 
@@ -313,9 +316,80 @@ router.post("/auth/forgot-password", async (req, res) => {
     res.status(400).json({ error: "Email required" });
     return;
   }
-  const user = await db.query.profilesTable.findFirst({ where: eq(profilesTable.email, email.toLowerCase().trim()) });
-  req.log.info({ email, found: !!user }, "Forgot password request");
+  const normalised = email.toLowerCase().trim();
+  const user = await db.query.profilesTable.findFirst({ where: eq(profilesTable.email, normalised) });
+
+  if (user) {
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+    const DATABASE_URL = process.env["DATABASE_URL"];
+    if (DATABASE_URL) {
+      const pool = new Pool({ connectionString: DATABASE_URL });
+      try {
+        await pool.query(
+          `INSERT INTO password_reset_tokens (profile_id, token, expires_at) VALUES ($1, $2, $3)`,
+          [user.id, token, expiresAt],
+        );
+      } finally {
+        await pool.end();
+      }
+    }
+    try {
+      await sendPasswordResetEmail(normalised, token);
+    } catch (err) {
+      req.log.error({ err }, "Failed to send password reset email");
+    }
+  }
+
+  req.log.info({ email: normalised, found: !!user }, "Forgot password request");
   res.json({ message: "If an account exists for this email, a reset link has been sent." });
+});
+
+router.post("/auth/reset-password", async (req, res) => {
+  const { token, password } = req.body;
+  if (!token || typeof token !== "string" || !password || typeof password !== "string") {
+    res.status(400).json({ error: "Token and password are required." });
+    return;
+  }
+  if (password.length < 8) {
+    res.status(400).json({ error: "Password must be at least 8 characters." });
+    return;
+  }
+
+  const DATABASE_URL = process.env["DATABASE_URL"];
+  if (!DATABASE_URL) {
+    res.status(503).json({ error: "Database not configured." });
+    return;
+  }
+
+  const pool = new Pool({ connectionString: DATABASE_URL });
+  try {
+    const result = await pool.query(
+      `SELECT id, profile_id, expires_at, used_at FROM password_reset_tokens WHERE token = $1 LIMIT 1`,
+      [token],
+    );
+    if (result.rows.length === 0) {
+      res.status(400).json({ error: "Invalid or expired reset link." });
+      return;
+    }
+    const row = result.rows[0];
+    if (row.used_at) {
+      res.status(400).json({ error: "This reset link has already been used." });
+      return;
+    }
+    if (new Date(row.expires_at) < new Date()) {
+      res.status(400).json({ error: "This reset link has expired. Please request a new one." });
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    await pool.query(`UPDATE profiles SET password_hash = $1 WHERE id = $2`, [passwordHash, row.profile_id]);
+    await pool.query(`UPDATE password_reset_tokens SET used_at = now() WHERE id = $1`, [row.id]);
+
+    res.json({ message: "Password updated successfully." });
+  } finally {
+    await pool.end();
+  }
 });
 
 router.patch("/users/me", requireAuth, async (req, res) => {
