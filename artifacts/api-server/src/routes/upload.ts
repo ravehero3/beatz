@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import fs from "node:fs";
 import { requireAuth } from "../lib/auth";
+import { isR2Configured, uploadToR2 } from "../lib/storage";
 
 const router: IRouter = Router();
 
@@ -14,34 +15,36 @@ if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const name = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
-    cb(null, name);
-  },
-});
+const ALLOWED_EXTS = [".mp3", ".wav", ".aiff", ".jpg", ".jpeg", ".png", ".webp", ".gif"];
 
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    const allowed = [".mp3", ".wav", ".aiff", ".jpg", ".jpeg", ".png", ".webp", ".gif"];
     const ext = path.extname(file.originalname).toLowerCase();
-    if (allowed.includes(ext)) cb(null, true);
+    if (ALLOWED_EXTS.includes(ext)) cb(null, true);
     else cb(new Error(`File type ${ext} not allowed`));
   },
 });
 
-router.post("/upload", requireAuth, upload.single("file"), (req, res) => {
+router.post("/upload", requireAuth, upload.single("file"), async (req, res) => {
   if (!req.file) {
     res.status(400).json({ error: "No file uploaded" });
     return;
   }
-  const host = process.env["APP_URL"] ?? `http://localhost:${process.env["PORT"] ?? 8080}`;
-  const url = `${host}/uploads/${req.file.filename}`;
-  res.json({ url, filename: req.file.filename, size: req.file.size });
+
+  if (isR2Configured()) {
+    const url = await uploadToR2(req.file.buffer, req.file.originalname);
+    res.json({ url, size: req.file.size });
+    return;
+  }
+
+  // Local fallback for development (no R2 configured)
+  const ext = path.extname(req.file.originalname).toLowerCase();
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
+  fs.writeFileSync(path.join(UPLOADS_DIR, filename), req.file.buffer);
+  const host = (process.env["APP_URL"] ?? `http://localhost:${process.env["PORT"] ?? 8080}`).replace(/\/$/, "");
+  res.json({ url: `${host}/uploads/${filename}`, size: req.file.size });
 });
 
 export default router;
