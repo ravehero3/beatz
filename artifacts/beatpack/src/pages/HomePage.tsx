@@ -14,15 +14,8 @@ export default function HomePage() {
   return (
     <div style={{ paddingTop: "44px" }}>
       {/* Hero */}
-      <section style={{
-        maxWidth: "1280px",
-        margin: "0 auto",
-        padding: "104px 24px 88px",
-        textAlign: "center",
-        position: "relative",
-        overflow: "hidden",
-      }}>
-        {/* Background image */}
+      <section style={{ position: "relative", overflow: "hidden" }}>
+        {/* Background image — full viewport width */}
         <img
           src={heroBg}
           aria-hidden="true"
@@ -38,8 +31,15 @@ export default function HomePage() {
             userSelect: "none",
           }}
         />
-        {/* Content sits above bg */}
-        <div style={{ position: "relative", zIndex: 1 }}>
+        {/* Content sits above bg, constrained to max-width */}
+        <div style={{
+          position: "relative",
+          zIndex: 1,
+          maxWidth: "1280px",
+          margin: "0 auto",
+          padding: "104px 24px 88px",
+          textAlign: "center",
+        }}>
         <h1 style={{
           fontFamily: "'Figtree', sans-serif",
           fontWeight: 800,
