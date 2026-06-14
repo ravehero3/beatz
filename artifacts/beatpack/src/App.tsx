@@ -31,6 +31,7 @@ import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminBeatsPage from "@/pages/admin/AdminBeatsPage";
 import AdminPayoutsPage from "@/pages/admin/AdminPayoutsPage";
 import AdminStorefrontsPage from "@/pages/admin/AdminStorefrontsPage";
+import AdminEmailsPage from "@/pages/admin/AdminEmailsPage";
 import GoogleCallbackPage from "@/pages/GoogleCallbackPage";
 import OnboardingPage from "@/pages/OnboardingPage";
 import ProfileSetupPage from "@/pages/ProfileSetupPage";
@@ -99,6 +100,7 @@ function AppRouter() {
       <Route path="/admin/beats" component={() => <ProtectedRoute component={AdminBeatsPage} roles={["admin"]} />} />
       <Route path="/admin/payouts" component={() => <ProtectedRoute component={AdminPayoutsPage} roles={["admin"]} />} />
       <Route path="/admin/storefronts" component={() => <ProtectedRoute component={AdminStorefrontsPage} roles={["admin"]} />} />
+      <Route path="/admin/emails" component={() => <ProtectedRoute component={AdminEmailsPage} roles={["admin"]} />} />
 
       <Route path="/become-a-seller" component={BecomeSellerPage} />
 

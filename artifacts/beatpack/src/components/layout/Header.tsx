@@ -48,9 +48,8 @@ export default function Header() {
           zIndex: 1000,
           display: "flex",
           alignItems: "center",
-          padding: "0 24px",
-          gap: "24px",
         }}
+        className="px-4 md:px-6 gap-3 md:gap-6"
       >
         {/* Logo */}
         <Link href="/">
@@ -59,7 +58,7 @@ export default function Header() {
             alt="beatpack"
             data-testid="logo"
             style={{ display: "block" }}
-            className="h-[17px] md:h-[20px]"
+            className="h-[15px] md:h-[20px]"
           />
         </Link>
 
@@ -271,7 +270,7 @@ export default function Header() {
           ))}
           {!user && (
             <div style={{ display: "flex", gap: "8px", paddingTop: "12px" }}>
-              <Link href="/login" onClick={() => setMobileOpen(false)} style={{ flex: 1 }}>
+              <Link href="/login" onClick={() => setMobileOpen(false)} style={{ flex: 1, minWidth: 0 }}>
                 <button style={{
                   width: "100%",
                   height: "40px",
@@ -279,16 +278,18 @@ export default function Header() {
                   background: "none",
                   border: "1px solid #E5E5E5",
                   fontFamily: "'Figtree', sans-serif",
-                  fontSize: "14px",
+                  fontSize: "13px",
                   fontWeight: 500,
                   color: "#0A0A0A",
                   cursor: "pointer",
                   whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}>
                   {t("nav.login")}
                 </button>
               </Link>
-              <Link href="/register" onClick={() => setMobileOpen(false)} style={{ flex: 1 }}>
+              <Link href="/register" onClick={() => setMobileOpen(false)} style={{ flex: 1, minWidth: 0 }}>
                 <button style={{
                   width: "100%",
                   height: "40px",
@@ -296,11 +297,13 @@ export default function Header() {
                   background: "#0A0A0A",
                   border: "none",
                   fontFamily: "'Figtree', sans-serif",
-                  fontSize: "14px",
+                  fontSize: "13px",
                   fontWeight: 500,
                   color: "#FFFFFF",
                   cursor: "pointer",
                   whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}>
                   {t("nav.signup")}
                 </button>

@@ -1,14 +1,21 @@
 import { Router, type IRouter } from "express";
 import { db } from "../lib/db";
-import { ordersTable, beatsTable, artistsTable } from "@workspace/db";
+import { ordersTable, beatsTable, artistsTable, profilesTable } from "@workspace/db";
 import { requireAuth, requireRole } from "../lib/auth";
 import { CreateOrderBody } from "@workspace/api-zod";
 import { eq, or, and } from "drizzle-orm";
 import { sql } from "drizzle-orm";
+import { sendOrderConfirmationEmail, sendBeatDeliveryEmail } from "../lib/email";
 
 const router: IRouter = Router();
 
-function formatOrder(order: typeof ordersTable.$inferSelect & { beatTitle?: string | null; beatCoverUrl?: string | null }) {
+function formatOrder(order: typeof ordersTable.$inferSelect & {
+  beatTitle?: string | null;
+  beatCoverUrl?: string | null;
+  audioPreviewUrl?: string | null;
+  audioFullUrl?: string | null;
+  audioWavUrl?: string | null;
+}) {
   return {
     id: order.id,
     buyerId: order.buyerId,
@@ -26,6 +33,9 @@ function formatOrder(order: typeof ordersTable.$inferSelect & { beatTitle?: stri
     beat: {
       title: order.beatTitle ?? null,
       coverUrl: order.beatCoverUrl ?? null,
+      audioPreviewUrl: order.audioPreviewUrl ?? null,
+      audioFullUrl: order.audioFullUrl ?? null,
+      audioWavUrl: order.audioWavUrl ?? null,
     },
   };
 }
@@ -77,12 +87,26 @@ router.post("/orders", requireAuth, async (req, res) => {
   }).returning();
 
   req.log.info({ orderId: order.id }, "Order created");
-  res.status(201).json(formatOrder({ ...order, beatTitle: beat.title, beatCoverUrl: beat.coverUrl }));
+  res.status(201).json(formatOrder({
+    ...order,
+    beatTitle: beat.title,
+    beatCoverUrl: beat.coverUrl,
+    audioPreviewUrl: beat.audioPreviewUrl,
+    audioFullUrl: beat.audioFullUrl,
+    audioWavUrl: beat.audioWavUrl,
+  }));
 });
 
 router.get("/orders/:id", requireAuth, async (req, res) => {
   const row = await db
-    .select({ order: ordersTable, title: beatsTable.title, coverUrl: beatsTable.coverUrl })
+    .select({
+      order: ordersTable,
+      title: beatsTable.title,
+      coverUrl: beatsTable.coverUrl,
+      audioPreviewUrl: beatsTable.audioPreviewUrl,
+      audioFullUrl: beatsTable.audioFullUrl,
+      audioWavUrl: beatsTable.audioWavUrl,
+    })
     .from(ordersTable)
     .leftJoin(beatsTable, eq(ordersTable.beatId, beatsTable.id))
     .where(eq(ordersTable.id, req.params["id"] as string))
@@ -98,12 +122,26 @@ router.get("/orders/:id", requireAuth, async (req, res) => {
     return;
   }
 
-  res.json(formatOrder({ ...row.order, beatTitle: row.title, beatCoverUrl: row.coverUrl }));
+  res.json(formatOrder({
+    ...row.order,
+    beatTitle: row.title,
+    beatCoverUrl: row.coverUrl,
+    audioPreviewUrl: row.audioPreviewUrl,
+    audioFullUrl: row.audioFullUrl,
+    audioWavUrl: row.audioWavUrl,
+  }));
 });
 
 router.get("/orders", requireAuth, async (req, res) => {
   const rows = await db
-    .select({ order: ordersTable, title: beatsTable.title, coverUrl: beatsTable.coverUrl, audioPreviewUrl: beatsTable.audioPreviewUrl })
+    .select({
+      order: ordersTable,
+      title: beatsTable.title,
+      coverUrl: beatsTable.coverUrl,
+      audioPreviewUrl: beatsTable.audioPreviewUrl,
+      audioFullUrl: beatsTable.audioFullUrl,
+      audioWavUrl: beatsTable.audioWavUrl,
+    })
     .from(ordersTable)
     .leftJoin(beatsTable, eq(ordersTable.beatId, beatsTable.id))
     .where(
@@ -114,13 +152,13 @@ router.get("/orders", requireAuth, async (req, res) => {
     )
     .orderBy(sql`${ordersTable.createdAt} desc`);
 
-  res.json(rows.map((r) => ({
-    ...formatOrder({ ...r.order, beatTitle: r.title, beatCoverUrl: r.coverUrl }),
-    beat: {
-      title: r.title ?? null,
-      coverUrl: r.coverUrl ?? null,
-      audioPreviewUrl: r.audioPreviewUrl ?? null,
-    },
+  res.json(rows.map((r) => formatOrder({
+    ...r.order,
+    beatTitle: r.title,
+    beatCoverUrl: r.coverUrl,
+    audioPreviewUrl: r.audioPreviewUrl,
+    audioFullUrl: r.audioFullUrl,
+    audioWavUrl: r.audioWavUrl,
   })));
 });
 
@@ -152,6 +190,40 @@ router.patch("/orders/:id/confirm", requireAuth, async (req, res) => {
   }
 
   req.log.info({ orderId: updated.id }, "Order confirmed");
+
+  // Send email notifications asynchronously
+  try {
+    const [buyerRow, beatRow] = await Promise.all([
+      db.query.profilesTable.findFirst({ where: eq(profilesTable.id, order.buyerId) }),
+      db.query.beatsTable.findFirst({ where: eq(beatsTable.id, order.beatId) }),
+    ]);
+
+    if (buyerRow?.email && beatRow) {
+      const buyerName = buyerRow.firstName ?? buyerRow.email.split("@")[0];
+      await Promise.all([
+        sendOrderConfirmationEmail({
+          email: buyerRow.email,
+          buyerName,
+          beatTitle: beatRow.title,
+          licenseType: order.licenseType,
+          amountCzk: Number(order.amountCzk),
+          variableSymbol: order.variableSymbol,
+          orderId: order.id,
+        }),
+        sendBeatDeliveryEmail({
+          email: buyerRow.email,
+          buyerName,
+          beatTitle: beatRow.title,
+          licenseType: order.licenseType,
+          audioFullUrl: beatRow.audioFullUrl,
+          audioWavUrl: beatRow.audioWavUrl,
+        }),
+      ]);
+    }
+  } catch (emailErr) {
+    req.log.warn({ err: emailErr }, "Failed to send confirmation emails");
+  }
+
   res.json(formatOrder({ ...updated, beatTitle: null, beatCoverUrl: null }));
 });
 

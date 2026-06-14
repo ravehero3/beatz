@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { ArrowRight, Upload, DollarSign, Zap } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import heroBg from "@assets/beatpack_headline_background_1781332914315.jpg";
+import heroBg from "@assets/beatpack_headline_background_2_1781422880067.jpg";
 
 export default function HomePage() {
   const t = useT();
@@ -60,24 +60,23 @@ export default function HomePage() {
           }}>
             {t("home.hero.sub")}
           </p>
-          <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap", marginBottom: "48px" }}>
+          <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "nowrap", marginBottom: "48px" }}>
             <Link href="/beats">
               <button
                 data-testid="btn-browse-beats"
+                className="h-10 md:h-12 px-5 md:px-8 text-[13px] md:text-[14px]"
                 style={{
-                  height: "48px",
-                  padding: "0 32px",
                   borderRadius: "9999px",
                   background: "linear-gradient(135deg, #1a1a1a 0%, #0A0A0A 100%)",
                   color: "#FFFFFF",
                   border: "none",
                   fontFamily: "'Figtree', sans-serif",
                   fontWeight: 600,
-                  fontSize: "14px",
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
-                  gap: "8px",
+                  gap: "6px",
+                  whiteSpace: "nowrap",
                   transition: "transform 0.2s ease, box-shadow 0.2s ease",
                   boxShadow: "0 4px 16px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.12)",
                 }}
@@ -90,15 +89,14 @@ export default function HomePage() {
                   (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 16px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.12)";
                 }}
               >
-                {t("home.hero.browse")} <ArrowRight size={16} />
+                {t("home.hero.browse")} <ArrowRight size={14} />
               </button>
             </Link>
             <Link href="/pricing">
               <button
                 data-testid="btn-start-selling"
+                className="h-10 md:h-12 px-5 md:px-8 text-[13px] md:text-[14px]"
                 style={{
-                  height: "48px",
-                  padding: "0 32px",
                   borderRadius: "9999px",
                   background: "rgba(255,255,255,0.85)",
                   backdropFilter: "blur(12px)",
@@ -106,8 +104,8 @@ export default function HomePage() {
                   border: "1px solid rgba(0,0,0,0.10)",
                   fontFamily: "'Figtree', sans-serif",
                   fontWeight: 500,
-                  fontSize: "14px",
                   cursor: "pointer",
+                  whiteSpace: "nowrap",
                   transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
                   boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
                 }}
