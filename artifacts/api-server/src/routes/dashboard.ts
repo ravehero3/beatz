@@ -46,7 +46,7 @@ router.get("/dashboard/stats", requireRole("artist", "admin"), async (req, res) 
   });
 });
 
-router.get("/dashboard/earnings-chart", requireRole("artist", "admin"), async (req, res) => {
+async function earningsChartHandler(req: import("express").Request, res: import("express").Response) {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -74,7 +74,10 @@ router.get("/dashboard/earnings-chart", requireRole("artist", "admin"), async (r
   }
 
   res.json(result);
-});
+}
+
+router.get("/dashboard/earnings-chart", requireRole("artist", "admin"), earningsChartHandler);
+router.get("/dashboard/earnings", requireRole("artist", "admin"), earningsChartHandler);
 
 router.get("/admin/stats", requireRole("admin"), async (_req, res) => {
   const startOfMonth = new Date();
