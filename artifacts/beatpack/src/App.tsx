@@ -1,3 +1,4 @@
+import React from "react";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -43,25 +44,82 @@ import ProfileSetupPage from "@/pages/ProfileSetupPage";
 import BecomeSellerPage from "@/pages/BecomeSellerPage";
 import BottomPlayer from "@/components/BottomPlayer";
 
+const F = "'Figtree', sans-serif";
+
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30000 } },
 });
 
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; message: string }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, message: "" };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, message: error?.message ?? "Unknown error" };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error("[ErrorBoundary]", error, info.componentStack);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F9F9F9", padding: "24px" }}>
+          <div style={{ textAlign: "center", maxWidth: "420px" }}>
+            <div style={{ fontSize: "40px", marginBottom: "16px" }}>⚠️</div>
+            <h2 style={{ fontFamily: F, fontWeight: 700, fontSize: "20px", color: "#0A0A0A", marginBottom: "8px", letterSpacing: "-0.02em" }}>
+              Something went wrong
+            </h2>
+            <p style={{ fontFamily: F, fontSize: "14px", color: "#888888", marginBottom: "8px", lineHeight: 1.6 }}>
+              An unexpected error occurred. Refreshing usually fixes it.
+            </p>
+            {this.state.message && (
+              <p style={{ fontFamily: "monospace", fontSize: "12px", color: "#AAAAAA", marginBottom: "24px", wordBreak: "break-word" }}>
+                {this.state.message}
+              </p>
+            )}
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                height: "40px", padding: "0 28px", borderRadius: "9999px",
+                background: "#0A0A0A", color: "#FFFFFF", border: "none",
+                fontFamily: F, fontWeight: 600, fontSize: "14px", cursor: "pointer",
+              }}
+            >
+              Refresh page
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function ProtectedRoute({ component: Component, roles }: { component: React.ComponentType; roles?: string[] }) {
-  const { user } = useAuthStore();
+  const { user, _hasHydrated } = useAuthStore();
+  if (!_hasHydrated) return null;
   if (!user) return <Redirect to="/login" />;
   if (roles && !roles.includes(user.role)) return <Redirect to="/" />;
   return <Component />;
 }
 
 function PublicOnlyRoute({ component: Component }: { component: React.ComponentType }) {
-  const { user } = useAuthStore();
+  const { user, _hasHydrated } = useAuthStore();
+  if (!_hasHydrated) return null;
   if (user) return <Redirect to="/" />;
   return <Component />;
 }
 
 function OnboardingRoute() {
-  const { user } = useAuthStore();
+  const { user, _hasHydrated } = useAuthStore();
+  if (!_hasHydrated) return null;
   if (!user) return <Redirect to="/register" />;
   return <OnboardingPage />;
 }
@@ -142,14 +200,16 @@ function Layout() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Layout />
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Layout />
+          </WouterRouter>
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

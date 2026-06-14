@@ -113,6 +113,30 @@ router.patch("/artists/me", requireAuth, async (req, res) => {
   res.json({ id: updated.id, displayName: updated.displayName });
 });
 
+router.get("/artists/me/leads", requireRole("artist", "admin"), async (req, res) => {
+  const leads = await db
+    .select({
+      id: beatLeadsTable.id,
+      email: beatLeadsTable.email,
+      consentGiven: beatLeadsTable.consentGiven,
+      createdAt: beatLeadsTable.createdAt,
+      beatTitle: beatsTable.title,
+    })
+    .from(beatLeadsTable)
+    .innerJoin(beatsTable, eq(beatLeadsTable.beatId, beatsTable.id))
+    .where(eq(beatLeadsTable.artistId, req.user!.userId))
+    .orderBy(desc(beatLeadsTable.createdAt))
+    .limit(1000);
+
+  res.json(leads.map((l) => ({
+    id: l.id,
+    email: l.email,
+    consentGiven: l.consentGiven,
+    beatTitle: l.beatTitle,
+    createdAt: l.createdAt.toISOString(),
+  })));
+});
+
 router.get("/artists/:slug", async (req, res) => {
   const artist = await db.query.artistsTable.findFirst({
     where: or(
@@ -162,30 +186,6 @@ router.get("/artists/:slug", async (req, res) => {
       createdAt: b.createdAt.toISOString(),
     })),
   });
-});
-
-router.get("/artists/me/leads", requireRole("artist", "admin"), async (req, res) => {
-  const leads = await db
-    .select({
-      id: beatLeadsTable.id,
-      email: beatLeadsTable.email,
-      consentGiven: beatLeadsTable.consentGiven,
-      createdAt: beatLeadsTable.createdAt,
-      beatTitle: beatsTable.title,
-    })
-    .from(beatLeadsTable)
-    .innerJoin(beatsTable, eq(beatLeadsTable.beatId, beatsTable.id))
-    .where(eq(beatLeadsTable.artistId, req.user!.userId))
-    .orderBy(desc(beatLeadsTable.createdAt))
-    .limit(1000);
-
-  res.json(leads.map((l) => ({
-    id: l.id,
-    email: l.email,
-    consentGiven: l.consentGiven,
-    beatTitle: l.beatTitle,
-    createdAt: l.createdAt.toISOString(),
-  })));
 });
 
 export default router;
