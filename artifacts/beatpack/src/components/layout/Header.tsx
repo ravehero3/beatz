@@ -54,7 +54,13 @@ export default function Header() {
       >
         {/* Logo */}
         <Link href="/">
-          <img src={beatpackLogo} alt="beatpack" style={{ height: "20px" }} data-testid="logo" />
+          <img
+            src={beatpackLogo}
+            alt="beatpack"
+            data-testid="logo"
+            style={{ display: "block" }}
+            className="h-[17px] md:h-[20px]"
+          />
         </Link>
 
         {/* Nav */}
@@ -171,7 +177,7 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <Link href="/login">
                 <button
                   style={{
@@ -185,6 +191,7 @@ export default function Header() {
                     fontWeight: 500,
                     color: "#0A0A0A",
                     cursor: "pointer",
+                    whiteSpace: "nowrap",
                     transition: "all 0.15s ease",
                   }}
                   data-testid="btn-login"
@@ -205,6 +212,7 @@ export default function Header() {
                     fontWeight: 500,
                     color: "#FFFFFF",
                     cursor: "pointer",
+                    whiteSpace: "nowrap",
                     transition: "all 0.15s ease",
                   }}
                   data-testid="btn-register"
@@ -240,7 +248,7 @@ export default function Header() {
             zIndex: 999,
             display: "flex",
             flexDirection: "column",
-            gap: "12px",
+            gap: "4px",
           }}
         >
           {navLinks.map((link) => (
@@ -254,12 +262,51 @@ export default function Header() {
                 fontSize: "15px",
                 color: "#0A0A0A",
                 textDecoration: "none",
-                padding: "8px 0",
+                padding: "10px 0",
+                borderBottom: "1px solid #F2F2F2",
               }}
             >
               {link.label}
             </Link>
           ))}
+          {!user && (
+            <div style={{ display: "flex", gap: "8px", paddingTop: "12px" }}>
+              <Link href="/login" onClick={() => setMobileOpen(false)} style={{ flex: 1 }}>
+                <button style={{
+                  width: "100%",
+                  height: "40px",
+                  borderRadius: "9999px",
+                  background: "none",
+                  border: "1px solid #E5E5E5",
+                  fontFamily: "'Figtree', sans-serif",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  color: "#0A0A0A",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}>
+                  {t("nav.login")}
+                </button>
+              </Link>
+              <Link href="/register" onClick={() => setMobileOpen(false)} style={{ flex: 1 }}>
+                <button style={{
+                  width: "100%",
+                  height: "40px",
+                  borderRadius: "9999px",
+                  background: "#0A0A0A",
+                  border: "none",
+                  fontFamily: "'Figtree', sans-serif",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  color: "#FFFFFF",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}>
+                  {t("nav.signup")}
+                </button>
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </>
