@@ -2,7 +2,7 @@ services:
   - type: web
     name: beatpack
     env: node
-    buildCommand: pnpm install --frozen-lockfile && pnpm run build
+    buildCommand: NODE_ENV=development pnpm install --frozen-lockfile && pnpm run build
     startCommand: node artifacts/api-server/dist/index.mjs
     envVars:
       - key: PORT

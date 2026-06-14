@@ -35,7 +35,7 @@ function Input({ value, onChange, type = "text", placeholder, disabled }: { valu
 }
 
 export default function AccountSettingsPage() {
-  const { user, login, token } = useAuthStore();
+  const { user, setAuth: login, token } = useAuthStore();
 
   const [firstName, setFirstName] = useState(user?.firstName ?? "");
   const [lastName, setLastName] = useState(user?.lastName ?? "");
