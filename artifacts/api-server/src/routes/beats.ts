@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "../lib/db";
-import { beatsTable, artistsTable, profilesTable } from "@workspace/db";
+import { beatsTable, artistsTable, profilesTable, beatLeadsTable } from "@workspace/db";
 import { requireAuth, requireRole, optionalAuth } from "../lib/auth";
 import { CreateBeatBody, ListBeatsQueryParams } from "@workspace/api-zod";
 import { eq, and, gte, lte, ilike, or, sql } from "drizzle-orm";
@@ -220,6 +220,45 @@ router.patch("/beats/:id/flag", requireRole("admin"), async (req, res) => {
 router.patch("/beats/:id/restore", requireRole("admin"), async (req, res) => {
   await db.update(beatsTable).set({ status: "active" }).where(eq(beatsTable.id, req.params["id"] as string));
   res.json({ message: "Beat restored" });
+});
+
+router.post("/beats/:id/request-download", async (req, res) => {
+  const { email, consentGiven } = req.body as { email?: string; consentGiven?: boolean };
+
+  if (!email || typeof email !== "string" || !email.includes("@")) {
+    res.status(400).json({ error: "A valid email address is required" });
+    return;
+  }
+  if (!consentGiven) {
+    res.status(400).json({ error: "Consent is required to proceed" });
+    return;
+  }
+
+  const beat = await db.query.beatsTable.findFirst({
+    where: eq(beatsTable.id, req.params["id"] as string),
+  });
+
+  if (!beat) {
+    res.status(404).json({ error: "Beat not found" });
+    return;
+  }
+
+  if (!beat.audioPreviewUrl) {
+    res.status(404).json({ error: "No preview file is available for this beat" });
+    return;
+  }
+
+  await db.insert(beatLeadsTable).values({
+    beatId: beat.id,
+    artistId: beat.artistId,
+    email: email.trim().toLowerCase(),
+    consentGiven: true,
+    ipAddress: req.ip ?? null,
+  });
+
+  req.log.info({ beatId: beat.id, email: email.trim().toLowerCase() }, "Beat lead recorded");
+
+  res.json({ downloadUrl: beat.audioPreviewUrl });
 });
 
 export default router;

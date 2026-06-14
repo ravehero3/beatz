@@ -30,6 +30,7 @@ import EditBeatPage from "@/pages/studio/EditBeatPage";
 import EarningsPage from "@/pages/studio/EarningsPage";
 import StudioOrdersPage from "@/pages/studio/StudioOrdersPage";
 import StoreSettingsPage from "@/pages/studio/StoreSettingsPage";
+import StudioLeadsPage from "@/pages/studio/StudioLeadsPage";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminBeatsPage from "@/pages/admin/AdminBeatsPage";
@@ -101,6 +102,7 @@ function AppRouter() {
       <Route path="/studio/earnings" component={() => <ProtectedRoute component={EarningsPage} roles={["artist", "admin"]} />} />
       <Route path="/studio/orders" component={() => <ProtectedRoute component={StudioOrdersPage} roles={["artist", "admin"]} />} />
       <Route path="/studio/store" component={() => <ProtectedRoute component={StoreSettingsPage} roles={["artist", "admin"]} />} />
+      <Route path="/studio/leads" component={() => <ProtectedRoute component={StudioLeadsPage} roles={["artist", "admin"]} />} />
 
       {/* Protected: admin */}
       <Route path="/admin" component={() => <ProtectedRoute component={AdminDashboard} roles={["admin"]} />} />

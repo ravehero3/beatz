@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { BarChart2, Music, Package, DollarSign, Palette, User, Settings, ArrowLeft } from "lucide-react";
+import { BarChart2, Music, Package, DollarSign, Palette, User, Settings, ArrowLeft, Mail } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import beatpackLogo from "@assets/beatpack_logo_1_1781012889607.png";
 
@@ -9,6 +9,7 @@ const navItems = [
   { href: "/studio/orders", icon: <Package size={16} />, label: "Orders" },
   { href: "/studio/earnings", icon: <DollarSign size={16} />, label: "Earnings" },
   { href: "/studio/store", icon: <Palette size={16} />, label: "Store Design" },
+  { href: "/studio/leads", icon: <Mail size={16} />, label: "Leads" },
   { href: "/studio/profile", icon: <User size={16} />, label: "Profile" },
   { href: "/studio/settings", icon: <Settings size={16} />, label: "Settings" },
 ];

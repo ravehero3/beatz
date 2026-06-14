@@ -1,8 +1,8 @@
 import { Router, type IRouter } from "express";
 import { db } from "../lib/db";
-import { artistsTable, beatsTable, profilesTable } from "@workspace/db";
+import { artistsTable, beatsTable, profilesTable, beatLeadsTable } from "@workspace/db";
 import { requireAuth, requireRole } from "../lib/auth";
-import { eq, ilike, or, sql, and } from "drizzle-orm";
+import { eq, ilike, or, sql, and, desc } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -157,10 +157,35 @@ router.get("/artists/:slug", async (req, res) => {
       pricePremium: b.pricePremium !== null ? Number(b.pricePremium) : null,
       priceExclusive: b.priceExclusive !== null ? Number(b.priceExclusive) : null,
       isExclusiveSold: b.isExclusiveSold,
+      tags: b.tags ?? [],
       plays: b.plays,
       createdAt: b.createdAt.toISOString(),
     })),
   });
+});
+
+router.get("/artists/me/leads", requireRole("artist", "admin"), async (req, res) => {
+  const leads = await db
+    .select({
+      id: beatLeadsTable.id,
+      email: beatLeadsTable.email,
+      consentGiven: beatLeadsTable.consentGiven,
+      createdAt: beatLeadsTable.createdAt,
+      beatTitle: beatsTable.title,
+    })
+    .from(beatLeadsTable)
+    .innerJoin(beatsTable, eq(beatLeadsTable.beatId, beatsTable.id))
+    .where(eq(beatLeadsTable.artistId, req.user!.userId))
+    .orderBy(desc(beatLeadsTable.createdAt))
+    .limit(1000);
+
+  res.json(leads.map((l) => ({
+    id: l.id,
+    email: l.email,
+    consentGiven: l.consentGiven,
+    beatTitle: l.beatTitle,
+    createdAt: l.createdAt.toISOString(),
+  })));
 });
 
 export default router;

@@ -20,7 +20,7 @@ const THEMES = {
 
 interface Beat {
   id: string; title: string; bpm?: number | null; key?: string | null;
-  genre?: string | null; coverUrl?: string | null; audioPreviewUrl?: string | null;
+  genre?: string | null; tags?: string[] | null; coverUrl?: string | null; audioPreviewUrl?: string | null;
   priceBasic?: number | null; artistSlug?: string | null; artistName?: string | null;
   plays?: number; createdAt?: string;
 }
