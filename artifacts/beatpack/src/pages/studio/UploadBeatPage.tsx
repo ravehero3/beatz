@@ -4,7 +4,7 @@ import { useCreateBeat, getListBeatsQueryKey } from "@workspace/api-client-react
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/authStore";
 import StudioLayout from "./StudioLayout";
-import { Upload, X, Music, Image } from "lucide-react";
+import { Upload, X, Music } from "lucide-react";
 
 const GENRES = ["Hip-Hop", "Trap", "Drill", "R&B", "Pop", "Afrobeats", "Lo-Fi", "House", "Techno", "Other"];
 const MOODS = ["Dark", "Chill", "Hype", "Emotional", "Aggressive", "Romantic", "Uplifting", "Mysterious"];
@@ -103,10 +103,16 @@ export default function UploadBeatPage() {
   const [form, setForm] = useState({ title: "", description: "", bpm: "", key: "", genre: "", mood: "", tags: "", priceBasic: "490", pricePremium: "1490", priceExclusive: "4900" });
   const [coverUrl, setCoverUrl] = useState("");
   const [coverPreview, setCoverPreview] = useState("");
-  const [audioUrl, setAudioUrl] = useState("");
-  const [audioName, setAudioName] = useState("");
+  const [previewAudioUrl, setPreviewAudioUrl] = useState("");
+  const [previewAudioName, setPreviewAudioName] = useState("");
+  const [fullAudioUrl, setFullAudioUrl] = useState("");
+  const [fullAudioName, setFullAudioName] = useState("");
+  const [wavAudioUrl, setWavAudioUrl] = useState("");
+  const [wavAudioName, setWavAudioName] = useState("");
   const [uploadingCover, setUploadingCover] = useState(false);
-  const [uploadingAudio, setUploadingAudio] = useState(false);
+  const [uploadingPreview, setUploadingPreview] = useState(false);
+  const [uploadingFull, setUploadingFull] = useState(false);
+  const [uploadingWav, setUploadingWav] = useState(false);
 
   function set(field: string, value: string) { setForm((f) => ({ ...f, [field]: value })); }
 
@@ -126,11 +132,14 @@ export default function UploadBeatPage() {
     finally { setUploadingCover(false); }
   }
 
-  async function handleAudioFile(file: File) {
-    setAudioName(file.name);
-    setUploadingAudio(true);
-    try { setAudioUrl(await uploadFile(file)); } catch { setAudioName(""); }
-    finally { setUploadingAudio(false); }
+  async function handleAudioFile(file: File, type: "preview" | "full" | "wav") {
+    const setUploading = type === "preview" ? setUploadingPreview : type === "full" ? setUploadingFull : setUploadingWav;
+    const setName = type === "preview" ? setPreviewAudioName : type === "full" ? setFullAudioName : setWavAudioName;
+    const setUrl = type === "preview" ? setPreviewAudioUrl : type === "full" ? setFullAudioUrl : setWavAudioUrl;
+    setName(file.name);
+    setUploading(true);
+    try { setUrl(await uploadFile(file)); } catch { setName(""); }
+    finally { setUploading(false); }
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -145,7 +154,8 @@ export default function UploadBeatPage() {
         mood: form.mood || undefined,
         tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
         coverUrl: coverUrl || undefined,
-        audioPreviewUrl: audioUrl || undefined,
+        audioPreviewUrl: previewAudioUrl || undefined,
+        audioFullUrl: fullAudioUrl || undefined,
         priceBasic: form.priceBasic ? Number(form.priceBasic) : undefined,
         pricePremium: form.pricePremium ? Number(form.pricePremium) : undefined,
         priceExclusive: form.priceExclusive ? Number(form.priceExclusive) : undefined,
@@ -166,37 +176,68 @@ export default function UploadBeatPage() {
           {/* Files */}
           <div style={card}>
             <div style={{ fontFamily: F, fontWeight: 600, fontSize: "15px", color: "#0A0A0A" }}>Files</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+            {/* Cover artwork */}
+            <FileDropZone
+              label="Cover Artwork"
+              accept="image/*"
+              hint="JPG, PNG, WebP"
+              uploading={uploadingCover}
+              onClear={() => { setCoverUrl(""); setCoverPreview(""); }}
+              onFile={handleCoverFile}
+              preview={coverPreview ? (
+                <div style={{ position: "relative", width: "100%" }}>
+                  <img src={coverPreview} alt="cover" style={{ width: "100%", aspectRatio: "1", objectFit: "cover", borderRadius: "8px" }} />
+                  {uploadingCover && (
+                    <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "8px", fontFamily: F, fontSize: "12px" }}>Uploading…</div>
+                  )}
+                </div>
+              ) : null}
+            />
+
+            {/* Audio files */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
               <FileDropZone
-                label="Cover Artwork"
-                accept="image/*"
-                hint="JPG, PNG, WebP"
-                uploading={uploadingCover}
-                onClear={() => { setCoverUrl(""); setCoverPreview(""); }}
-                onFile={handleCoverFile}
-                preview={coverPreview ? (
-                  <div style={{ position: "relative", width: "100%" }}>
-                    <img src={coverPreview} alt="cover" style={{ width: "100%", aspectRatio: "1", objectFit: "cover", borderRadius: "8px" }} />
-                    {uploadingCover && (
-                      <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "8px", fontFamily: F, fontSize: "12px" }}>Uploading…</div>
-                    )}
+                label="Preview Audio"
+                accept=".mp3,.wav,.aiff"
+                hint="Tagged MP3 for public listening"
+                uploading={uploadingPreview}
+                onClear={() => { setPreviewAudioUrl(""); setPreviewAudioName(""); }}
+                onFile={(f) => handleAudioFile(f, "preview")}
+                preview={previewAudioName ? (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
+                    <Music size={16} color="#0A0A0A" />
+                    <div style={{ fontFamily: F, fontSize: "11px", color: "#444", textAlign: "center", wordBreak: "break-all" }}>{previewAudioName}</div>
+                    {previewAudioUrl && <audio controls src={previewAudioUrl} style={{ width: "100%", height: "26px" }} />}
                   </div>
                 ) : null}
               />
               <FileDropZone
-                label="Audio File"
-                accept=".mp3,.wav,.aiff"
-                hint="MP3 or WAV (max 50 MB)"
-                uploading={uploadingAudio}
-                onClear={() => { setAudioUrl(""); setAudioName(""); }}
-                onFile={handleAudioFile}
-                preview={audioName ? (
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-                    <div style={{ width: "40px", height: "40px", background: "#F0F0F0", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Music size={18} color="#0A0A0A" />
-                    </div>
-                    <div style={{ fontFamily: F, fontSize: "12px", color: "#444", textAlign: "center", wordBreak: "break-all" }}>{audioName}</div>
-                    {audioUrl && <audio controls src={audioUrl} style={{ width: "100%", height: "28px" }} />}
+                label="Full MP3"
+                accept=".mp3"
+                hint="Clean MP3 for buyers (Basic+)"
+                uploading={uploadingFull}
+                onClear={() => { setFullAudioUrl(""); setFullAudioName(""); }}
+                onFile={(f) => handleAudioFile(f, "full")}
+                preview={fullAudioName ? (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
+                    <Music size={16} color="#6D28D9" />
+                    <div style={{ fontFamily: F, fontSize: "11px", color: "#444", textAlign: "center", wordBreak: "break-all" }}>{fullAudioName}</div>
+                    {fullAudioUrl && <audio controls src={fullAudioUrl} style={{ width: "100%", height: "26px" }} />}
+                  </div>
+                ) : null}
+              />
+              <FileDropZone
+                label="WAV File"
+                accept=".wav"
+                hint="High quality (Premium/Exclusive)"
+                uploading={uploadingWav}
+                onClear={() => { setWavAudioUrl(""); setWavAudioName(""); }}
+                onFile={(f) => handleAudioFile(f, "wav")}
+                preview={wavAudioName ? (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
+                    <Music size={16} color="#92400E" />
+                    <div style={{ fontFamily: F, fontSize: "11px", color: "#444", textAlign: "center", wordBreak: "break-all" }}>{wavAudioName}</div>
+                    {wavAudioUrl && <audio controls src={wavAudioUrl} style={{ width: "100%", height: "26px" }} />}
                   </div>
                 ) : null}
               />
@@ -255,13 +296,13 @@ export default function UploadBeatPage() {
           </div>
 
           <div style={{ display: "flex", gap: "10px" }}>
-            <button type="submit" disabled={createBeat.isPending || uploadingCover || uploadingAudio} data-testid="btn-submit-upload" style={{
+            <button type="submit" disabled={createBeat.isPending || uploadingCover || uploadingPreview || uploadingFull || uploadingWav} data-testid="btn-submit-upload" style={{
               height: "44px", padding: "0 28px", borderRadius: "9999px", background: "#0A0A0A", color: "#FFFFFF", border: "none",
               fontFamily: F, fontSize: "14px", fontWeight: 500,
-              cursor: (createBeat.isPending || uploadingCover || uploadingAudio) ? "not-allowed" : "pointer",
-              opacity: (createBeat.isPending || uploadingCover || uploadingAudio) ? 0.6 : 1,
+              cursor: (createBeat.isPending || uploadingCover || uploadingPreview || uploadingFull || uploadingWav) ? "not-allowed" : "pointer",
+              opacity: (createBeat.isPending || uploadingCover || uploadingPreview || uploadingFull || uploadingWav) ? 0.6 : 1,
             }}>
-              {createBeat.isPending ? "Uploading…" : uploadingCover || uploadingAudio ? "Processing files…" : "Upload Beat"}
+              {createBeat.isPending ? "Uploading…" : (uploadingCover || uploadingPreview || uploadingFull || uploadingWav) ? "Processing files…" : "Upload Beat"}
             </button>
             <button type="button" onClick={() => setLocation("/studio/beats")} style={{
               height: "44px", padding: "0 20px", borderRadius: "9999px", background: "#FFFFFF", color: "#0A0A0A",

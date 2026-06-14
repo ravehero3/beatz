@@ -21,7 +21,8 @@ export default function AccountPage() {
         {/* Quick links */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px", marginBottom: "32px" }}>
           {[
-            { href: "/account/purchases", icon: <ShoppingBag size={20} />, label: "My Purchases", desc: "Download purchased beats" },
+            { href: "/account/orders", icon: <ShoppingBag size={20} />, label: "My Orders", desc: "Track purchases & payments" },
+            { href: "/account/purchases", icon: <ShoppingBag size={20} />, label: "Downloads", desc: "Download purchased beats" },
             { href: "/account/licenses", icon: <FileText size={20} />, label: "Licenses", desc: "View license agreements" },
             { href: "/account/saved", icon: <Heart size={20} />, label: "Saved Beats", desc: "Your wishlist" },
             { href: "/account/settings", icon: <Settings size={20} />, label: "Settings", desc: "Account preferences" },

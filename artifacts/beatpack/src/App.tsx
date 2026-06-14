@@ -20,9 +20,13 @@ import CheckoutPage from "@/pages/CheckoutPage";
 import AccountPage from "@/pages/account/AccountPage";
 import PurchasesPage from "@/pages/account/PurchasesPage";
 import SavedPage from "@/pages/account/SavedPage";
+import OrdersPage from "@/pages/account/OrdersPage";
+import AccountSettingsPage from "@/pages/account/AccountSettingsPage";
+import LicensesPage from "@/pages/account/LicensesPage";
 import StudioDashboard from "@/pages/studio/StudioDashboard";
 import MyBeatsPage from "@/pages/studio/MyBeatsPage";
 import UploadBeatPage from "@/pages/studio/UploadBeatPage";
+import EditBeatPage from "@/pages/studio/EditBeatPage";
 import EarningsPage from "@/pages/studio/EarningsPage";
 import StudioOrdersPage from "@/pages/studio/StudioOrdersPage";
 import StoreSettingsPage from "@/pages/studio/StoreSettingsPage";
@@ -83,13 +87,17 @@ function AppRouter() {
       {/* Protected: buyers */}
       <Route path="/checkout" component={() => <ProtectedRoute component={CheckoutPage} />} />
       <Route path="/account" component={() => <ProtectedRoute component={AccountPage} />} />
+      <Route path="/account/orders" component={() => <ProtectedRoute component={OrdersPage} />} />
       <Route path="/account/purchases" component={() => <ProtectedRoute component={PurchasesPage} />} />
+      <Route path="/account/licenses" component={() => <ProtectedRoute component={LicensesPage} />} />
+      <Route path="/account/settings" component={() => <ProtectedRoute component={AccountSettingsPage} />} />
       <Route path="/account/saved" component={() => <ProtectedRoute component={SavedPage} />} />
 
       {/* Protected: studio (artist | admin) */}
       <Route path="/studio" component={() => <ProtectedRoute component={StudioDashboard} roles={["artist", "admin"]} />} />
       <Route path="/studio/beats" component={() => <ProtectedRoute component={MyBeatsPage} roles={["artist", "admin"]} />} />
       <Route path="/studio/beats/upload" component={() => <ProtectedRoute component={UploadBeatPage} roles={["artist", "admin"]} />} />
+      <Route path="/studio/beats/:id/edit" component={() => <ProtectedRoute component={EditBeatPage} roles={["artist", "admin"]} />} />
       <Route path="/studio/earnings" component={() => <ProtectedRoute component={EarningsPage} roles={["artist", "admin"]} />} />
       <Route path="/studio/orders" component={() => <ProtectedRoute component={StudioOrdersPage} roles={["artist", "admin"]} />} />
       <Route path="/studio/store" component={() => <ProtectedRoute component={StoreSettingsPage} roles={["artist", "admin"]} />} />
