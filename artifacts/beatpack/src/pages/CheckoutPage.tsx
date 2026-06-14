@@ -4,7 +4,8 @@ import { useGetBeat, getGetBeatQueryKey, useCreateOrder, useGetOrder, getGetOrde
 import { useAuthStore } from "@/store/authStore";
 import { formatCurrency } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, Clock, AlertCircle, Copy } from "lucide-react";
+import { CheckCircle2, Clock, AlertCircle, Copy, Download } from "lucide-react";
+import QRCode from "@/components/QRCode";
 
 function useQuery() {
   const [location] = useLocation();
@@ -132,12 +133,22 @@ export default function CheckoutPage() {
               )}
             </div>
 
-            {/* QR Code placeholder */}
-            <div style={{ width: "256px", height: "256px", background: "#F2F2F2", borderRadius: "16px", margin: "0 auto 24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ textAlign: "center", color: "#AAAAAA" }}>
-                <div style={{ fontSize: "48px", marginBottom: "8px" }}>QR</div>
-                <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "12px" }}>QR code here</div>
-              </div>
+            {/* Real QR Code */}
+            <div style={{ margin: "0 auto 24px" }}>
+              {order?.qrCodeData ? (
+                <QRCode
+                  data={order.qrCodeData}
+                  size={220}
+                  label="Scan with your banking app (Czech banks)"
+                />
+              ) : (
+                <div style={{ width: "220px", height: "220px", background: "#F2F2F2", borderRadius: "16px", margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                  <span style={{ fontSize: "36px" }}>QR</span>
+                  <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: "12px", color: "#AAAAAA", textAlign: "center", padding: "0 16px" }}>
+                    Artist has not set up a bank account yet
+                  </span>
+                </div>
+              )}
             </div>
 
             <div style={{ fontFamily: "'Figtree', sans-serif", fontWeight: 800, fontSize: "28px", color: "#0A0A0A", marginBottom: "8px" }}>
@@ -154,18 +165,32 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: "13px", color: "#888888", lineHeight: 1.6, maxWidth: "360px", margin: "0 auto 24px" }}>
-              Open your banking app and scan this QR code to complete the payment. The page updates automatically every 15 seconds.
-            </p>
+            {order?.paymentStatus !== "paid" && (
+              <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: "13px", color: "#888888", lineHeight: 1.6, maxWidth: "360px", margin: "0 auto 24px" }}>
+                Scan the QR code with your Czech banking app or transfer manually using the variable symbol above. This page refreshes automatically every 15 seconds.
+              </p>
+            )}
 
             {order?.paymentStatus === "paid" && (
-              <button
-                onClick={() => setLocation("/account/purchases")}
-                data-testid="btn-view-purchases"
-                style={{ height: "44px", padding: "0 24px", borderRadius: "9999px", background: "#0A0A0A", color: "#FFFFFF", border: "none", fontFamily: "'Figtree', sans-serif", fontWeight: 500, fontSize: "14px", cursor: "pointer" }}
-              >
-                View my purchases
-              </button>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
+                <button
+                  onClick={() => setLocation("/account/orders")}
+                  data-testid="btn-view-purchases"
+                  style={{ height: "44px", padding: "0 24px", borderRadius: "9999px", background: "#0A0A0A", color: "#FFFFFF", border: "none", fontFamily: "'Figtree', sans-serif", fontWeight: 500, fontSize: "14px", cursor: "pointer" }}
+                >
+                  View my orders
+                </button>
+                {(order as any).licensePdfUrl && (
+                  <a
+                    href={(order as any).licensePdfUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ display: "inline-flex", alignItems: "center", gap: "6px", height: "36px", padding: "0 16px", borderRadius: "9999px", background: "#F2F2F2", color: "#444", textDecoration: "none", fontFamily: "'Figtree', sans-serif", fontSize: "13px", fontWeight: 500 }}
+                  >
+                    <Download size={13} /> Download License PDF
+                  </a>
+                )}
+              </div>
             )}
           </div>
         )}

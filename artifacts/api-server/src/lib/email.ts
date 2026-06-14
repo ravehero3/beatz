@@ -70,8 +70,9 @@ export function buildOrderConfirmationHtml(params: {
   amountCzk: number;
   variableSymbol: string | null;
   orderId: string;
+  licensePdfUrl?: string;
 }): string {
-  const { buyerName, beatTitle, licenseType, amountCzk, variableSymbol, orderId } = params;
+  const { buyerName, beatTitle, licenseType, amountCzk, variableSymbol, orderId, licensePdfUrl } = params;
   const purchasesUrl = `${APP_URL}/account/purchases`;
   const licenseLabel = licenseType.charAt(0).toUpperCase() + licenseType.slice(1);
 
@@ -102,9 +103,12 @@ export function buildOrderConfirmationHtml(params: {
       </div>` : ""}
     </div>
 
-    <a href="${purchasesUrl}" style="display:inline-block;background:#0A0A0A;color:#fff;text-decoration:none;padding:12px 28px;border-radius:9999px;font-size:14px;font-weight:600">
-      Download your beat →
-    </a>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a href="${purchasesUrl}" style="display:inline-block;background:#0A0A0A;color:#fff;text-decoration:none;padding:12px 28px;border-radius:9999px;font-size:14px;font-weight:600">
+        Download your beat →
+      </a>
+      ${licensePdfUrl ? `<a href="${APP_URL}${licensePdfUrl}" style="display:inline-block;background:#F2F2F2;color:#0A0A0A;text-decoration:none;padding:12px 20px;border-radius:9999px;font-size:14px;font-weight:600">License PDF</a>` : ""}
+    </div>
     <p style="font-size:12px;color:#999;margin:24px 0 0">
       You can always find your purchases in your account at
       <a href="${purchasesUrl}" style="color:#666">${purchasesUrl}</a>.
@@ -183,6 +187,7 @@ export async function sendOrderConfirmationEmail(params: {
   amountCzk: number;
   variableSymbol: string | null;
   orderId: string;
+  licensePdfUrl?: string;
 }): Promise<void> {
   if (!isConfigured()) {
     console.warn(`[email] SMTP not configured — order confirmation for ${params.email}, order ${params.orderId}`);
@@ -195,7 +200,7 @@ export async function sendOrderConfirmationEmail(params: {
     to: params.email,
     subject: `Payment confirmed — ${params.beatTitle}`,
     html: buildOrderConfirmationHtml(params),
-    text: `Payment confirmed!\n\nYour payment for "${params.beatTitle}" (${params.licenseType} license) of ${params.amountCzk} Kč has been confirmed.\n\nDownload your beat at: ${APP_URL}/account/purchases`,
+    text: `Payment confirmed!\n\nYour payment for "${params.beatTitle}" (${params.licenseType} license) of ${params.amountCzk} Kč has been confirmed.\n\nDownload your beat at: ${APP_URL}/account/purchases${params.licensePdfUrl ? `\nLicense PDF: ${APP_URL}${params.licensePdfUrl}` : ""}`,
   });
 }
 

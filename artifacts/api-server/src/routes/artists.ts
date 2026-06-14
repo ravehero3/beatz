@@ -78,6 +78,8 @@ router.get("/artists/me", requireAuth, async (req, res) => {
     socialInstagram: artist.socialInstagram,
     socialSoundcloud: artist.socialSoundcloud,
     socialYoutube: artist.socialYoutube,
+    bankIban: artist.bankIban ?? null,
+    bankAccountName: artist.bankAccountName ?? null,
     subscriptionTier: artist.subscriptionTier,
     subscriptionStatus: artist.subscriptionStatus,
     balanceCzk: Number(artist.balanceCzk),

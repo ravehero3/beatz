@@ -3,9 +3,16 @@ import { db } from "../lib/db";
 import { ordersTable, beatsTable, artistsTable, profilesTable } from "@workspace/db";
 import { requireAuth, requireRole } from "../lib/auth";
 import { CreateOrderBody } from "@workspace/api-zod";
-import { eq, or, and } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import { sendOrderConfirmationEmail, sendBeatDeliveryEmail } from "../lib/email";
+import { generateLicensePdf } from "../lib/pdf";
+import path from "node:path";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router: IRouter = Router();
 
@@ -15,6 +22,7 @@ function formatOrder(order: typeof ordersTable.$inferSelect & {
   audioPreviewUrl?: string | null;
   audioFullUrl?: string | null;
   audioWavUrl?: string | null;
+  beatId?: string;
 }) {
   return {
     id: order.id,
@@ -38,6 +46,26 @@ function formatOrder(order: typeof ordersTable.$inferSelect & {
       audioWavUrl: order.audioWavUrl ?? null,
     },
   };
+}
+
+/** Build a Czech QR Platba (SPD) string for bank transfer */
+function buildCzechQrString(params: {
+  iban: string;
+  amountCzk: number;
+  variableSymbol: string;
+  message: string;
+}): string {
+  const amount = (params.amountCzk / 100).toFixed(2); // øre → Kč
+  const msg = params.message.replace(/[*]/g, "").substring(0, 60);
+  const parts = [
+    "SPD*1.0",
+    `ACC:${params.iban.replace(/\s/g, "")}`,
+    `AM:${amount}`,
+    "CC:CZK",
+    `MSG:${msg}`,
+    `X-VS:${params.variableSymbol}`,
+  ];
+  return parts.join("*");
 }
 
 router.post("/orders", requireAuth, async (req, res) => {
@@ -75,6 +103,18 @@ router.post("/orders", requireAuth, async (req, res) => {
 
   const variableSymbol = Date.now().toString().slice(-8);
 
+  // Look up artist IBAN and generate QR string
+  const artist = await db.query.artistsTable.findFirst({ where: eq(artistsTable.id, beat.artistId) });
+  let qrCodeData: string | null = null;
+  if (artist?.bankIban) {
+    qrCodeData = buildCzechQrString({
+      iban: artist.bankIban,
+      amountCzk: Number(price),
+      variableSymbol,
+      message: `Beatpack ${beat.title ?? "beat"}`,
+    });
+  }
+
   const [order] = await db.insert(ordersTable).values({
     buyerId: req.user!.userId,
     artistId: beat.artistId,
@@ -84,6 +124,7 @@ router.post("/orders", requireAuth, async (req, res) => {
     paymentMethod: paymentMethod ?? "qr_bank",
     paymentStatus: "pending",
     variableSymbol,
+    qrCodeData,
   }).returning();
 
   req.log.info({ orderId: order.id }, "Order created");
@@ -173,9 +214,42 @@ router.patch("/orders/:id/confirm", requireAuth, async (req, res) => {
     return;
   }
 
+  // Generate license PDF
+  let licensePdfUrl: string | null = order.licensePdfUrl;
+  try {
+    const [buyerProfile, beatRow, artistRow] = await Promise.all([
+      db.query.profilesTable.findFirst({ where: eq(profilesTable.id, order.buyerId) }),
+      db.query.beatsTable.findFirst({ where: eq(beatsTable.id, order.beatId) }),
+      db.query.artistsTable.findFirst({ where: eq(artistsTable.id, order.artistId) }),
+    ]);
+
+    if (buyerProfile && beatRow) {
+      const pdfBuffer = await generateLicensePdf({
+        orderId: order.id,
+        variableSymbol: order.variableSymbol,
+        beatTitle: beatRow.title ?? "Beat",
+        artistName: artistRow?.displayName ?? "Artist",
+        buyerName: (`${buyerProfile.firstName ?? ""} ${buyerProfile.lastName ?? ""}`.trim()) || (buyerProfile.email ?? "Buyer"),
+        buyerEmail: buyerProfile.email ?? "",
+        licenseType: order.licenseType,
+        amountCzk: Number(order.amountCzk),
+        purchaseDate: new Date().toISOString(),
+      });
+
+      const uploadsDir = path.resolve(__dirname, "../../../../uploads");
+      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+      const pdfFilename = `license-${order.id}.pdf`;
+      fs.writeFileSync(path.join(uploadsDir, pdfFilename), pdfBuffer);
+      licensePdfUrl = `/uploads/${pdfFilename}`;
+    }
+  } catch (pdfErr) {
+    req.log.warn({ err: pdfErr }, "Failed to generate license PDF");
+  }
+
   const [updated] = await db.update(ordersTable).set({
     paymentStatus: "paid",
     confirmedAt: new Date(),
+    ...(licensePdfUrl ? { licensePdfUrl } : {}),
   }).where(eq(ordersTable.id, req.params["id"] as string)).returning();
 
   await db.update(artistsTable)
@@ -209,6 +283,7 @@ router.patch("/orders/:id/confirm", requireAuth, async (req, res) => {
           amountCzk: Number(order.amountCzk),
           variableSymbol: order.variableSymbol,
           orderId: order.id,
+          licensePdfUrl: licensePdfUrl ?? undefined,
         }),
         sendBeatDeliveryEmail({
           email: buyerRow.email,

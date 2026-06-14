@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useListMyOrders } from "@workspace/api-client-react";
 import { useLocation, Link } from "wouter";
-import { Download, Clock, CheckCircle2, AlertCircle, Copy, Music, RotateCcw } from "lucide-react";
+import { Download, Clock, CheckCircle2, AlertCircle, Copy, Music, RotateCcw, FileText } from "lucide-react";
+import QRCode from "@/components/QRCode";
 import { formatCurrency } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -68,10 +69,15 @@ function PendingOrderCard({ order }: { order: any }) {
         <StatusBadge status={order.paymentStatus} />
       </div>
 
-      <div style={{ background: "rgba(255,255,255,0.7)", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
-        <p style={{ fontFamily: F, fontSize: "13px", color: "#666", margin: 0, lineHeight: 1.5 }}>
-          Open your banking app and scan the QR code or use the variable symbol below to complete the bank transfer.
-        </p>
+      <div style={{ background: "rgba(255,255,255,0.7)", borderRadius: "12px", padding: "16px", display: "flex", flexDirection: "column", gap: "14px" }}>
+          {order.qrCodeData && (
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <QRCode data={order.qrCodeData} size={180} label="Scan with your Czech banking app" />
+            </div>
+          )}
+          <p style={{ fontFamily: F, fontSize: "13px", color: "#666", margin: 0, lineHeight: 1.5 }}>
+            Open your banking app, scan the QR code, or use the variable symbol below to complete the transfer.
+          </p>
         {order.variableSymbol && (
           <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
             <span style={{ fontFamily: F, fontSize: "13px", color: "#888" }}>Variable symbol:</span>
@@ -136,6 +142,11 @@ function PaidOrderCard({ order }: { order: any }) {
           <Link href="/account/purchases">
             <span style={{ fontFamily: F, fontSize: "12px", color: "#888", cursor: "pointer", textDecoration: "underline" }}>View downloads</span>
           </Link>
+        )}
+        {order.licensePdfUrl && (
+          <a href={order.licensePdfUrl} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "6px", height: "34px", padding: "0 14px", borderRadius: "9999px", background: "#F2F2F2", color: "#444444", textDecoration: "none", fontFamily: F, fontSize: "12px", fontWeight: 500 }}>
+            <FileText size={12} /> License PDF
+          </a>
         )}
       </div>
     </div>

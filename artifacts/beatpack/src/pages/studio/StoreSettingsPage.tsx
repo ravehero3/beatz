@@ -76,10 +76,23 @@ const PLAYERS = [
 
 const F = "'Figtree', sans-serif";
 
+function SInput({ value, onChange, placeholder, type = "text", mono }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: string; mono?: boolean }) {
+  return (
+    <input type={type} value={value} placeholder={placeholder}
+      onChange={(e) => onChange(e.target.value)}
+      style={{ width: "100%", height: "40px", padding: "0 12px", borderRadius: "10px", border: "1px solid #E5E5E5", fontFamily: mono ? "'Courier New', monospace" : F, fontSize: "14px", outline: "none", boxSizing: "border-box", background: "#FFFFFF" }}
+      onFocus={(e) => (e.target.style.borderColor = "#0A0A0A")}
+      onBlur={(e) => (e.target.style.borderColor = "#E5E5E5")}
+    />
+  );
+}
+
 export default function StoreSettingsPage() {
   const { token } = useAuthStore();
   const [layout, setLayout] = useState("light");
   const [player, setPlayer] = useState("classic");
+  const [bankIban, setBankIban] = useState("");
+  const [bankAccountName, setBankAccountName] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -90,6 +103,8 @@ export default function StoreSettingsPage() {
       .then((data) => {
         if (data.storeTemplate) setLayout(data.storeTemplate);
         if (data.playerStyle) setPlayer(data.playerStyle);
+        if (data.bankIban) setBankIban(data.bankIban);
+        if (data.bankAccountName) setBankAccountName(data.bankAccountName);
       })
       .finally(() => setLoading(false));
   }, [token]);
@@ -99,7 +114,7 @@ export default function StoreSettingsPage() {
     await fetch("/api/artists/me", {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ storeTemplate: layout, playerStyle: player }),
+      body: JSON.stringify({ storeTemplate: layout, playerStyle: player, bankIban: bankIban.trim() || null, bankAccountName: bankAccountName.trim() || null }),
     });
     setSaving(false);
     setSaved(true);
@@ -162,6 +177,25 @@ export default function StoreSettingsPage() {
                 </div>
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Bank account */}
+        <div style={{ background: "#FFFFFF", border: "1px solid #E5E5E5", borderRadius: "16px", padding: "24px", marginBottom: "24px" }}>
+          {sectionTitle("Bank Account for Payments")}
+          <p style={{ fontFamily: F, fontSize: "13px", color: "#888888", marginBottom: "16px", lineHeight: 1.6 }}>
+            Buyers pay you directly via Czech QR bank transfer. Add your IBAN so a scannable QR code is automatically generated on every order.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            <div>
+              <label style={{ display: "block", fontFamily: F, fontSize: "12px", fontWeight: 500, color: "#444", marginBottom: "5px" }}>IBAN</label>
+              <SInput value={bankIban} onChange={setBankIban} placeholder="CZ65 0800 0000 1920 0014 5399" mono />
+              <span style={{ fontFamily: F, fontSize: "11px", color: "#AAAAAA", marginTop: "4px", display: "block" }}>Czech IBAN — found in your banking app under "Account details"</span>
+            </div>
+            <div>
+              <label style={{ display: "block", fontFamily: F, fontSize: "12px", fontWeight: 500, color: "#444", marginBottom: "5px" }}>Account holder name</label>
+              <SInput value={bankAccountName} onChange={setBankAccountName} placeholder="Jan Novák" />
+            </div>
           </div>
         </div>
 
