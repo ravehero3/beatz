@@ -12,7 +12,7 @@ function seedRng(seed: string) {
   };
 }
 
-export function generateWaveform(beatId: string, bars = 80): number[] {
+export function generateWaveform(beatId: string, bars = 480): number[] {
   const rng = seedRng(beatId || "default");
   return Array.from({ length: bars }, (_, i) => {
     const pos = i / bars;
@@ -31,7 +31,14 @@ interface WaveformProps {
   height?: number;
 }
 
-export function Waveform({ beatId, progress, onSeek, playedColor = "#0A0A0A", unplayedColor = "#E0E0E0", height = 48 }: WaveformProps) {
+export function Waveform({
+  beatId,
+  progress,
+  onSeek,
+  playedColor = "#0A0A0A",
+  unplayedColor = "#E0E0E0",
+  height = 48,
+}: WaveformProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bars = useMemo(() => generateWaveform(beatId), [beatId]);
 
@@ -47,14 +54,15 @@ export function Waveform({ beatId, progress, onSeek, playedColor = "#0A0A0A", un
     canvas.height = h * dpr;
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, w, h);
-    const gap = 2;
-    const barW = Math.max(1, (w - gap * (bars.length - 1)) / bars.length);
+
+    const barW = w / bars.length;
     bars.forEach((v, i) => {
-      const barH = Math.max(2, v * h);
-      const x = i * (barW + gap);
+      const barH = Math.max(1, v * h * 0.9);
+      const x = i * barW;
       const y = (h - barH) / 2;
+      const lineW = Math.max(0.5, barW - 0.6);
       ctx.fillStyle = i / bars.length <= progress ? playedColor : unplayedColor;
-      ctx.fillRect(x, y, barW, barH);
+      ctx.fillRect(x, y, lineW, barH);
     });
   }, [bars, progress, playedColor, unplayedColor, height]);
 
@@ -67,7 +75,12 @@ export function Waveform({ beatId, progress, onSeek, playedColor = "#0A0A0A", un
     <canvas
       ref={canvasRef}
       onClick={handleClick}
-      style={{ width: "100%", height: `${height}px`, cursor: onSeek ? "pointer" : "default", display: "block" }}
+      style={{
+        width: "100%",
+        height: `${height}px`,
+        cursor: onSeek ? "pointer" : "default",
+        display: "block",
+      }}
     />
   );
 }
@@ -88,7 +101,11 @@ export function useAudioPlayer(audioUrl: string | null | undefined) {
       setCurrentTime(audio.currentTime);
       setProgress(audio.duration ? audio.currentTime / audio.duration : 0);
     };
-    const onEnded = () => { setPlaying(false); setProgress(0); setCurrentTime(0); };
+    const onEnded = () => {
+      setPlaying(false);
+      setProgress(0);
+      setCurrentTime(0);
+    };
     audio.addEventListener("loadedmetadata", onMeta);
     audio.addEventListener("timeupdate", onTime);
     audio.addEventListener("ended", onEnded);
@@ -105,8 +122,12 @@ export function useAudioPlayer(audioUrl: string | null | undefined) {
   const toggle = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (playing) { audio.pause(); setPlaying(false); }
-    else { audio.play().then(() => setPlaying(true)).catch(() => {}); }
+    if (playing) {
+      audio.pause();
+      setPlaying(false);
+    } else {
+      audio.play().then(() => setPlaying(true)).catch(() => {});
+    }
   }, [playing]);
 
   const seek = useCallback((ratio: number) => {

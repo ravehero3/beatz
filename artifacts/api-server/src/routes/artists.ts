@@ -141,12 +141,15 @@ router.get("/artists/me/leads", requireRole("artist", "admin"), async (req, res)
   })));
 });
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 router.get("/artists/:slug", async (req, res) => {
+  const param = req.params["slug"] as string;
+  const isUuid = UUID_RE.test(param);
   const artist = await db.query.artistsTable.findFirst({
-    where: or(
-      eq(artistsTable.slug, req.params["slug"] as string),
-      eq(artistsTable.id, req.params["slug"] as string)
-    ),
+    where: isUuid
+      ? or(eq(artistsTable.slug, param), eq(artistsTable.id, param))
+      : eq(artistsTable.slug, param),
   });
 
   if (!artist) {

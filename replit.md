@@ -52,9 +52,9 @@ A full-stack Czech beat marketplace SaaS for independent music producers. Produc
 
 ## Seed credentials (dev)
 
-- `marek@beatpack.cz` / `Demo1234!` — artist
-- `lucie@beatpack.cz` / `Demo1234!` — artist
-- `jan@beatpack.cz` / `Demo1234!` — artist
+- `marek@beatpack.cz` / `Demo1234!` — artist (slug: `marek-novak`)
+- `lucie@beatpack.cz` / `Demo1234!` — artist (slug: `lucie-kovar`)
+- `jan@beatpack.cz` / `Demo1234!` — artist (slug: `jan-prochazka`)
 - `admin@beatpack.cz` / `Demo1234!` — admin
 
 ## User preferences
