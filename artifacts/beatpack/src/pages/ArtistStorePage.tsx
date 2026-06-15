@@ -5,12 +5,9 @@ import { useGetArtistBySlug, getGetArtistBySlugQueryKey } from "@workspace/api-c
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
 import { useAuthStore } from "@/store/authStore";
-import PlayerClassic from "@/components/players/PlayerClassic";
-import PlayerMinimal from "@/components/players/PlayerMinimal";
-import PlayerDeck from "@/components/players/PlayerDeck";
+import PlayerPlaylist from "@/components/players/PlayerPlaylist";
 
 type ThemeKey = "light" | "grey" | "dark";
-type PlayerKey = "classic" | "minimal" | "deck";
 
 const THEMES = {
   light: { bg: "#FFFFFF", cardBg: "#F9F9F9", text: "#0A0A0A", muted: "#888888", border: "#E5E5E5", accent: "#0A0A0A", waveformPlayed: "#0A0A0A", waveformUnplayed: "#E5E5E5" },
@@ -94,7 +91,6 @@ export default function ArtistStorePage() {
 
   const rawBeats = (artist as any).beats ?? [];
   const themeKey: ThemeKey = ((artist as any).storeTemplate as ThemeKey) ?? "light";
-  const playerKey: PlayerKey = ((artist as any).playerStyle as PlayerKey) ?? "classic";
   const theme = THEMES[themeKey] ?? THEMES.light;
   const isDark = themeKey === "dark";
 
@@ -112,7 +108,6 @@ export default function ArtistStorePage() {
 
   const tabBorderColor = isDark ? "#1F1F1F" : "#E5E5E5";
   const tabActiveColor = theme.text;
-
   const socialBorder = isDark ? "#333333" : "#E5E5E5";
   const socialIconColor = theme.text;
 
@@ -124,7 +119,6 @@ export default function ArtistStorePage() {
         background: artist.bannerUrl ? `url(${artist.bannerUrl}) center/cover` : (isDark ? "#111111" : "#F0F0F0"),
         position: "relative",
       }}>
-        {/* Bottom gradient bridge into page bg */}
         <div style={{
           position: "absolute", bottom: 0, left: 0, right: 0, height: "120px",
           background: `linear-gradient(to bottom, transparent 0%, ${theme.bg} 100%)`,
@@ -205,7 +199,7 @@ export default function ArtistStorePage() {
         )}
 
         {/* Tab bar */}
-        <div style={{ borderBottom: `1px solid ${tabBorderColor}`, marginBottom: "32px", display: "flex", gap: "24px" }}>
+        <div style={{ borderBottom: `1px solid ${tabBorderColor}`, marginBottom: "8px", display: "flex", gap: "24px" }}>
           {(["all", "popular", "new"] as const).map((tab) => (
             <button key={tab} onClick={() => setActiveTab(tab)} data-testid={`tab-${tab}`} style={{
               background: "none", border: "none",
@@ -228,18 +222,8 @@ export default function ArtistStorePage() {
             <div style={{ fontSize: "40px", marginBottom: "12px" }}>♪</div>
             <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "15px" }}>No beats yet</div>
           </div>
-        ) : playerKey === "classic" ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "20px", paddingBottom: "64px" }}>
-            {beats.map((beat) => <PlayerClassic key={beat.id} beat={beat} theme={theme} onBuy={onBuy} />)}
-          </div>
-        ) : playerKey === "minimal" ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px", paddingBottom: "64px" }}>
-            {beats.map((beat) => <PlayerMinimal key={beat.id} beat={beat} theme={theme} onBuy={onBuy} />)}
-          </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", paddingBottom: "64px" }}>
-            {beats.map((beat) => <PlayerDeck key={beat.id} beat={beat} theme={theme} onBuy={onBuy} />)}
-          </div>
+          <PlayerPlaylist beats={beats} theme={theme} onBuy={onBuy} />
         )}
       </div>
     </div>

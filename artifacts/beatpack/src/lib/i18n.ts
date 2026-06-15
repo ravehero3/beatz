@@ -124,6 +124,17 @@ const translations = {
     "seller.submit": "Start selling",
     "seller.submitting": "Setting up your store…",
     "seller.error": "Something went wrong. Please try again.",
+
+    // Studio nav
+    "studio.nav.dashboard": "Dashboard",
+    "studio.nav.beats": "My Beats",
+    "studio.nav.orders": "Orders",
+    "studio.nav.earnings": "Earnings",
+    "studio.nav.store": "Store Design",
+    "studio.nav.leads": "Leads",
+    "studio.nav.profile": "Profile",
+    "studio.nav.settings": "Settings",
+    "studio.nav.back": "Back to site",
   },
   cs: {
     // Header nav
@@ -139,8 +150,8 @@ const translations = {
     "nav.logout": "Odhlásit se",
 
     // Home
-    "home.hero.title": "Tvoje beaty. Tvůj obchod.",
-    "home.hero.sub": "Česká tržiště beatů pro nezávislé producenty. Prodávej beaty přímo kupujícím — nech si vše, co vyděláš.",
+    "home.hero.title": "Vaše beaty. Váš obchod.",
+    "home.hero.sub": "České tržiště beatů pro nezávislé producenty. Prodávejte beaty přímo kupujícím — nechte si vše, co vyděláte.",
     "home.hero.browse": "Procházet beaty",
     "home.hero.sell": "Začít prodávat zdarma",
     "home.featured.beats": "Vybrané beaty",
@@ -149,14 +160,14 @@ const translations = {
     "home.featured.viewAllArtists": "Zobrazit vše",
     "home.artist.beats": "beatů",
     "home.how.title": "Jak to funguje",
-    "home.how.upload.title": "Nahraj beaty",
-    "home.how.upload.desc": "Nahraj MP3/WAV soubory a nastav vlastní ceny pro každou licenční úroveň.",
-    "home.how.price.title": "Nastav ceny",
-    "home.how.price.desc": "Vyber základní, prémiové nebo exkluzivní licence. Ty kontroluješ každou cenu.",
-    "home.how.pay.title": "Dostávej platby přímo",
-    "home.how.pay.desc": "Kupující platí přímo na tvůj bankovní účet přes QR platbu. Peníze jdou přímo k tobě.",
-    "home.cta.title": "Otevři svůj beat store ještě dnes",
-    "home.cta.sub": "Navždy zdarma. Upgraduj, až budeš připraven.",
+    "home.how.upload.title": "Nahrajte beaty",
+    "home.how.upload.desc": "Nahrajte MP3/WAV soubory a nastavte vlastní ceny pro každou licenční úroveň.",
+    "home.how.price.title": "Nastavte ceny",
+    "home.how.price.desc": "Vyberte základní, prémiové nebo exkluzivní licence. Vy kontrolujete každou cenu.",
+    "home.how.pay.title": "Dostávejte platby přímo",
+    "home.how.pay.desc": "Kupující platí přímo na váš bankovní účet přes QR platbu. Peníze jdou přímo k vám.",
+    "home.cta.title": "Otevřete svůj beat store ještě dnes",
+    "home.cta.sub": "Navždy zdarma. Upgradujte, až budete připraveni.",
     "home.cta.button": "Zobrazit ceník",
     "home.footer": "© 2024 Beatpack. Všechna práva vyhrazena.",
 
@@ -248,6 +259,17 @@ const translations = {
     "seller.submit": "Začít prodávat",
     "seller.submitting": "Nastavuji váš obchod…",
     "seller.error": "Něco se pokazilo. Zkuste to prosím znovu.",
+
+    // Studio nav
+    "studio.nav.dashboard": "Přehled",
+    "studio.nav.beats": "Moje beaty",
+    "studio.nav.orders": "Objednávky",
+    "studio.nav.earnings": "Příjmy",
+    "studio.nav.store": "Vzhled obchodu",
+    "studio.nav.leads": "Leady",
+    "studio.nav.profile": "Profil",
+    "studio.nav.settings": "Nastavení",
+    "studio.nav.back": "Zpět na web",
   },
 } as const;
 

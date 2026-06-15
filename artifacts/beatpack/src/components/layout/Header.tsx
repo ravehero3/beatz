@@ -18,6 +18,8 @@ export default function Header() {
   const { lang, toggle } = useLanguageStore();
   const t = useT();
 
+  const isStudio = location.startsWith("/studio");
+
   function handleLogout() {
     logoutMutation.mutate(undefined, {
       onSettled: () => {
@@ -51,37 +53,61 @@ export default function Header() {
         }}
         className="px-4 md:px-6 gap-3 md:gap-6"
       >
-        {/* Logo */}
-        <Link href="/">
-          <img
-            src={beatpackLogo}
-            alt="beatpack"
-            data-testid="logo"
-            style={{ display: "block" }}
-            className="h-[15px] md:h-[20px]"
-          />
+        {/* Logo + optional "studio" badge */}
+        <Link href={isStudio ? "/studio" : "/"}>
+          <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+            <img
+              src={beatpackLogo}
+              alt="beatpack"
+              data-testid="logo"
+              style={{ display: "block" }}
+              className="h-[15px] md:h-[20px]"
+            />
+            {isStudio && (
+              <span style={{
+                position: "absolute",
+                top: "calc(100% + 2px)",
+                left: "18px",
+                fontFamily: "'Figtree', sans-serif",
+                fontSize: "8px",
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "#888888",
+                whiteSpace: "nowrap",
+                lineHeight: 1,
+                pointerEvents: "none",
+              }}>
+                Studio
+              </span>
+            )}
+          </div>
         </Link>
 
-        {/* Nav */}
-        <nav className="hidden md:flex items-center gap-6 flex-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              style={{
-                fontFamily: "'Figtree', sans-serif",
-                fontWeight: 500,
-                fontSize: "14px",
-                color: location.startsWith(link.href) ? "#0A0A0A" : "#444444",
-                textDecoration: "none",
-                transition: "color 0.15s ease",
-              }}
-              data-testid={`nav-${link.href.replace("/", "")}`}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        {/* Nav — hide in studio to keep header clean */}
+        {!isStudio && (
+          <nav className="hidden md:flex items-center gap-6 flex-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                style={{
+                  fontFamily: "'Figtree', sans-serif",
+                  fontWeight: 500,
+                  fontSize: "14px",
+                  color: location.startsWith(link.href) ? "#0A0A0A" : "#444444",
+                  textDecoration: "none",
+                  transition: "color 0.15s ease",
+                }}
+                data-testid={`nav-${link.href.replace("/", "")}`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        )}
+
+        {isStudio && <div style={{ flex: 1 }} />}
 
         <div className="flex items-center gap-3 ml-auto">
           {/* Language toggle */}
@@ -223,18 +249,20 @@ export default function Header() {
           )}
 
           {/* Mobile menu toggle */}
-          <button
-            className="md:hidden"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            style={{ background: "none", border: "none", cursor: "pointer" }}
-          >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          {!isStudio && (
+            <button
+              className="md:hidden"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              style={{ background: "none", border: "none", cursor: "pointer" }}
+            >
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          )}
         </div>
       </header>
 
       {/* Mobile menu */}
-      {mobileOpen && (
+      {mobileOpen && !isStudio && (
         <div
           style={{
             position: "fixed",

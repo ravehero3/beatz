@@ -180,7 +180,7 @@ function AppRouter() {
   );
 }
 
-const HIDE_CHROME_PATHS = ["/studio", "/admin", "/login", "/register", "/onboarding", "/forgot-password", "/reset-password", "/auth/"];
+const HIDE_CHROME_PATHS = ["/admin", "/login", "/register", "/onboarding", "/forgot-password", "/reset-password", "/auth/"];
 
 function Layout() {
   const [location] = useLocation();

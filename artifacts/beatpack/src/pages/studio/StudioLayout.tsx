@@ -1,28 +1,29 @@
 import { Link, useLocation } from "wouter";
 import { BarChart2, Music, Package, DollarSign, Palette, User, Settings, ArrowLeft, Mail } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
-import beatpackLogo from "@assets/beatpack_logo_1_1781012889607.png";
-
-const navItems = [
-  { href: "/studio", icon: <BarChart2 size={16} />, label: "Dashboard" },
-  { href: "/studio/beats", icon: <Music size={16} />, label: "My Beats" },
-  { href: "/studio/orders", icon: <Package size={16} />, label: "Orders" },
-  { href: "/studio/earnings", icon: <DollarSign size={16} />, label: "Earnings" },
-  { href: "/studio/store", icon: <Palette size={16} />, label: "Store Design" },
-  { href: "/studio/leads", icon: <Mail size={16} />, label: "Leads" },
-  { href: "/studio/profile", icon: <User size={16} />, label: "Profile" },
-  { href: "/studio/settings", icon: <Settings size={16} />, label: "Settings" },
-];
+import { useT } from "@/lib/i18n";
 
 export default function StudioLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { user } = useAuthStore();
+  const t = useT();
+
+  const navItems = [
+    { href: "/studio", icon: <BarChart2 size={16} />, label: t("studio.nav.dashboard") },
+    { href: "/studio/beats", icon: <Music size={16} />, label: t("studio.nav.beats") },
+    { href: "/studio/orders", icon: <Package size={16} />, label: t("studio.nav.orders") },
+    { href: "/studio/earnings", icon: <DollarSign size={16} />, label: t("studio.nav.earnings") },
+    { href: "/studio/store", icon: <Palette size={16} />, label: t("studio.nav.store") },
+    { href: "/studio/leads", icon: <Mail size={16} />, label: t("studio.nav.leads") },
+    { href: "/studio/profile", icon: <User size={16} />, label: t("studio.nav.profile") },
+    { href: "/studio/settings", icon: <Settings size={16} />, label: t("studio.nav.settings") },
+  ];
 
   return (
     <div style={{ paddingTop: "44px", display: "flex", minHeight: "100vh" }}>
       {/* Sidebar */}
       <div style={{
-        width: "240px",
+        width: "220px",
         flexShrink: 0,
         background: "rgba(255,255,255,0.88)",
         backdropFilter: "blur(20px)",
@@ -38,18 +39,13 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
         overflowY: "auto",
         zIndex: 100,
       }}>
-        <div style={{ padding: "20px 16px", borderBottom: "1px solid #F2F2F2" }}>
-          <img src={beatpackLogo} alt="beatpack" style={{ height: "18px" }} />
-          <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "11px", fontWeight: 500, color: "#888888", letterSpacing: "0.06em", textTransform: "uppercase", marginTop: "-8px", marginLeft: "20px" }}>Studio</div>
-        </div>
-
-        <nav style={{ padding: "8px", flex: 1 }}>
+        <nav style={{ padding: "8px", flex: 1, paddingTop: "12px" }}>
           {navItems.map((item) => {
             const isActive = item.href === "/studio" ? location === "/studio" : location.startsWith(item.href);
             return (
               <Link key={item.href} href={item.href}>
                 <div
-                  data-testid={`nav-studio-${item.label.toLowerCase().replace(/ /g, "-")}`}
+                  data-testid={`nav-studio-${item.href.replace("/studio/", "").replace("/studio", "dashboard")}`}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -87,13 +83,13 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
             </div>
           </div>
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: "'Figtree', sans-serif", fontSize: "12px", color: "#888888", textDecoration: "none" }}>
-            <ArrowLeft size={12} /> Back to site
+            <ArrowLeft size={12} /> {t("studio.nav.back")}
           </Link>
         </div>
       </div>
 
       {/* Main content */}
-      <div style={{ marginLeft: "240px", flex: 1, background: "#F9F9F9", minWidth: 0 }}>
+      <div style={{ marginLeft: "220px", flex: 1, background: "#F9F9F9", minWidth: 0 }}>
         {children}
       </div>
     </div>

@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Link } from "wouter";
 import {
-  Music2, User, CreditCard, Paintbrush, BarChart2, Headphones,
+  Music2, CreditCard, Paintbrush, BarChart2, Headphones,
   Zap, FileText, Link2, Package, Users, Shield, Globe, MessageSquare,
   Check, X,
 } from "lucide-react";
@@ -16,7 +16,6 @@ const YEARLY_PROPLUS_FULL = MONTHLY_PROPLUS * 12;
 const SAVE_PRO = YEARLY_PRO_FULL - YEARLY_PRO;
 const SAVE_PROPLUS = YEARLY_PROPLUS_FULL - YEARLY_PROPLUS;
 
-/* ── 2× smaller toggle: label on LEFT, blue accent ── */
 function CardAnnualToggle({ annual, onToggle, lang }: { annual: boolean; onToggle: () => void; lang: string }) {
   return (
     <button
@@ -60,7 +59,6 @@ function CardAnnualToggle({ annual, onToggle, lang }: { annual: boolean; onToggl
   );
 }
 
-/* ── Star field data ── */
 const STARS: { x: number; y: number; r: number; opacity: number }[] = [
   { x: 5.2,  y: 8.1,  r: 1.0, opacity: 0.55 }, { x: 14.7, y: 3.4,  r: 0.7, opacity: 0.40 },
   { x: 22.3, y: 13.8, r: 1.3, opacity: 0.65 }, { x: 31.0, y: 6.2,  r: 0.8, opacity: 0.50 },
@@ -96,6 +94,78 @@ const STARS: { x: number; y: number; r: number; opacity: number }[] = [
   { x: 73.6, y: 87.5, r: 0.9, opacity: 0.45 }, { x: 82.2, y: 94.2, r: 1.1, opacity: 0.57 },
   { x: 90.7, y: 88.8, r: 0.6, opacity: 0.33 }, { x: 96.3, y: 95.4, r: 1.2, opacity: 0.60 },
 ];
+
+interface TiltCardProps {
+  children: React.ReactNode;
+  isPaid: boolean;
+  style?: React.CSSProperties;
+  onHoverChange?: (hovered: boolean) => void;
+}
+
+function TiltCard({ children, isPaid, style = {}, onHoverChange }: TiltCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = useState(false);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current || !isPaid) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    const rotateX = -y * 16;
+    const rotateY = x * 16;
+    const shadowX = -x * 20;
+    const shadowY = -y * 20;
+    cardRef.current.style.transition = "transform 0.1s ease, box-shadow 0.1s ease, background 0.45s ease, border-color 0.45s ease";
+    cardRef.current.style.transform = `perspective(700px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.01)`;
+    cardRef.current.style.boxShadow = `${shadowX}px ${shadowY}px 40px rgba(0,40,120,0.14), 0 8px 32px rgba(0,80,200,0.08), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 0 0 1px rgba(180,210,255,0.2)`;
+  }, [isPaid]);
+
+  const handleMouseEnter = useCallback(() => {
+    setHovered(true);
+    onHoverChange?.(true);
+  }, [onHoverChange]);
+
+  const handleMouseLeave = useCallback(() => {
+    setHovered(false);
+    onHoverChange?.(false);
+    if (!cardRef.current) return;
+    cardRef.current.style.transition = "transform 0.4s ease, box-shadow 0.4s ease, background 0.45s ease, border-color 0.45s ease";
+    cardRef.current.style.transform = "perspective(700px) rotateX(0deg) rotateY(0deg) scale(1)";
+    cardRef.current.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)";
+  }, [onHoverChange]);
+
+  const glassStyle: React.CSSProperties = isPaid && hovered ? {
+    background: "rgba(240,248,255,0.75)",
+    backdropFilter: "blur(40px) saturate(180%)",
+    WebkitBackdropFilter: "blur(40px) saturate(180%)",
+    border: "1px solid rgba(180,210,255,0.5)",
+  } : {};
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        willChange: "transform",
+        transformStyle: "preserve-3d",
+        borderRadius: "20px",
+        padding: "28px",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        overflow: "hidden",
+        transition: "transform 0.4s ease, box-shadow 0.4s ease, background 0.45s ease, border-color 0.45s ease",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+        ...style,
+        ...glassStyle,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 export default function PricingPage() {
   const [proBillingAnnual, setProBillingAnnual] = useState(true);
@@ -183,7 +253,7 @@ export default function PricingPage() {
           </p>
         </div>
 
-        {/* Plans grid — equal columns */}
+        {/* Plans grid */}
         <div style={{
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
@@ -194,6 +264,7 @@ export default function PricingPage() {
             const isFree = plan.key === "free";
             const isPro = plan.key === "pro";
             const isProPlus = plan.key === "proplus";
+            const isPaid = isPro || isProPlus;
             const hovered = isPro ? proHovered : isProPlus ? proplusHovered : false;
             const billingAnnual = isPro ? proBillingAnnual : isProPlus ? proplusBillingAnnual : false;
 
@@ -209,64 +280,59 @@ export default function PricingPage() {
               : 0;
 
             return (
-              <div
+              <TiltCard
                 key={plan.key}
-                data-testid={`card-plan-${plan.key}`}
+                isPaid={isPaid}
+                onHoverChange={isPro ? setProHovered : isProPlus ? setProplusHovered : undefined}
                 style={{
-                  background: hovered ? "#0c1120" : "#FFFFFF",
-                  border: `1px solid ${hovered ? "rgba(255,255,255,0.08)" : "#EBEBEB"}`,
-                  borderRadius: "20px",
-                  padding: "28px",
-                  display: "flex",
-                  flexDirection: "column",
-                  position: "relative",
-                  overflow: "hidden",
-                  boxShadow: hovered
-                    ? "0 20px 48px rgba(0,0,10,.5)"
-                    : "0 2px 8px rgba(0,0,0,0.04)",
-                  transition: "background 0.45s ease, box-shadow 0.45s ease, border-color 0.45s ease",
-                }}
-                onMouseEnter={() => {
-                  if (isPro) setProHovered(true);
-                  if (isProPlus) setProplusHovered(true);
-                }}
-                onMouseLeave={() => {
-                  if (isPro) setProHovered(false);
-                  if (isProPlus) setProplusHovered(false);
+                  background: "#FFFFFF",
+                  border: `1px solid ${hovered ? "rgba(180,210,255,0.5)" : "#EBEBEB"}`,
                 }}
               >
                 {/* Stars — fade in on hover for paid cards */}
-                {!isFree && (
+                {isPaid && (
                   <svg
                     aria-hidden="true"
                     style={{
                       position: "absolute", inset: 0, width: "100%", height: "100%",
                       pointerEvents: "none",
-                      opacity: hovered ? 1 : 0,
+                      opacity: hovered ? 0.6 : 0,
                       transition: "opacity 0.5s ease",
                     }}
                     preserveAspectRatio="none"
                     viewBox="0 0 100 100"
                   >
                     {STARS.map((s, i) => (
-                      <circle key={i} cx={s.x} cy={s.y} r={s.r * 0.75} fill="white" opacity={s.opacity} />
+                      <circle key={i} cx={s.x} cy={s.y} r={s.r * 0.7} fill="#6EA8FF" opacity={s.opacity * 0.5} />
                     ))}
                   </svg>
                 )}
 
-                {/* Card content above stars */}
-                <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", flex: 1 }}>
+                {/* Shimmer highlight on hover */}
+                {isPaid && (
+                  <div style={{
+                    position: "absolute", inset: 0, borderRadius: "20px",
+                    background: hovered
+                      ? "linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(180,210,255,0.15) 50%, rgba(255,255,255,0.05) 100%)"
+                      : "transparent",
+                    transition: "background 0.45s ease",
+                    pointerEvents: "none",
+                  }} />
+                )}
 
-                  {/* Plan name row + toggle top-right */}
+                {/* Card content above effects */}
+                <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", flex: 1 }}
+                  data-testid={`card-plan-${plan.key}`}
+                >
+                  {/* Plan name row + toggle */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
                     <div>
                       <span style={{
                         fontFamily: "'Figtree', sans-serif",
                         fontWeight: 700,
                         fontSize: "17px",
-                        color: hovered ? "#FFFFFF" : isFree ? "#666666" : "#0A0A0A",
+                        color: isFree ? "#666666" : "#0A0A0A",
                         letterSpacing: "-0.02em",
-                        transition: "color 0.45s ease",
                       }}>
                         {plan.name}
                       </span>
@@ -275,9 +341,8 @@ export default function PricingPage() {
                           fontFamily: "'Figtree', sans-serif",
                           fontWeight: 400,
                           fontSize: "13px",
-                          color: hovered ? "rgba(255,255,255,0.5)" : "#888888",
+                          color: "#888888",
                           marginLeft: "6px",
-                          transition: "color 0.45s ease",
                         }}>/ {(plan as { nameSub?: string }).nameSub}</span>
                       )}
                     </div>
@@ -311,10 +376,9 @@ export default function PricingPage() {
                             fontFamily: "'Figtree', sans-serif",
                             fontWeight: 800,
                             fontSize: "32px",
-                            color: hovered ? "#FFFFFF" : "#0A0A0A",
+                            color: "#0A0A0A",
                             letterSpacing: "-0.03em",
                             lineHeight: 1,
-                            transition: "color 0.45s ease",
                           }}>
                             {displayMonthly.toLocaleString("cs-CZ")} Kč
                           </span>
@@ -322,8 +386,7 @@ export default function PricingPage() {
                             fontFamily: "'Figtree', sans-serif",
                             fontSize: "13px",
                             fontWeight: 400,
-                            color: hovered ? "rgba(255,255,255,0.5)" : "#888888",
-                            transition: "color 0.45s ease",
+                            color: "#888888",
                           }}>
                             / {lang === "cs" ? "měsíc" : "month"}
                           </span>
@@ -367,9 +430,8 @@ export default function PricingPage() {
                           alignItems: "center",
                           marginTop: "1px",
                           color: feature.included
-                            ? hovered ? "#60A5FA" : isFree ? "#888888" : "#3B82F6"
-                            : hovered ? "rgba(255,255,255,0.2)" : "#DDDDDD",
-                          transition: "color 0.45s ease",
+                            ? isFree ? "#888888" : "#3B82F6"
+                            : "#DDDDDD",
                         }}>
                           {feature.included
                             ? <Check size={14} strokeWidth={2.5} />
@@ -380,10 +442,9 @@ export default function PricingPage() {
                           fontFamily: "'Figtree', sans-serif",
                           fontSize: "13.5px",
                           color: feature.included
-                            ? hovered ? "rgba(255,255,255,0.85)" : isFree ? "#666666" : "#333333"
-                            : hovered ? "rgba(255,255,255,0.25)" : "#C0C0C0",
+                            ? isFree ? "#666666" : "#333333"
+                            : "#C0C0C0",
                           lineHeight: 1.45,
-                          transition: "color 0.45s ease",
                         }}>
                           {feature.text}
                         </span>
@@ -428,7 +489,7 @@ export default function PricingPage() {
                     </Link>
                   </div>
                 </div>
-              </div>
+              </TiltCard>
             );
           })}
         </div>
