@@ -120,14 +120,21 @@ export default function ArtistStorePage() {
     <div style={{ background: theme.bg, minHeight: "100vh", paddingTop: "44px" }}>
       {/* Banner */}
       <div style={{
-        height: "280px",
-        background: artist.bannerUrl ? `url(${artist.bannerUrl}) center/cover` : (isDark ? "#111111" : "#F2F2F2"),
+        height: "300px",
+        background: artist.bannerUrl ? `url(${artist.bannerUrl}) center/cover` : (isDark ? "#111111" : "#F0F0F0"),
         position: "relative",
-      }} />
+      }}>
+        {/* Bottom gradient bridge into page bg */}
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0, height: "120px",
+          background: `linear-gradient(to bottom, transparent 0%, ${theme.bg} 100%)`,
+          pointerEvents: "none",
+        }} />
+      </div>
 
       <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}>
         {/* Artist header */}
-        <div style={{ display: "flex", alignItems: "flex-end", gap: "20px", marginTop: "-48px", marginBottom: "32px", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: "20px", marginTop: "-64px", marginBottom: "32px", flexWrap: "wrap" }}>
           <div style={{
             width: "96px", height: "96px", borderRadius: "50%",
             background: isDark ? "#1F1F1F" : "#FFFFFF",

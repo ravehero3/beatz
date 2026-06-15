@@ -377,6 +377,7 @@ function StorePreview({
 export default function StoreSettingsPage() {
   const { token } = useAuthStore();
 
+  const [slug, setSlug] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [bannerUrl, setBannerUrl] = useState("");
@@ -393,12 +394,14 @@ export default function StoreSettingsPage() {
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/artists/me", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((data) => {
+        if (data.slug) setSlug(data.slug);
         if (data.displayName) setDisplayName(data.displayName);
         if (data.bio) setBio(data.bio);
         if (data.bannerUrl) setBannerUrl(data.bannerUrl);
@@ -449,7 +452,38 @@ export default function StoreSettingsPage() {
       <div style={{ display: "flex", minHeight: "calc(100vh - 44px)", alignItems: "flex-start" }}>
         {/* Form column */}
         <div style={{ flex: "0 0 560px", maxWidth: "560px", padding: "32px 28px", overflowY: "auto" }}>
-          <h1 style={{ fontFamily: F, fontWeight: 700, fontSize: "22px", color: "#0A0A0A", letterSpacing: "-0.02em", marginBottom: "6px" }}>Store Design</h1>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px", marginBottom: "6px" }}>
+            <h1 style={{ fontFamily: F, fontWeight: 700, fontSize: "22px", color: "#0A0A0A", letterSpacing: "-0.02em" }}>Store Design</h1>
+            {slug && (
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}/artists/${slug}`;
+                  navigator.clipboard.writeText(url).then(() => {
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  });
+                }}
+                style={{
+                  display: "flex", alignItems: "center", gap: "6px",
+                  height: "34px", padding: "0 14px", borderRadius: "9999px",
+                  background: copied ? "#22C55E" : "#F5F5F5",
+                  border: `1px solid ${copied ? "#22C55E" : "#E5E5E5"}`,
+                  fontFamily: F, fontSize: "12px", fontWeight: 600,
+                  color: copied ? "#FFFFFF" : "#444444",
+                  cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0,
+                  transition: "all 0.25s ease",
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  {copied
+                    ? <><polyline points="20 6 9 17 4 12"/></>
+                    : <><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></>
+                  }
+                </svg>
+                {copied ? "Copied!" : "Copy shop link"}
+              </button>
+            )}
+          </div>
           <p style={{ fontFamily: F, fontSize: "14px", color: "#888888", marginBottom: "28px" }}>
             Set up your storefront — changes reflect in the preview.
           </p>

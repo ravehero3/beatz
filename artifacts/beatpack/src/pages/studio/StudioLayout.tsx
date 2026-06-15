@@ -24,8 +24,11 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
       <div style={{
         width: "240px",
         flexShrink: 0,
-        background: "#FFFFFF",
-        borderRight: "1px solid #E5E5E5",
+        background: "rgba(255,255,255,0.88)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderRight: "1px solid rgba(0,0,0,0.07)",
+        boxShadow: "inset -1px 0 0 rgba(255,255,255,0.6)",
         position: "fixed",
         top: "44px",
         bottom: 0,
