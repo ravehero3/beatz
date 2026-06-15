@@ -32,6 +32,8 @@ import EarningsPage from "@/pages/studio/EarningsPage";
 import StudioOrdersPage from "@/pages/studio/StudioOrdersPage";
 import StoreSettingsPage from "@/pages/studio/StoreSettingsPage";
 import StudioLeadsPage from "@/pages/studio/StudioLeadsPage";
+import StudioProfilePage from "@/pages/studio/StudioProfilePage";
+import StudioSettingsPage from "@/pages/studio/StudioSettingsPage";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminBeatsPage from "@/pages/admin/AdminBeatsPage";
@@ -161,6 +163,8 @@ function AppRouter() {
       <Route path="/studio/orders" component={() => <ProtectedRoute component={StudioOrdersPage} roles={["artist", "admin"]} />} />
       <Route path="/studio/store" component={() => <ProtectedRoute component={StoreSettingsPage} roles={["artist", "admin"]} />} />
       <Route path="/studio/leads" component={() => <ProtectedRoute component={StudioLeadsPage} roles={["artist", "admin"]} />} />
+      <Route path="/studio/profile" component={() => <ProtectedRoute component={StudioProfilePage} roles={["artist", "admin"]} />} />
+      <Route path="/studio/settings" component={() => <ProtectedRoute component={StudioSettingsPage} roles={["artist", "admin"]} />} />
 
       {/* Protected: admin */}
       <Route path="/admin" component={() => <ProtectedRoute component={AdminDashboard} roles={["admin"]} />} />
@@ -181,10 +185,11 @@ function AppRouter() {
 }
 
 const HIDE_CHROME_PATHS = ["/admin", "/login", "/register", "/onboarding", "/forgot-password", "/reset-password", "/auth/"];
+const ARTIST_STORE_RE = /^\/artists\/[^/]+$/;
 
 function Layout() {
   const [location] = useLocation();
-  const hideChrome = HIDE_CHROME_PATHS.some((p) => location === p || location.startsWith(p + "/") || location.startsWith(p)) || location.startsWith("/profile-setup");
+  const hideChrome = HIDE_CHROME_PATHS.some((p) => location === p || location.startsWith(p + "/") || location.startsWith(p)) || location.startsWith("/profile-setup") || ARTIST_STORE_RE.test(location);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>

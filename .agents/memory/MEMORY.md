@@ -1,3 +1,6 @@
 - [Beatpack project overview](beatpack-overview.md) — Czech beat marketplace SaaS; key quirks for Express 5, BeatCard props, Radix Select, lib build order
 - [DB migrations without TTY](db-migrations.md) — drizzle-kit push requires interactive TTY; use direct SQL ALTER TABLE instead in Replit
 - [Global audio player pattern](global-audio-player.md) — Zustand audioStore + BottomPlayer in Layout for cross-page persistence
+- [Artists table missing columns](artists-table-schema.md) — Drizzle schema evolved past DB; must ADD COLUMN for logo_url, hero_logo_url + subscription/balance fields before API works
+- [Artist store chrome hiding](artist-store-chrome.md) — Artist store (/artists/:slug) has its own custom header; ARTIST_STORE_RE regex in App.tsx hides global Header/Footer for those pages
+- [Cart store pattern](cart-store-pattern.md) — cartStore at store/cartStore.ts; cart icon on beat rows adds items, cart button in store header opens Nakupní košík slide-over modal

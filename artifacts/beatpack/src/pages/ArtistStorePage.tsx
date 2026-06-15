@@ -1,41 +1,394 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
-import { ArrowLeft, X, Instagram, Youtube } from "lucide-react";
+import { X, ShoppingCart, Heart, Instagram, Trash2, ChevronLeft } from "lucide-react";
 import { useGetArtistBySlug, getGetArtistBySlugQueryKey } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
-import PlayerPlaylist, { type PlaylistBeat } from "@/components/players/PlayerPlaylist";
-
-type ThemeKey = "light" | "grey" | "dark";
-
-const THEMES: Record<ThemeKey, {
-  bg: string; cardBg: string; text: string; muted: string; border: string;
-  accent: string; waveformPlayed: string; waveformUnplayed: string;
-}> = {
-  light: { bg: "#FFFFFF", cardBg: "#F9F9F9", text: "#0A0A0A", muted: "#888888", border: "#E5E5E5", accent: "#0A0A0A", waveformPlayed: "#0A0A0A", waveformUnplayed: "#E5E5E5" },
-  grey:  { bg: "#F5F5F5", cardBg: "#FFFFFF", text: "#0A0A0A", muted: "#666666", border: "#E0E0E0", accent: "#0A0A0A", waveformPlayed: "#0A0A0A", waveformUnplayed: "#CCCCCC" },
-  dark:  { bg: "#0A0A0A", cardBg: "#141414", text: "#FFFFFF", muted: "#888888", border: "#1F1F1F", accent: "#FFFFFF", waveformPlayed: "#A78BFA", waveformUnplayed: "#2A2A2A" },
-};
+import { useAudioStore } from "@/store/audioStore";
+import { useCartStore, type LicenseType } from "@/store/cartStore";
+import { formatCurrency } from "@/lib/format";
 
 const F = "'Figtree', sans-serif";
 
+/* ─── Beat colour palette ─────────────────────────────────────── */
+const PALETTES = [
+  { accent: "#7C3AED", light: "rgba(124,58,237,0.07)", played: "#7C3AED", bar: "rgba(124,58,237,0.18)" },
+  { accent: "#DB2777", light: "rgba(219,39,119,0.07)", played: "#DB2777", bar: "rgba(219,39,119,0.18)" },
+  { accent: "#EA580C", light: "rgba(234,88,12,0.07)",  played: "#EA580C", bar: "rgba(234,88,12,0.18)"  },
+  { accent: "#16A34A", light: "rgba(22,163,74,0.07)",  played: "#16A34A", bar: "rgba(22,163,74,0.18)"  },
+  { accent: "#2563EB", light: "rgba(37,99,235,0.07)",  played: "#2563EB", bar: "rgba(37,99,235,0.18)"  },
+  { accent: "#9333EA", light: "rgba(147,51,234,0.07)", played: "#9333EA", bar: "rgba(147,51,234,0.18)" },
+  { accent: "#D97706", light: "rgba(217,119,6,0.07)",  played: "#D97706", bar: "rgba(217,119,6,0.18)"  },
+  { accent: "#0891B2", light: "rgba(8,145,178,0.07)",  played: "#0891B2", bar: "rgba(8,145,178,0.18)"  },
+];
+
+/* ─── Deterministic waveform bars ────────────────────────────── */
+function genBars(seed: string, count: number): number[] {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) & 0xffffff;
+  const bars: number[] = [];
+  for (let i = 0; i < count; i++) {
+    h = (h * 1664525 + 1013904223) & 0xffffffff;
+    const unsigned = h >>> 0;
+    bars.push(0.15 + ((unsigned & 0xff) / 255) * 0.85);
+  }
+  return bars;
+}
+
+function fmt(sec: number) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+/* ─── Icons ──────────────────────────────────────────────────── */
 function SoundCloudIcon({ color }: { color: string }) {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill={color}>
-      <path d="M11.56 8.87V17h8.76c1.04 0 1.68-.69 1.68-1.56 0-.76-.54-1.43-1.27-1.55v-.08c0-1.44-1.15-2.61-2.56-2.61-.28 0-.55.05-.8.13C16.9 9.87 15.47 9 13.83 9c-.87 0-1.67.29-2.27.87zM0 15.24c0 .97.77 1.76 1.72 1.76s1.72-.79 1.72-1.76V12.1a1.72 1.72 0 1 0-3.44 0v3.14zm5.01 1.52c0 .97.77 1.76 1.72 1.76s1.72-.79 1.72-1.76V10.2a1.72 1.72 0 1 0-3.44 0v6.56zm-2.5-.11c0 .97.77 1.76 1.72 1.76s1.72-.79 1.72-1.76v-4.35a1.72 1.72 0 1 0-3.44 0v4.35z"/>
+      <path d="M11.56 8.87V17h8.76c1.04 0 1.68-.69 1.68-1.56 0-.76-.54-1.43-1.27-1.55v-.08c0-1.44-1.15-2.61-2.56-2.61-.28 0-.55.05-.8.13C16.9 9.87 15.47 9 13.83 9c-.87 0-1.67.29-2.27.87zM0 15.24c0 .97.77 1.76 1.72 1.76s1.72-.79 1.72-1.76V12.1a1.72 1.72 0 1 0-3.44 0v3.14zm5.01 1.52c0 .97.77 1.76 1.72 1.76s1.72-.79 1.72-1.76V10.2a1.72 1.72 0 1 0-3.44 0v6.56zm-2.5-.11c0 .97.77 1.76 1.72 1.76s1.72-.79 1.72-1.76v-4.35a1.72 1.72 0 1 0-3.44 0v4.35z" />
     </svg>
   );
 }
-
 function YoutubeIcon({ color }: { color: string }) {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill={color}>
-      <path d="M23 7s-.3-2-1.2-2.7c-1.1-1.2-2.4-1.2-3-1.3C16.2 3 12 3 12 3s-4.2 0-6.8.1c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.1.7 11.3v2c0 2.1.3 4.3.3 4.3s.3 2 1.2 2.7c1.1 1.2 2.6 1.1 3.3 1.2C7.2 21.7 12 21.7 12 21.7s4.2 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.7 1.2-2.7 1.2-2.7s.3-2.1.3-4.3v-2C23.3 9.1 23 7 23 7zm-13.5 8.5v-7.4l8.1 3.7-8.1 3.7z"/>
+      <path d="M23 7s-.3-2-1.2-2.7c-1.1-1.2-2.4-1.2-3-1.3C16.2 3 12 3 12 3s-4.2 0-6.8.1c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.1.7 11.3v2c0 2.1.3 4.3.3 4.3s.3 2 1.2 2.7c1.1 1.2 2.6 1.1 3.3 1.2C7.2 21.7 12 21.7 12 21.7s4.2 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.7 1.2-2.7 1.2-2.7s.3-2.1.3-4.3v-2C23.3 9.1 23 7 23 7zm-13.5 8.5v-7.4l8.1 3.7-8.1 3.7z" />
     </svg>
   );
 }
 
-function ArtistProfileModal({ artist, open, onClose }: {
+/* ─── Waveform row ──────────────────────────────────────────── */
+function BeatWaveformRow({
+  beatId,
+  isPlaying,
+  palette,
+}: {
+  beatId: string;
+  isPlaying: boolean;
+  palette: (typeof PALETTES)[0];
+}) {
+  const bars = genBars(beatId, 80);
+  const playedCount = isPlaying ? Math.floor(bars.length * 0.3) : 0;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "2px",
+        flex: 1,
+        height: "32px",
+        overflow: "hidden",
+      }}
+    >
+      {bars.map((h, i) => (
+        <div
+          key={i}
+          style={{
+            width: "2px",
+            flexShrink: 0,
+            borderRadius: "1px",
+            height: `${Math.max(4, h * 28)}px`,
+            background: i < playedCount ? palette.played : palette.bar,
+            transition: "background 0.3s",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ─── Play / Pause button ────────────────────────────────────── */
+function PlayBtn({
+  isPlaying,
+  color,
+  onClick,
+}: {
+  isPlaying: boolean;
+  color: string;
+  onClick: () => void;
+}) {
+  const [hov, setHov] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        width: "38px",
+        height: "38px",
+        borderRadius: "50%",
+        flexShrink: 0,
+        background: isPlaying ? color : hov ? color : "transparent",
+        border: `2px solid ${color}`,
+        color: isPlaying || hov ? "#fff" : color,
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        transition: "background 0.15s, color 0.15s",
+      }}
+    >
+      {isPlaying ? (
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+          <rect x="1" y="0" width="4" height="12" rx="1" />
+          <rect x="7" y="0" width="4" height="12" rx="1" />
+        </svg>
+      ) : (
+        <svg width="11" height="13" viewBox="0 0 11 13" fill="currentColor" style={{ marginLeft: "1px" }}>
+          <path d="M0.5 1.5 L10.5 6.5 L0.5 11.5 Z" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
+/* ─── Beat row ───────────────────────────────────────────────── */
+function BeatRow({
+  beat,
+  index,
+  palette,
+  artistSlug,
+}: {
+  beat: any;
+  index: number;
+  palette: (typeof PALETTES)[0];
+  artistSlug: string | null;
+}) {
+  const { currentBeat, setTrack } = useAudioStore();
+  const { addItem, items } = useCartStore();
+  const [cartFlash, setCartFlash] = useState(false);
+  const [hov, setHov] = useState(false);
+
+  const isPlaying = currentBeat?.id === beat.id;
+  const inCart = items.some((i) => i.beatId === beat.id);
+
+  function togglePlay() {
+    if (isPlaying) {
+      setTrack({ ...beat, artistName: beat.artistName });
+    } else {
+      setTrack({
+        id: beat.id,
+        title: beat.title,
+        artistName: beat.artistName ?? null,
+        coverUrl: beat.coverUrl ?? null,
+        audioUrl: beat.audioUrl,
+      });
+    }
+  }
+
+  function handleAddToCart() {
+    const license: LicenseType =
+      beat.priceBasic != null && Number(beat.priceBasic) > 0
+        ? "basic"
+        : beat.pricePremium != null && Number(beat.pricePremium) > 0
+        ? "premium"
+        : "exclusive";
+    const price =
+      license === "basic"
+        ? Number(beat.priceBasic)
+        : license === "premium"
+        ? Number(beat.pricePremium)
+        : Number(beat.priceExclusive);
+    addItem({
+      beatId: beat.id,
+      beatTitle: beat.title,
+      artistName: beat.artistName ?? null,
+      artistSlug: artistSlug,
+      coverUrl: beat.coverUrl ?? null,
+      license,
+      price,
+    });
+    setCartFlash(true);
+    setTimeout(() => setCartFlash(false), 1500);
+  }
+
+  const tags: string[] = beat.tags ?? [];
+  const durationSec: number | null = beat.durationSeconds ?? null;
+
+  return (
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        padding: "10px 16px",
+        borderRadius: "12px",
+        background: isPlaying ? palette.light : hov ? "rgba(0,0,0,0.025)" : "transparent",
+        borderLeft: `3px solid ${isPlaying || hov ? palette.accent : "transparent"}`,
+        transition: "background 0.15s, border-color 0.15s",
+        marginLeft: "-19px",
+        marginRight: "-4px",
+      }}
+    >
+      {/* Index */}
+      <span
+        style={{
+          fontFamily: F,
+          fontSize: "12px",
+          fontWeight: 600,
+          color: isPlaying ? palette.accent : "#AAAAAA",
+          width: "18px",
+          textAlign: "center",
+          flexShrink: 0,
+        }}
+      >
+        {index + 1}
+      </span>
+
+      {/* Play button */}
+      <PlayBtn isPlaying={isPlaying} color={palette.accent} onClick={togglePlay} />
+
+      {/* Cover */}
+      <div
+        style={{
+          width: "40px",
+          height: "40px",
+          borderRadius: "8px",
+          flexShrink: 0,
+          overflow: "hidden",
+          background: palette.bar,
+          border: `1.5px solid ${isPlaying ? palette.accent : "transparent"}`,
+        }}
+      >
+        {beat.coverUrl ? (
+          <img src={beat.coverUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        ) : (
+          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", opacity: 0.4 }}>♪</div>
+        )}
+      </div>
+
+      {/* Title + meta */}
+      <div style={{ minWidth: "140px", flexShrink: 0 }}>
+        <div
+          style={{
+            fontFamily: F,
+            fontWeight: 700,
+            fontSize: "14px",
+            color: "#0A0A0A",
+            letterSpacing: "-0.01em",
+            marginBottom: "2px",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {beat.title}
+        </div>
+        <div style={{ display: "flex", gap: "5px", flexWrap: "nowrap" }}>
+          {beat.bpm && (
+            <span
+              style={{
+                fontFamily: F,
+                fontSize: "10px",
+                fontWeight: 600,
+                padding: "1px 6px",
+                borderRadius: "4px",
+                background: palette.bar,
+                color: palette.accent,
+              }}
+            >
+              {beat.bpm} BPM
+            </span>
+          )}
+          {beat.key && (
+            <span
+              style={{
+                fontFamily: F,
+                fontSize: "10px",
+                fontWeight: 600,
+                padding: "1px 6px",
+                borderRadius: "4px",
+                background: "#F0F0F0",
+                color: "#666666",
+              }}
+            >
+              {beat.key}
+            </span>
+          )}
+          {tags.slice(0, 1).map((tag: string) => (
+            <span
+              key={tag}
+              style={{
+                fontFamily: F,
+                fontSize: "10px",
+                padding: "1px 6px",
+                borderRadius: "4px",
+                background: "#F0F0F0",
+                color: "#888888",
+              }}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Waveform */}
+      <div style={{ flex: 1, overflow: "hidden", minWidth: 0 }}>
+        <BeatWaveformRow beatId={beat.id} isPlaying={isPlaying} palette={palette} />
+      </div>
+
+      {/* Duration */}
+      <span
+        style={{
+          fontFamily: F,
+          fontSize: "12px",
+          color: "#AAAAAA",
+          flexShrink: 0,
+          minWidth: "34px",
+          textAlign: "right",
+        }}
+      >
+        {durationSec != null ? fmt(durationSec) : "—"}
+      </span>
+
+      {/* Price */}
+      {beat.priceBasic != null && Number(beat.priceBasic) > 0 && (
+        <span
+          style={{
+            fontFamily: F,
+            fontSize: "13px",
+            fontWeight: 700,
+            color: "#0A0A0A",
+            flexShrink: 0,
+            minWidth: "60px",
+            textAlign: "right",
+          }}
+        >
+          {formatCurrency(Number(beat.priceBasic))}
+        </span>
+      )}
+
+      {/* Add to cart */}
+      <button
+        onClick={handleAddToCart}
+        title={inCart ? "V košíku" : "Přidat do košíku"}
+        style={{
+          width: "34px",
+          height: "34px",
+          borderRadius: "50%",
+          border: `1.5px solid ${inCart || cartFlash ? palette.accent : "#E5E5E5"}`,
+          background: inCart || cartFlash ? palette.light : "transparent",
+          color: inCart || cartFlash ? palette.accent : "#888888",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          transition: "all 0.15s",
+        }}
+      >
+        <ShoppingCart size={14} />
+      </button>
+    </div>
+  );
+}
+
+/* ─── Profile modal ──────────────────────────────────────────── */
+function ProfileModal({ artist, open, onClose }: {
   artist: { displayName?: string | null; profilePictureUrl?: string | null; slug?: string | null; bio?: string | null };
   open: boolean;
   onClose: () => void;
@@ -77,23 +430,19 @@ function ArtistProfileModal({ artist, open, onClose }: {
           <X size={13} />
         </button>
 
-        <div style={{
-          width: "96px", height: "96px", borderRadius: "50%",
-          background: "#F0F0F0", overflow: "hidden",
-          margin: "0 auto 16px",
-          border: "3px solid #EBEBEB",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.10)",
-        }}>
+        <div
+          style={{
+            width: "100px", height: "100px", borderRadius: "50%",
+            background: "#F0F0F0", overflow: "hidden",
+            margin: "0 auto 16px",
+            border: "3px solid #EBEBEB",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.10)",
+          }}
+        >
           {artist.profilePictureUrl ? (
-            <img
-              src={artist.profilePictureUrl}
-              alt={artist.displayName ?? ""}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
+            <img src={artist.profilePictureUrl} alt={artist.displayName ?? ""} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
-            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "36px", color: "#CCCCCC" }}>
-              ♪
-            </div>
+            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "38px", color: "#CCCCCC" }}>♪</div>
           )}
         </div>
 
@@ -102,8 +451,6 @@ function ArtistProfileModal({ artist, open, onClose }: {
         </div>
         <div style={{ fontFamily: F, fontSize: "13px", color: "#888888", marginBottom: artist.bio ? "14px" : "0" }}>
           @{artist.slug ?? ""}
-          <span style={{ color: "#D4D4D4", margin: "0 6px" }}>·</span>
-          beatpack.cz/{artist.slug}
         </div>
         {artist.bio && (
           <p style={{ fontFamily: F, fontSize: "13px", color: "#666666", lineHeight: 1.55, marginTop: "10px" }}>
@@ -115,11 +462,379 @@ function ArtistProfileModal({ artist, open, onClose }: {
   );
 }
 
+/* ─── Cart modal (Nakupní košík) ─────────────────────────────── */
+const LICENSE_LABELS: Record<string, string> = {
+  basic: "Základní",
+  premium: "Prémiová",
+  exclusive: "Exkluzivní",
+};
+
+function CartModal({
+  open,
+  onClose,
+  artistName,
+}: {
+  open: boolean;
+  onClose: () => void;
+  artistName: string;
+}) {
+  const { items, removeItem, updateLicense } = useCartStore();
+  const [, setLocation] = useLocation();
+
+  if (!open) return null;
+
+  const total = items.reduce((s, i) => s + i.price, 0);
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 9999,
+        background: "rgba(0,0,0,0.45)",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        display: "flex", alignItems: "flex-start", justifyContent: "flex-end",
+        padding: "0",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "#FFFFFF",
+          width: "100%",
+          maxWidth: "420px",
+          height: "100vh",
+          overflowY: "auto",
+          boxShadow: "-8px 0 40px rgba(0,0,0,0.12)",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Header */}
+        <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid #F0F0F0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <h2 style={{ fontFamily: F, fontWeight: 800, fontSize: "18px", color: "#0A0A0A", letterSpacing: "-0.02em", marginBottom: "2px" }}>
+              Nákupní košík
+            </h2>
+            <p style={{ fontFamily: F, fontSize: "12px", color: "#888888" }}>
+              {items.length === 0 ? "Košík je prázdný" : `${items.length} ${items.length === 1 ? "beat" : items.length < 5 ? "beaty" : "beatů"} · obchod ${artistName}`}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              width: "32px", height: "32px", borderRadius: "50%",
+              background: "#F5F5F5", border: "none", cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            <X size={14} />
+          </button>
+        </div>
+
+        {/* Items */}
+        <div style={{ flex: 1, padding: "16px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+          {items.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "60px 0" }}>
+              <div style={{ fontSize: "40px", marginBottom: "12px", opacity: 0.25 }}>🛒</div>
+              <div style={{ fontFamily: F, fontSize: "14px", color: "#AAAAAA" }}>Zatím jste nic nepřidali</div>
+              <div style={{ fontFamily: F, fontSize: "12px", color: "#CCCCCC", marginTop: "6px" }}>Klikněte na ikonu košíku u beatu</div>
+            </div>
+          ) : (
+            items.map((item) => (
+              <div
+                key={item.beatId}
+                style={{
+                  background: "#F9F9F9",
+                  borderRadius: "14px",
+                  padding: "14px",
+                  border: "1px solid #F0F0F0",
+                }}
+              >
+                <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
+                  {/* Cover */}
+                  <div style={{ width: "48px", height: "48px", borderRadius: "8px", flexShrink: 0, overflow: "hidden", background: "#E5E5E5" }}>
+                    {item.coverUrl ? (
+                      <img src={item.coverUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", opacity: 0.3 }}>♪</div>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontFamily: F, fontWeight: 700, fontSize: "14px", color: "#0A0A0A", marginBottom: "4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {item.beatTitle}
+                    </div>
+                    <div style={{ fontFamily: F, fontSize: "12px", color: "#888888", marginBottom: "8px" }}>
+                      {item.artistName ?? ""}
+                    </div>
+
+                    {/* License selector */}
+                    <select
+                      value={item.license}
+                      onChange={(e) => {
+                        const lic = e.target.value as LicenseType;
+                        const beat = (window as any).__storeBeat?.[item.beatId];
+                        const price =
+                          lic === "basic" ? (beat?.priceBasic ?? item.price)
+                          : lic === "premium" ? (beat?.pricePremium ?? item.price)
+                          : (beat?.priceExclusive ?? item.price);
+                        updateLicense(item.beatId, lic, Number(price));
+                      }}
+                      style={{
+                        fontFamily: F, fontSize: "12px", padding: "4px 8px",
+                        borderRadius: "6px", border: "1px solid #E5E5E5",
+                        background: "#FFFFFF", color: "#444444", cursor: "pointer",
+                        outline: "none",
+                      }}
+                    >
+                      <option value="basic">Základní licence</option>
+                      <option value="premium">Prémiová licence</option>
+                      <option value="exclusive">Exkluzivní licence</option>
+                    </select>
+                  </div>
+
+                  {/* Remove */}
+                  <button
+                    onClick={() => removeItem(item.beatId)}
+                    style={{
+                      width: "28px", height: "28px", borderRadius: "8px",
+                      background: "transparent", border: "none", cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: "#CCCCCC", flexShrink: 0,
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "#EF4444"; e.currentTarget.style.background = "#FEF2F2"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "#CCCCCC"; e.currentTarget.style.background = "transparent"; }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+
+                {/* Price + checkout */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "12px", paddingTop: "10px", borderTop: "1px solid #EBEBEB" }}>
+                  <span style={{ fontFamily: F, fontWeight: 800, fontSize: "16px", color: "#0A0A0A", letterSpacing: "-0.02em" }}>
+                    {formatCurrency(item.price)}
+                  </span>
+                  <button
+                    onClick={() => {
+                      onClose();
+                      setLocation(`/checkout?beatId=${item.beatId}&license=${item.license}`);
+                    }}
+                    style={{
+                      height: "34px", padding: "0 16px", borderRadius: "9999px",
+                      background: "#0A0A0A", color: "#FFFFFF", border: "none",
+                      fontFamily: F, fontSize: "12px", fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Zaplatit
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Footer total */}
+        {items.length > 0 && (
+          <div style={{ padding: "16px 20px", borderTop: "1px solid #F0F0F0" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <span style={{ fontFamily: F, fontSize: "14px", color: "#888888" }}>Celkem</span>
+              <span style={{ fontFamily: F, fontWeight: 800, fontSize: "20px", color: "#0A0A0A", letterSpacing: "-0.02em" }}>
+                {formatCurrency(total)}
+              </span>
+            </div>
+            <p style={{ fontFamily: F, fontSize: "11px", color: "#AAAAAA", lineHeight: 1.5 }}>
+              Každý beat se platí zvlášť. Klikněte na „Zaplatit" u každého beatu výše.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Store header ────────────────────────────────────────────── */
+function StoreHeader({
+  artist,
+  onLogoClick,
+  onCartClick,
+}: {
+  artist: any;
+  onLogoClick: () => void;
+  onCartClick: () => void;
+}) {
+  const { items } = useCartStore();
+  const [heartActive, setHeartActive] = useState(false);
+
+  const heroLogoUrl: string | null = (artist as any).heroLogoUrl ?? null;
+  const logoUrl: string | null = (artist as any).logoUrl ?? null;
+
+  return (
+    <header
+      style={{
+        position: "fixed",
+        top: 0, left: 0, right: 0,
+        height: "60px",
+        background: "rgba(255,255,255,0.92)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderBottom: "1px solid rgba(0,0,0,0.06)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 20px",
+        zIndex: 9000,
+      }}
+    >
+      {/* Left — back to home */}
+      <Link href="/">
+        <button
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            color: "#888888",
+            fontFamily: F,
+            fontSize: "13px",
+            padding: "6px",
+            borderRadius: "8px",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "#F5F5F5"; e.currentTarget.style.color = "#0A0A0A"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#888888"; }}
+        >
+          <ChevronLeft size={18} />
+        </button>
+      </Link>
+
+      {/* Center — artist logo / name */}
+      <button
+        onClick={onLogoClick}
+        style={{
+          position: "absolute",
+          left: "50%",
+          transform: "translateX(-50%)",
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "4px 8px",
+          borderRadius: "8px",
+          maxWidth: "220px",
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = "#F5F5F5"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+        title="Zobrazit profil"
+      >
+        {heroLogoUrl ? (
+          <img
+            src={heroLogoUrl}
+            alt={artist.displayName ?? ""}
+            style={{ height: "34px", maxWidth: "200px", objectFit: "contain" }}
+          />
+        ) : logoUrl ? (
+          <img
+            src={logoUrl}
+            alt={artist.displayName ?? ""}
+            style={{ height: "30px", maxWidth: "180px", objectFit: "contain" }}
+          />
+        ) : (
+          <span
+            style={{
+              fontFamily: F,
+              fontWeight: 800,
+              fontSize: "17px",
+              color: "#0A0A0A",
+              letterSpacing: "-0.02em",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "200px",
+            }}
+          >
+            {artist.displayName ?? "Store"}
+          </span>
+        )}
+      </button>
+
+      {/* Right — heart + cart */}
+      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <button
+          onClick={() => setHeartActive((v) => !v)}
+          style={{
+            width: "38px",
+            height: "38px",
+            borderRadius: "50%",
+            background: heartActive ? "#FEF2F2" : "transparent",
+            border: `1.5px solid ${heartActive ? "#FCA5A5" : "#E5E5E5"}`,
+            color: heartActive ? "#EF4444" : "#888888",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "all 0.15s",
+          }}
+          onMouseEnter={(e) => { if (!heartActive) { e.currentTarget.style.background = "#F5F5F5"; e.currentTarget.style.borderColor = "#D4D4D4"; } }}
+          onMouseLeave={(e) => { if (!heartActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "#E5E5E5"; } }}
+          title="Sledovat obchod"
+        >
+          <Heart size={15} fill={heartActive ? "#EF4444" : "none"} />
+        </button>
+
+        <button
+          onClick={onCartClick}
+          style={{
+            height: "38px",
+            padding: "0 14px",
+            borderRadius: "9999px",
+            background: items.length > 0 ? "#0A0A0A" : "transparent",
+            border: `1.5px solid ${items.length > 0 ? "#0A0A0A" : "#E5E5E5"}`,
+            color: items.length > 0 ? "#FFFFFF" : "#0A0A0A",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "7px",
+            transition: "all 0.15s",
+            fontFamily: F,
+            fontSize: "13px",
+            fontWeight: 600,
+          }}
+          onMouseEnter={(e) => {
+            if (items.length === 0) {
+              e.currentTarget.style.background = "#F5F5F5";
+              e.currentTarget.style.borderColor = "#D4D4D4";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (items.length === 0) {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.borderColor = "#E5E5E5";
+            }
+          }}
+          title="Nákupní košík"
+        >
+          <ShoppingCart size={15} />
+          {items.length > 0 && (
+            <span>{items.length}</span>
+          )}
+        </button>
+      </div>
+    </header>
+  );
+}
+
+/* ─── Main page ──────────────────────────────────────────────── */
 export default function ArtistStorePage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug ?? "";
-  const [, setLocation] = useLocation();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
   const { data: artist, isLoading } = useGetArtistBySlug(slug, {
     query: { enabled: !!slug, queryKey: getGetArtistBySlugQueryKey(slug) },
@@ -127,15 +842,19 @@ export default function ArtistStorePage() {
 
   if (isLoading) {
     return (
-      <div style={{ paddingTop: "44px" }}>
-        <Skeleton style={{ height: "340px" }} />
-        <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 24px" }}>
+      <div style={{ paddingTop: "60px", background: "#FFFFFF", minHeight: "100vh" }}>
+        {/* Fake header */}
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: "60px", background: "rgba(255,255,255,0.92)", borderBottom: "1px solid rgba(0,0,0,0.06)", zIndex: 9000 }} />
+        <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 24px" }}>
+          <Skeleton style={{ height: "28px", width: "200px", marginBottom: "8px" }} />
+          <Skeleton style={{ height: "14px", width: "140px", marginBottom: "32px" }} />
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "12px" }}>
-              <Skeleton style={{ width: "52px", height: "52px", borderRadius: "10px", flexShrink: 0 }} />
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "14px" }}>
+              <Skeleton style={{ width: "38px", height: "38px", borderRadius: "50%" }} />
+              <Skeleton style={{ width: "42px", height: "42px", borderRadius: "8px" }} />
               <div style={{ flex: 1 }}>
-                <Skeleton style={{ height: "16px", width: "200px", marginBottom: "8px" }} />
-                <Skeleton style={{ height: "12px", width: "300px" }} />
+                <Skeleton style={{ height: "14px", width: "160px", marginBottom: "6px" }} />
+                <Skeleton style={{ height: "10px", width: "280px" }} />
               </div>
             </div>
           ))}
@@ -146,11 +865,11 @@ export default function ArtistStorePage() {
 
   if (!artist) {
     return (
-      <div style={{ paddingTop: "44px", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
+      <div style={{ paddingTop: "60px", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#FFFFFF" }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontFamily: F, fontWeight: 700, fontSize: "20px", color: "#0A0A0A", marginBottom: "8px" }}>Artist not found</div>
+          <div style={{ fontFamily: F, fontWeight: 700, fontSize: "20px", color: "#0A0A0A", marginBottom: "8px" }}>Obchod nenalezen</div>
           <Link href="/artists" style={{ color: "#888888", fontSize: "14px", display: "flex", alignItems: "center", gap: "4px", justifyContent: "center" }}>
-            <ArrowLeft size={14} /> Back to artists
+            ← Zpět na umělce
           </Link>
         </div>
       </div>
@@ -158,194 +877,170 @@ export default function ArtistStorePage() {
   }
 
   const rawBeats = (artist as any).beats ?? [];
-  const themeKey: ThemeKey = ((artist as any).storeTemplate as ThemeKey) ?? "light";
-  const theme = THEMES[themeKey] ?? THEMES.light;
-  const isDark = themeKey === "dark";
-
-  const logoUrl: string | null = (artist as any).logoUrl ?? null;
-  const heroLogoUrl: string | null = (artist as any).heroLogoUrl ?? null;
-
-  const beats: PlaylistBeat[] = rawBeats.map((b: any) => ({
+  const beats = rawBeats.map((b: any) => ({
     ...b,
     artistName: artist.displayName,
     artistSlug: artist.slug,
   }));
 
-  const socialIconColor = isDark ? "#888888" : "#888888";
-
   return (
-    <div style={{ background: theme.bg, minHeight: "100vh", paddingTop: "44px" }}>
+    <div
+      style={{
+        background: "#FFFFFF",
+        minHeight: "100vh",
+        paddingTop: "60px",
+        fontFamily: F,
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Background gradient blobs — matching home page hero aesthetic */}
+      <div
+        style={{
+          position: "fixed",
+          top: "-120px",
+          right: "-80px",
+          width: "500px",
+          height: "500px",
+          borderRadius: "50%",
+          background: "radial-gradient(ellipse at center, rgba(167,139,250,0.08) 0%, transparent 70%)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+      <div
+        style={{
+          position: "fixed",
+          bottom: "-80px",
+          left: "-60px",
+          width: "420px",
+          height: "420px",
+          borderRadius: "50%",
+          background: "radial-gradient(ellipse at center, rgba(251,113,133,0.07) 0%, transparent 70%)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
 
-      {/* ── SECTION 1: Hero ── */}
-      <section style={{ position: "relative" }}>
-        {/* Banner */}
-        <div style={{
-          height: "340px",
-          background: artist.bannerUrl
-            ? `url(${artist.bannerUrl}) center/cover no-repeat`
-            : isDark ? "linear-gradient(135deg, #111111 0%, #1A1A1A 100%)" : "linear-gradient(135deg, #F0F0F0 0%, #E8E8E8 100%)",
-          position: "relative",
-        }}>
-          {/* Bottom gradient */}
-          <div style={{
-            position: "absolute", bottom: 0, left: 0, right: 0, height: "200px",
-            background: `linear-gradient(to bottom, transparent 0%, ${theme.bg} 100%)`,
-            pointerEvents: "none",
-          }} />
-        </div>
+      {/* Custom store header */}
+      <StoreHeader
+        artist={artist}
+        onLogoClick={() => setProfileModalOpen(true)}
+        onCartClick={() => setCartOpen(true)}
+      />
 
-        {/* Artist identity row */}
-        <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 24px" }}>
-          <div style={{
-            display: "flex", alignItems: "flex-end", gap: "20px",
-            marginTop: "-52px", paddingBottom: "28px", flexWrap: "wrap",
-          }}>
-            {/* Profile picture — clickable for modal */}
-            <div
-              onClick={() => setProfileModalOpen(true)}
+      {/* Page content */}
+      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 24px 100px", position: "relative", zIndex: 1 }}>
+
+        {/* Artist identity */}
+        <div style={{ marginBottom: "36px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
+            <h1
               style={{
-                width: "88px", height: "88px", borderRadius: "50%",
-                background: isDark ? "#1F1F1F" : "#FFFFFF",
-                border: `4px solid ${theme.bg}`,
-                overflow: "hidden", flexShrink: 0,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
-                cursor: "pointer",
-                transition: "opacity 0.15s ease",
+                fontFamily: F,
+                fontWeight: 900,
+                fontSize: "28px",
+                color: "#0A0A0A",
+                letterSpacing: "-0.03em",
+                lineHeight: 1,
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
-              title="View profile"
             >
-              {artist.profilePictureUrl ? (
-                <img src={artist.profilePictureUrl} alt={artist.displayName ?? ""} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <span style={{ fontSize: "32px", opacity: 0.3 }}>♪</span>
-              )}
-            </div>
-
-            <div style={{ flex: 1, minWidth: 0, paddingBottom: "4px" }}>
-              {/* Logo or display name — also opens profile modal */}
-              {logoUrl ? (
-                <img
-                  src={logoUrl}
-                  alt={artist.displayName ?? ""}
-                  onClick={() => setProfileModalOpen(true)}
-                  style={{
-                    height: "36px", objectFit: "contain", maxWidth: "260px",
-                    marginBottom: "8px", display: "block", cursor: "pointer",
-                    opacity: 1, transition: "opacity 0.15s ease",
-                  }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = "0.75"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = "1"; }}
-                  title="View profile"
-                />
-              ) : (
-                <h1
-                  onClick={() => setProfileModalOpen(true)}
-                  style={{
-                    fontFamily: F, fontWeight: 700, fontSize: "26px", color: theme.text,
-                    letterSpacing: "-0.02em", marginBottom: "4px",
-                    cursor: "pointer", display: "inline-block",
-                    borderBottom: `1px solid transparent`,
-                    transition: "opacity 0.15s ease",
-                  }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.7"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
-                  title="View profile"
-                >
-                  {artist.displayName ?? "Artist"}
-                </h1>
-              )}
-
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-                <span style={{ fontFamily: F, fontSize: "13px", color: theme.muted }}>
-                  @{artist.slug} · {beats.length} beats
-                </span>
-                <div style={{ display: "flex", gap: "8px" }}>
-                  {artist.socialInstagram && (
-                    <a href={`https://instagram.com/${artist.socialInstagram}`} target="_blank" rel="noreferrer"
-                      style={{ color: socialIconColor, transition: "opacity 0.15s" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.6"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
-                    >
-                      <Instagram size={16} />
-                    </a>
-                  )}
-                  {artist.socialYoutube && (
-                    <a href={`https://youtube.com/${artist.socialYoutube}`} target="_blank" rel="noreferrer"
-                      style={{ color: socialIconColor, transition: "opacity 0.15s" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.6"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
-                    >
-                      <YoutubeIcon color={socialIconColor} />
-                    </a>
-                  )}
-                  {artist.socialSoundcloud && (
-                    <a href={`https://soundcloud.com/${artist.socialSoundcloud}`} target="_blank" rel="noreferrer"
-                      style={{ color: socialIconColor, transition: "opacity 0.15s" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.6"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
-                    >
-                      <SoundCloudIcon color={socialIconColor} />
-                    </a>
-                  )}
-                </div>
-              </div>
-
-              {artist.bio && (
-                <p style={{ fontFamily: F, fontSize: "14px", color: theme.muted, marginTop: "8px", maxWidth: "520px", lineHeight: 1.55 }}>
-                  {artist.bio}
-                </p>
-              )}
-            </div>
+              {artist.displayName ?? "Artist"}
+            </h1>
           </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 2: Playlist ── */}
-      <section style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 24px 80px" }}>
-        {/* Hero logo above playlist */}
-        {heroLogoUrl && (
-          <div style={{ marginBottom: "20px" }}>
-            <img
-              src={heroLogoUrl}
-              alt=""
-              style={{ height: "48px", objectFit: "contain", maxWidth: "300px", display: "block" }}
-            />
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+            <span style={{ fontFamily: F, fontSize: "13px", color: "#AAAAAA" }}>
+              {beats.length} {beats.length === 1 ? "beat" : beats.length < 5 ? "beaty" : "beatů"}
+            </span>
+            {artist.socialInstagram && (
+              <a href={`https://instagram.com/${artist.socialInstagram}`} target="_blank" rel="noreferrer"
+                style={{ color: "#AAAAAA", transition: "color 0.15s", display: "flex", alignItems: "center", gap: "4px" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#0A0A0A"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#AAAAAA"; }}
+              >
+                <Instagram size={14} />
+              </a>
+            )}
+            {artist.socialYoutube && (
+              <a href={`https://youtube.com/${artist.socialYoutube}`} target="_blank" rel="noreferrer"
+                style={{ color: "#AAAAAA", transition: "color 0.15s", display: "flex", alignItems: "center" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#0A0A0A"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#AAAAAA"; }}
+              >
+                <YoutubeIcon color="currentColor" />
+              </a>
+            )}
+            {artist.socialSoundcloud && (
+              <a href={`https://soundcloud.com/${artist.socialSoundcloud}`} target="_blank" rel="noreferrer"
+                style={{ color: "#AAAAAA", transition: "color 0.15s", display: "flex", alignItems: "center" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#0A0A0A"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#AAAAAA"; }}
+              >
+                <SoundCloudIcon color="currentColor" />
+              </a>
+            )}
           </div>
-        )}
-
-        {/* Section heading */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          marginBottom: "12px", paddingBottom: "10px",
-          borderBottom: `1px solid ${isDark ? "#1F1F1F" : "#EBEBEB"}`,
-        }}>
-          <h2 style={{ fontFamily: F, fontWeight: 700, fontSize: "16px", color: theme.text, letterSpacing: "-0.01em" }}>
-            Beats
-          </h2>
-          <div style={{ display: "flex", gap: "20px" }}>
-            {(["TITLE", "BPM", "KEY", "TAGS", "", ""] as const).map((h, i) => (
-              <span key={i} style={{ fontFamily: F, fontSize: "11px", fontWeight: 600, color: theme.muted, letterSpacing: "0.06em", textTransform: "uppercase", opacity: h ? 1 : 0, userSelect: "none" }}>
-                {h}
-              </span>
-            ))}
-          </div>
+          {artist.bio && (
+            <p style={{ fontFamily: F, fontSize: "14px", color: "#666666", marginTop: "10px", maxWidth: "480px", lineHeight: 1.6 }}>
+              {artist.bio}
+            </p>
+          )}
         </div>
 
+        {/* Column headers */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "18px 38px 40px 1fr 1fr 34px 60px 34px",
+            gap: "12px",
+            alignItems: "center",
+            padding: "0 16px 8px",
+            marginLeft: "-19px",
+            borderBottom: "1px solid #F0F0F0",
+            marginBottom: "4px",
+          }}
+        >
+          {["#", "", "", "NÁZEV", "VLNA", "ČAS", "CENA", ""].map((h, i) => (
+            <span
+              key={i}
+              style={{
+                fontFamily: F,
+                fontSize: "10px",
+                fontWeight: 600,
+                color: "#CCCCCC",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                textAlign: i >= 5 ? "right" : "left",
+              }}
+            >
+              {h}
+            </span>
+          ))}
+        </div>
+
+        {/* Beat rows */}
         {beats.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 24px" }}>
-            <div style={{ fontSize: "40px", marginBottom: "12px", opacity: 0.3 }}>♪</div>
-            <div style={{ fontFamily: F, fontSize: "15px", color: theme.muted }}>No beats yet</div>
+            <div style={{ fontSize: "48px", marginBottom: "16px", opacity: 0.2 }}>♪</div>
+            <div style={{ fontFamily: F, fontSize: "15px", color: "#888888" }}>Žádné beaty zatím</div>
           </div>
         ) : (
-          <PlayerPlaylist beats={beats} theme={theme} maxRows={5} />
+          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+            {beats.map((beat: any, idx: number) => (
+              <BeatRow
+                key={beat.id}
+                beat={beat}
+                index={idx}
+                palette={PALETTES[idx % PALETTES.length]}
+                artistSlug={artist.slug ?? null}
+              />
+            ))}
+          </div>
         )}
-      </section>
+      </div>
 
-      {/* Artist profile modal */}
-      <ArtistProfileModal
+      {/* Profile modal */}
+      <ProfileModal
         artist={{
           displayName: artist.displayName,
           profilePictureUrl: artist.profilePictureUrl,
@@ -354,6 +1049,13 @@ export default function ArtistStorePage() {
         }}
         open={profileModalOpen}
         onClose={() => setProfileModalOpen(false)}
+      />
+
+      {/* Cart modal */}
+      <CartModal
+        open={cartOpen}
+        onClose={() => setCartOpen(false)}
+        artistName={artist.displayName ?? "obchod"}
       />
     </div>
   );
