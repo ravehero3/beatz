@@ -10,6 +10,8 @@ export const artistsTable = pgTable("artists", {
   bio: text("bio"),
   bannerUrl: text("banner_url"),
   profilePictureUrl: text("profile_picture_url"),
+  logoUrl: text("logo_url"),
+  heroLogoUrl: text("hero_logo_url"),
   storeTemplate: text("store_template").default("light"),
   storePrimaryColor: text("store_primary_color").default("#0A0A0A"),
   playerStyle: text("player_style").default("classic"),

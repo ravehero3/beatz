@@ -37,7 +37,7 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
       }}>
         <div style={{ padding: "20px 16px", borderBottom: "1px solid #F2F2F2" }}>
           <img src={beatpackLogo} alt="beatpack" style={{ height: "18px" }} />
-          <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "11px", fontWeight: 500, color: "#888888", letterSpacing: "0.06em", textTransform: "uppercase", marginTop: "6px" }}>Studio</div>
+          <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: "11px", fontWeight: 500, color: "#888888", letterSpacing: "0.06em", textTransform: "uppercase", marginTop: "-8px", marginLeft: "20px" }}>Studio</div>
         </div>
 
         <nav style={{ padding: "8px", flex: 1 }}>
