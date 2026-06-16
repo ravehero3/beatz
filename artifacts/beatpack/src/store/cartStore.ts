@@ -16,7 +16,7 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   addItem: (item: CartItem) => void;
-  removeItem: (beatId: string, license: string) => void;
+  removeItem: (beatId: string) => void;
   updateLicense: (beatId: string, license: LicenseType, price: number) => void;
   clear: () => void;
 }
