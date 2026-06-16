@@ -111,6 +111,8 @@ const alterTableStatements = [
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS subscription_ends_at timestamptz`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS balance_czk numeric(10,2) DEFAULT 0`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS total_earned_czk numeric(10,2) DEFAULT 0`,
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS logo_url text`,
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS hero_logo_url text`,
   `ALTER TABLE beats ADD COLUMN IF NOT EXISTS slug text`,
   `ALTER TABLE beats ADD COLUMN IF NOT EXISTS mood text`,
   `ALTER TABLE beats ADD COLUMN IF NOT EXISTS audio_wav_url text`,
