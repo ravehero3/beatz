@@ -155,24 +155,25 @@ function BeatRow({
   palette: (typeof PALETTES)[0];
   artistSlug: string | null;
 }) {
-  const { currentBeat, setTrack } = useAudioStore();
+  const { currentBeat, isPlaying: storeIsPlaying, setTrack, toggle } = useAudioStore();
   const { addItem, items } = useCartStore();
   const [cartFlash, setCartFlash] = useState(false);
   const [hov, setHov] = useState(false);
 
-  const isPlaying = currentBeat?.id === beat.id;
+  const isCurrentTrack = currentBeat?.id === beat.id;
+  const isPlaying = isCurrentTrack && storeIsPlaying;
   const inCart = items.some((i) => i.beatId === beat.id);
 
   function togglePlay() {
-    if (isPlaying) {
-      setTrack({ ...beat, artistName: beat.artistName });
+    if (isCurrentTrack) {
+      toggle();
     } else {
       setTrack({
         id: beat.id,
         title: beat.title,
         artistName: beat.artistName ?? null,
         coverUrl: beat.coverUrl ?? null,
-        audioUrl: beat.audioUrl,
+        audioUrl: beat.audioPreviewUrl ?? "",
       });
     }
   }
