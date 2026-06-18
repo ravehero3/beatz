@@ -26,6 +26,7 @@ export const artistsTable = pgTable("artists", {
   subscriptionEndsAt: timestamp("subscription_ends_at", { withTimezone: true }),
   balanceCzk: numeric("balance_czk", { precision: 10, scale: 2 }).default("0"),
   totalEarnedCzk: numeric("total_earned_czk", { precision: 10, scale: 2 }).default("0"),
+  pageSections: text("page_sections"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

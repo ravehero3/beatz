@@ -4,3 +4,4 @@
 - [Artists table missing columns](artists-table-schema.md) — Drizzle schema evolved past DB; must ADD COLUMN for logo_url, hero_logo_url + subscription/balance fields before API works
 - [Artist store chrome hiding](artist-store-chrome.md) — Artist store (/artists/:slug) has its own custom header; ARTIST_STORE_RE regex in App.tsx hides global Header/Footer for those pages
 - [Cart store pattern](cart-store-pattern.md) — cartStore at store/cartStore.ts; cart icon on beat rows adds items, cart button in store header opens Nakupní košík slide-over modal
+- [Page Builder pattern](page-builder-pattern.md) — StudioPageBuilder at /studio/store; pageSections JSON stored in artists.page_sections; ArtistStorePage conditionally renders SectionsStorePage when field is set

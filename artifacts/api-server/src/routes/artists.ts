@@ -86,12 +86,13 @@ router.get("/artists/me", requireAuth, async (req, res) => {
     subscriptionStatus: artist.subscriptionStatus,
     balanceCzk: Number(artist.balanceCzk),
     totalEarnedCzk: Number(artist.totalEarnedCzk),
+    pageSections: artist.pageSections ?? null,
     createdAt: artist.createdAt.toISOString(),
   });
 });
 
 router.patch("/artists/me", requireAuth, async (req, res) => {
-  const { displayName, bio, bannerUrl, profilePictureUrl, logoUrl, heroLogoUrl, storeTemplate, storePrimaryColor, playerStyle, socialInstagram, socialYoutube, socialSoundcloud, bankIban, bankAccountName } = req.body;
+  const { displayName, bio, bannerUrl, profilePictureUrl, logoUrl, heroLogoUrl, storeTemplate, storePrimaryColor, playerStyle, socialInstagram, socialYoutube, socialSoundcloud, bankIban, bankAccountName, pageSections } = req.body;
 
   const [updated] = await db.update(artistsTable).set({
     ...(displayName !== undefined && { displayName }),
@@ -108,6 +109,7 @@ router.patch("/artists/me", requireAuth, async (req, res) => {
     ...(socialSoundcloud !== undefined && { socialSoundcloud }),
     ...(bankIban !== undefined && { bankIban }),
     ...(bankAccountName !== undefined && { bankAccountName }),
+    ...(pageSections !== undefined && { pageSections: typeof pageSections === "string" ? pageSections : JSON.stringify(pageSections) }),
   }).where(eq(artistsTable.id, req.user!.userId)).returning();
 
   if (!updated) {
@@ -176,6 +178,7 @@ router.get("/artists/:slug", async (req, res) => {
     socialInstagram: artist.socialInstagram,
     socialYoutube: artist.socialYoutube,
     socialSoundcloud: artist.socialSoundcloud,
+    pageSections: artist.pageSections ?? null,
     createdAt: artist.createdAt.toISOString(),
     beats: beats.map((b) => ({
       id: b.id,

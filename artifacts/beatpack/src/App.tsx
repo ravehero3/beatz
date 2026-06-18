@@ -31,6 +31,7 @@ import EditBeatPage from "@/pages/studio/EditBeatPage";
 import EarningsPage from "@/pages/studio/EarningsPage";
 import StudioOrdersPage from "@/pages/studio/StudioOrdersPage";
 import StoreSettingsPage from "@/pages/studio/StoreSettingsPage";
+import StudioPageBuilder from "@/pages/studio/StudioPageBuilder";
 import StudioLeadsPage from "@/pages/studio/StudioLeadsPage";
 import StudioProfilePage from "@/pages/studio/StudioProfilePage";
 import StudioSettingsPage from "@/pages/studio/StudioSettingsPage";
@@ -161,7 +162,7 @@ function AppRouter() {
       <Route path="/studio/beats/:id/edit" component={() => <ProtectedRoute component={EditBeatPage} roles={["artist", "admin"]} />} />
       <Route path="/studio/earnings" component={() => <ProtectedRoute component={EarningsPage} roles={["artist", "admin"]} />} />
       <Route path="/studio/orders" component={() => <ProtectedRoute component={StudioOrdersPage} roles={["artist", "admin"]} />} />
-      <Route path="/studio/store" component={() => <ProtectedRoute component={StoreSettingsPage} roles={["artist", "admin"]} />} />
+      <Route path="/studio/store" component={() => <ProtectedRoute component={StudioPageBuilder} roles={["artist", "admin"]} />} />
       <Route path="/studio/leads" component={() => <ProtectedRoute component={StudioLeadsPage} roles={["artist", "admin"]} />} />
       <Route path="/studio/profile" component={() => <ProtectedRoute component={StudioProfilePage} roles={["artist", "admin"]} />} />
       <Route path="/studio/settings" component={() => <ProtectedRoute component={StudioSettingsPage} roles={["artist", "admin"]} />} />

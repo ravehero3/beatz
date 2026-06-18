@@ -1,0 +1,31 @@
+within my website that i have on github as "beatz" and its currently live on beatpack.voodoo808.com i want to change around some things in the studio as i dont like how the studio currently is looking and i dont like the live preview. another problem is that even though i make changes in live preview, when i save it and go to the actual page its supposed to be, the page looks different than what i edited in the studio, so i wrote a long prompt explaining what i want and here it is :
+
+i want to  code my own "studio" environment where i can have a canvas like environment where i can add sections (each section should take up the whole width of the page and should have correct hight for a website section. user starts with empty page that only has header and footer
+
+sections are shown even when empty by very light grey outline that shows the empty section as a card that has padding 2px to the sides but the actual section when filled with image or other contents should fill the whole width.
+
+clicking on empty section shows 5 different options to choose from AND THE OPTIONS ARE: 
+
+1. hero section that shows a background image that the user can choose. centered logo that the user can upload. when logo is uploaded, user can select from 3 different sizes of the logo. 
+2. beat playlist where the user can choose either white, black, light grey or very dark grey background that should fill the whole width of the page within the section
+3. youtube section that allows the user to showcase one video from their youtube. 
+4. beat pricing section with cards that show prices with 2 CARDS -  FREE and EXCLUSIVE pricing options. the free option should have a button that sends the users back to the beat playlist section and highlights for a quick animation the download buttons of all uploaded beats in the beat playlist
+5. sound kit section where user can upload their sound kits for sale 
+
+footer of the page should have a option to add email that should be clickable to the centre and middle of the footer. it should also say beatpack.cz next to it with the correct padding
+
+all of these elements and the whole studio should be profesionally made and should look spotless. everything should be coded and designed with the latest web design trends in mind. all cards should have profesionally sized rounded corners according to the highest standards. 
+
+the background should be white and options in sections should be within containers/cards that have the correct sizing and design. correctly selected elements within should have the correct shadows not too much but correctly set to look like the latest webdesign trends 
+
+the fonts used should be figtree and roboto correctly picked and sized
+
+all section options should show what their purpose is. 
+
+everything should update live when we make changes and we should be able to drag with move handle the sections up and down and correct animations should be shown. keep it proffesional but show the latest aproach to this 
+
+there should be 2 sections on the desktop view of this studio. 1 section is a card/tab/admin panel where we can select between the different admin features that are needed to run the studio and to set up everything. we also want to be able to hover over a section or a container within the section and see a hover effect that makes the section or the container within the sections cale up slightly according to latest approaches.
+
+each section should open correct modal that lets us edit everything that is needed for this studio and each section to function perfectly.
+
+when this modal is active, the background elements except the section itself should become blured slightly so we can focus on the elements within the section card we are currently working on
