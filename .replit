@@ -63,3 +63,4 @@ channel = "stable-25_05"
 
 [userenv.shared]
 APP_URL = "https://f47f0cc2-59b6-4abf-a964-273d8308e878-00-2c69qjoy9bj99.janeway.replit.dev"
+ADMIN_EMAILS = "ravehero3@gmail.com"

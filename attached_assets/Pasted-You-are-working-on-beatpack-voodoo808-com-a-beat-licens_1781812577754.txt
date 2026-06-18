@@ -1,0 +1,48 @@
+You are working on beatpack.voodoo808.com — a beat licensing platform where producers sell beat packs and individual beats. The site has both Czech and English versions, which change automatically depending on the user's location.
+
+TECH STACK — DO NOT CHANGE OR UPGRADE ANY OF THESE:
+- Monorepo: pnpm workspaces (pnpm v10.26.1)
+- Frontend: React 19, Vite 7, Tailwind CSS 4, Radix UI primitives, Framer Motion, TanStack React Query, Wouter (routing), shadcn/ui components
+- Backend: Express 5 (Node.js), TypeScript, esbuild bundler
+- Database: PostgreSQL with Drizzle ORM, hosted on Supabase
+- Auth: Google OAuth 2.0 with JWT (jsonwebtoken)
+- File storage: Cloudflare R2 via AWS S3 SDK
+- Email: Nodemailer with Resend SMTP
+- PDF generation: PDFKit
+- Logging: Pino
+- Package manager: pnpm ONLY (npm and yarn are blocked by preinstall script)
+
+MONOREPO STRUCTURE:
+- artifacts/api-server/ — Express backend (builds to artifacts/api-server/dist/index.mjs)
+- artifacts/beatpack/ — Vite React frontend
+- lib/ — shared libraries (db schemas, API types, integrations)
+- lib/db/ — Drizzle database schema and migrations
+- lib/api-zod/ — Zod validation schemas shared between frontend and backend
+
+SCRIPTS (run from root):
+- Install: pnpm install --frozen-lockfile
+- Build: pnpm run build (typechecks everything, then builds all packages)
+- Typecheck: pnpm run typecheck
+- Start: node artifacts/api-server/dist/index.mjs
+- Server listens on PORT env var (set to 10000)
+
+CRITICAL RULES:
+1. ALWAYS use pnpm — npm and yarn are blocked and will error
+2. NEVER switch from Drizzle to Prisma
+3. NEVER upgrade React, Vite, or Tailwind major versions
+4. NEVER modify the pnpm-workspace.yaml security settings (minimumReleaseAge)
+5. NEVER change the monorepo structure (artifacts/, lib/)
+6. NEVER modify build.mjs in api-server without understanding the esbuild config
+7. When adding new dependencies, use: pnpm add <package> --filter @workspace/beatpack (for frontend) or --filter @workspace/api-server (for backend)
+8. The site supports both CZECH and ENGLISH languages, switching automatically based on the user's location. Ensure all new user-facing text handles both languages appropriately.
+9. Database schema lives in lib/db/ — changes there affect both frontend and backend
+10. Shared API types live in lib/api-zod/ — keep frontend and backend in sync
+
+COMMON PITFALLS TO AVOID:
+- Don't run npm install — it will fail. Use pnpm install
+- Don't add dependencies to root package.json — add them to the correct workspace
+- Don't forget that the frontend and backend are separate packages in the monorepo
+- Don't break the R2 file upload/download flow
+- Don't modify the catalog versions in pnpm-workspace.yaml without good reason
+- TypeScript is strict — don't add @ts-ignore unless absolutely necessary
+- The esbuild bundler creates a single dist/index.mjs — don't change the output format

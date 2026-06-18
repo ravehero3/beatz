@@ -18,6 +18,18 @@ const GOOGLE_CLIENT_ID = process.env["GOOGLE_CLIENT_ID"] ?? "";
 const GOOGLE_CLIENT_SECRET = process.env["GOOGLE_CLIENT_SECRET"] ?? "";
 const GOOGLE_REDIRECT_URI = `${APP_URL}/api/auth/google/callback`;
 
+// Comma-separated list of emails that should automatically get admin role.
+// Set ADMIN_EMAILS=you@example.com,other@example.com in your environment.
+const ADMIN_EMAILS = (process.env["ADMIN_EMAILS"] ?? "")
+  .split(",")
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
+function resolvedRole(email: string, currentRole: string): string {
+  if (ADMIN_EMAILS.includes(email.toLowerCase())) return "admin";
+  return currentRole;
+}
+
 function makeOAuthState(): string {
   return jwt.sign({ nonce: crypto.randomUUID() }, JWT_SECRET, { expiresIn: "10m" });
 }
@@ -108,22 +120,29 @@ router.get("/auth/google/callback", async (req, res) => {
     let isNewUser = false;
 
     if (user) {
+      const targetRole = resolvedRole(googleUser.email, user.role);
+      const updates: Record<string, unknown> = {};
       if (!user.googleId) {
-        await db.update(profilesTable)
-          .set({
-            googleId: googleUser.id,
-            ...(googleUser.picture && !user.avatarUrl ? { avatarUrl: googleUser.picture } : {}),
-          })
-          .where(eq(profilesTable.id, user.id));
+        updates["googleId"] = googleUser.id;
+        if (googleUser.picture && !user.avatarUrl) updates["avatarUrl"] = googleUser.picture;
+      }
+      if (targetRole !== user.role) updates["role"] = targetRole;
+      if (Object.keys(updates).length > 0) {
+        const [refreshed] = await db.update(profilesTable)
+          .set(updates)
+          .where(eq(profilesTable.id, user.id))
+          .returning();
+        user = refreshed ?? user;
       }
     } else {
+      const role = resolvedRole(googleUser.email, "buyer");
       const [created] = await db.insert(profilesTable).values({
         email: googleUser.email,
         firstName: googleUser.given_name ?? null,
         lastName: googleUser.family_name ?? null,
         avatarUrl: googleUser.picture ?? null,
         googleId: googleUser.id,
-        role: "buyer",
+        role,
       }).returning();
       user = created;
       isNewUser = true;
@@ -222,11 +241,12 @@ router.post("/auth/register", async (req, res) => {
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
+  const role = resolvedRole(email, "buyer");
   const [user] = await db.insert(profilesTable).values({
     email,
     firstName: firstName ?? null,
     lastName: lastName ?? null,
-    role: "buyer",
+    role,
     passwordHash,
   }).returning();
 
@@ -271,7 +291,13 @@ router.post("/auth/login", async (req, res) => {
     return;
   }
 
-  const token = signToken({ userId: user.id, role: user.role });
+  // Auto-promote to admin if email is in ADMIN_EMAILS list
+  let effectiveRole = resolvedRole(user.email ?? "", user.role);
+  if (effectiveRole !== user.role) {
+    await db.update(profilesTable).set({ role: effectiveRole }).where(eq(profilesTable.id, user.id));
+  }
+
+  const token = signToken({ userId: user.id, role: effectiveRole });
   req.log.info({ userId: user.id }, "User logged in");
   res.json({
     token,
@@ -280,7 +306,7 @@ router.post("/auth/login", async (req, res) => {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      role: user.role,
+      role: effectiveRole,
       avatarUrl: user.avatarUrl,
       createdAt: user.createdAt,
     },
