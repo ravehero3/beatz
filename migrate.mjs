@@ -103,6 +103,16 @@ const createTableStatements = [
     beat_id uuid NOT NULL REFERENCES beats(id) ON DELETE CASCADE,
     created_at timestamptz NOT NULL DEFAULT now()
   )`,
+
+  `CREATE TABLE IF NOT EXISTS beat_leads (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    beat_id uuid NOT NULL REFERENCES beats(id) ON DELETE CASCADE,
+    artist_id uuid NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+    email text NOT NULL,
+    consent_given boolean NOT NULL DEFAULT false,
+    ip_address text,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`,
 ];
 
 const alterTableStatements = [
@@ -121,9 +131,22 @@ const alterTableStatements = [
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS subscription_ends_at timestamptz`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS balance_czk numeric(10,2) DEFAULT 0`,
   `ALTER TABLE artists ADD COLUMN IF NOT EXISTS total_earned_czk numeric(10,2) DEFAULT 0`,
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS logo_url text`,
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS hero_logo_url text`,
+  `ALTER TABLE artists ADD COLUMN IF NOT EXISTS page_sections text`,
   `ALTER TABLE beats ADD COLUMN IF NOT EXISTS slug text`,
   `ALTER TABLE beats ADD COLUMN IF NOT EXISTS mood text`,
   `ALTER TABLE beats ADD COLUMN IF NOT EXISTS audio_wav_url text`,
+  `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS marketing_opt_in boolean NOT NULL DEFAULT true`,
+  `CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    profile_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    token text NOT NULL UNIQUE,
+    expires_at timestamptz NOT NULL,
+    used_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`,
+  `CREATE INDEX IF NOT EXISTS password_reset_tokens_token_idx ON password_reset_tokens (token)`,
 ];
 
 async function migrate() {
